@@ -78,21 +78,21 @@ global_spr <- Get_Reference_Points(data = om_values$data,
 sim_env_current <- Setup_sim_env(sim_list = sim_list_rand)
 sim_env_current <- add_aggregated_obj_to_simenv(sim_env = sim_env_current)
 sim_env_current <- run_single_rg_closedloop_parallel(sim_env = sim_env_current, n_sims = n_sims,
-                                                     fleet_allocation = fleet_allocation, lls_design_type = "current", n_cores = 8)
-saveRDS(sim_env, here("outputs", "mse_results", "single_region_rand_current.RDS"))
+                                                     fleet_allocation = fleet_allocation, lls_design_type = "current", n_cores = 7)
+saveRDS(sim_env_current, here("outputs", "mse_results", "single_region_rand_current.RDS"))
 
 # Single-region, historical design
 sim_env_hist <- Setup_sim_env(sim_list = sim_list_rand)
 sim_env_hist <- add_aggregated_obj_to_simenv(sim_env = sim_env_hist)
 sim_env_hist <- run_single_rg_closedloop_parallel(sim_env = sim_env_hist, n_sims = n_sims, fleet_allocation = fleet_allocation,
-                                                  lls_design_type = "historical", n_cores = 8)
+                                                  lls_design_type = "historical", n_cores = 7)
 saveRDS(sim_env_hist, here("outputs", "mse_results", "single_region_rand_hist.RDS"))
 
 # Single-region, sample all regions
 sim_env_all <- Setup_sim_env(sim_list = sim_list_rand)
 sim_env_all <- add_aggregated_obj_to_simenv(sim_env = sim_env_all)
 sim_env_all <- run_single_rg_closedloop_parallel(sim_env = sim_env_hist, n_sims = n_sims,
-                                                 fleet_allocation = fleet_allocation,lls_design_type =  "all", n_cores = 8)
+                                                 fleet_allocation = fleet_allocation,lls_design_type =  "all", n_cores = 7)
 saveRDS(sim_env_all, here("outputs", "mse_results", "single_region_rand_all.RDS"))
 
 

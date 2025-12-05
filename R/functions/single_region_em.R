@@ -172,6 +172,10 @@ single_region_em <- function(sim_env, y, sim, srv_idx_se = 0.2, age_lag = 1, lls
     block = c(1, 2, 3, 1)
   )
 
+  # merge together (note that unlike the operational assessment, selectivity
+  # blocks are reduced from 3 to 2)
+  fish_selex_structure <- merge(fleet_blocks, sex_par)
+
   # Add the lognormal prior values - creates a dataframe, each row is a unique parameter combination to apply the prior to
   fish_selex_prior <- cbind(
     region = 1,

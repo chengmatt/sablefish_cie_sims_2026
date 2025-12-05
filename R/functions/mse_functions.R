@@ -464,6 +464,7 @@ run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
 
   plan(multisession, workers = n_cores)
   options(future.globals.maxSize = 5e9)
+  handlers(handler_progress(format = "[:bar] :percent"))
 
   # run in parrallel and return simulation environment
   with_progress({
@@ -475,7 +476,7 @@ run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
       },
       .progress = TRUE
     )
-  }, handlers = progressr::handler_progress(format = "[:bar] :percent"))
+  })
 
   # Merge results back in
   for(i in 1:n_sims) {
