@@ -463,6 +463,7 @@ run_single_rg_closedloop_i <- function(sim_env, sim, fleet_allocation, lls_desig
 run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, lls_design_type, n_cores) {
 
   plan(multisession, workers = n_cores)
+  options(future.globals.maxSize = 5e9)
 
   # run in parrallel and return simulation environment
   with_progress({
