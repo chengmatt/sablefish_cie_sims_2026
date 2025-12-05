@@ -1,0 +1,19 @@
+Version: 1.0
+ProjectId: d1e7af60-4742-4297-b25f-33e76d39fc03
+
+RestoreWorkspace: Default
+SaveWorkspace: Default
+AlwaysSaveHistory: Default
+
+EnableCodeIndexing: Yes
+UseSpacesForTab: Yes
+NumSpacesForTab: 2
+Encoding: UTF-8
+
+RnwWeave: Sweave
+LaTeX: pdfLaTeX
+
+AutoAppendNewline: Yes
+StripTrailingWhitespace: Yes
+
+ProjectName: sablefish_cie_sims_2026
