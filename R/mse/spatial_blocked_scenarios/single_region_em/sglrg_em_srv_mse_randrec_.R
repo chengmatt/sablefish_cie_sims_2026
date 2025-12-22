@@ -1,4 +1,4 @@
-# Purpose: To run a five region OM, with a single region EM
+# Purpose: To run a five region OM, with a single region EM (random recruitment)
 # Creator: Matthew LH. Cheng (UAF - CFOS)
 # Date: 11/26/25
 
@@ -30,8 +30,6 @@ closed_loop_yrs <- 30      # Years to project forward
 n_years <- length(data$years)  # number of years
 burnin_years <- 1:n_years  # Historical conditioning period
 n_sims <- 100              # Number of replicate simulations
-assess_freq <- 1           # Assessment frequency
-data_yr_freq <- 1          # Data collection frequency
 n_regions <- 5             # number of regions
 n_fish_fleets <- 2         # number of fishery fleets
 n_srv_fleets <- 3          # number of survey fleets
@@ -79,20 +77,20 @@ sim_env_current <- Setup_sim_env(sim_list = sim_list_rand)
 sim_env_current <- add_aggregated_obj_to_simenv(sim_env = sim_env_current)
 sim_env_current <- run_single_rg_closedloop_parallel(sim_env = sim_env_current, n_sims = n_sims,
                                                      fleet_allocation = fleet_allocation, lls_design_type = "current", n_cores = 7)
-saveRDS(sim_env_current, here("outputs", "mse_results", "single_region_rand_current.RDS"))
+saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_blocked_scenarios", "single_region_rand_current.RDS"))
 
 # Single-region, historical design
 sim_env_hist <- Setup_sim_env(sim_list = sim_list_rand)
 sim_env_hist <- add_aggregated_obj_to_simenv(sim_env = sim_env_hist)
 sim_env_hist <- run_single_rg_closedloop_parallel(sim_env = sim_env_hist, n_sims = n_sims, fleet_allocation = fleet_allocation,
                                                   lls_design_type = "historical", n_cores = 7)
-saveRDS(sim_env_hist, here("outputs", "mse_results", "single_region_rand_hist.RDS"))
+saveRDS(sim_env_hist, here("outputs", "mse_results", "spatial_blocked_scenarios", "single_region_rand_hist.RDS"))
 
 # Single-region, sample all regions
 sim_env_all <- Setup_sim_env(sim_list = sim_list_rand)
 sim_env_all <- add_aggregated_obj_to_simenv(sim_env = sim_env_all)
-sim_env_all <- run_single_rg_closedloop_parallel(sim_env = sim_env_hist, n_sims = n_sims,
+sim_env_all <- run_single_rg_closedloop_parallel(sim_env = sim_env_all, n_sims = n_sims,
                                                  fleet_allocation = fleet_allocation,lls_design_type =  "all", n_cores = 7)
-saveRDS(sim_env_all, here("outputs", "mse_results", "single_region_rand_all.RDS"))
+saveRDS(sim_env_all, here("outputs", "mse_results", "spatial_blocked_scenarios", "single_region_rand_all.RDS"))
 
 

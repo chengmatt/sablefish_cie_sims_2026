@@ -16,14 +16,16 @@
 #'   Default is `1`.
 #' @param lls_design_type Character. Sampling design type used when aggregating
 #'   length-limited surveys.
+#' @param srv_wgt numbers', 'biomass', or 'eqwt' weighting for survey comps (default, numbers)
+#' @param fish_wgt numbers', 'biomass', or 'eqwt' weighting for fishery comps (default, biomass)
 #'
 #' @return A fully configured SPoRC estimation-model `input_list` for a
 #'   single-region model.
-single_region_em <- function(sim_env, y, sim, srv_idx_se = 0.2, age_lag = 1, lls_design_type) {
+single_region_em <- function(sim_env, y, sim, srv_idx_se = 0.2, age_lag = 1, lls_design_type, srv_wgt = 'numbers', fish_wgt = 'biomass') {
 
   # Get simulated data
   sim_data <- simulation_data_to_SPoRC(sim_env, y, sim)
-  agg_data_to_single_rg(sim_data, sim_env, y, sim, lls_design_type) # aggregate data; updates sim_env
+  agg_data_to_single_rg(sim_data, sim_env, y, sim, lls_design_type, srv_wgt, fish_wgt, srv_idx_se) # aggregate data; updates sim_env
   use_indcators <- single_region_use_indicators(y, sim_env$n_fish_fleets, sim_env$n_srv_fleets, age_lag = age_lag)
 
   ### Setup Model -------------------------------------------------------------
@@ -132,7 +134,7 @@ single_region_em <- function(sim_env, y, sim, srv_idx_se = 0.2, age_lag = 1, lls
   input_list <- Setup_Mod_SrvIdx_and_Comps(input_list = input_list,
                                            # data inputs
                                            ObsSrvIdx = array(sim_env$Agg_ObsSrvIdx[,1:y,,sim], dim = c(input_list$data$n_regions, length(input_list$data$years), input_list$data$n_srv_fleets)),
-                                           ObsSrvIdx_SE = sim_data$ObsSrvIdx_SE[1,,,drop = FALSE],
+                                           ObsSrvIdx_SE = array(srv_idx_se, dim = c(input_list$data$n_regions, length(input_list$data$years), input_list$data$n_srv_fleets)),
                                            UseSrvIdx =  use_indcators$usesrvidx,
                                            ObsSrvAgeComps = array(sim_env$Agg_ObsSrvAgeComps[,1:y,,,,sim],
                                                                   dim = c(input_list$data$n_regions, length(input_list$data$years), length(input_list$data$ages), input_list$data$n_sexes,
@@ -168,8 +170,8 @@ single_region_em <- function(sim_env, y, sim, srv_idx_se = 0.2, age_lag = 1, lls
   # defining priors
   sex_par <- expand.grid(sex = 1:2, par = 1:2)
   fleet_blocks <- data.frame(
-    fleet = c(1, 1, 1, 2),
-    block = c(1, 2, 3, 1)
+    fleet = c(1, 2),
+    block = c(1, 1)
   )
 
   # merge together (note that unlike the operational assessment, selectivity
@@ -196,10 +198,8 @@ single_region_em <- function(sim_env, y, sim, srv_idx_se = 0.2, age_lag = 1, lls
 
   input_list <- Setup_Mod_Fishsel_and_Q(input_list = input_list,
                                         cont_tv_fish_sel = c("none_Fleet_1", "none_Fleet_2"),
-                                        fish_sel_blocks =                        # fishery selectivity time blocks if not TV specified above for a given fleet
-                                          c("Block_1_Year_1-35_Fleet_1",         # pre-IFQ time block for fixed gear fishery 1994 and before
-                                            "Block_2_Year_36-56_Fleet_1",        # IFQ time block for fixed gear fishery-- 1995 to 2015
-                                            "Block_3_Year_57-terminal_Fleet_1",  # Recent time block for fixed gear fishery--2016 to terminal year
+                                        fish_sel_blocks =
+                                          c("none_Fleet_1",
                                             "none_Fleet_2"),
                                         fish_sel_model =
                                           c("logist1_Fleet_1", "gamma_Fleet_2"),
@@ -218,8 +218,8 @@ single_region_em <- function(sim_env, y, sim, srv_idx_se = 0.2, age_lag = 1, lls
 
   # Define valid fleet-block combinations (only estimating domestic and jp LLS)
   fleet_blocks <- data.frame(
-    fleet = c(1, 1, 3),
-    block = c(1, 2, 1)
+    fleet = c(1, 3),
+    block = c(1, 1)
   )
 
   # Merge to get all valid combinations
@@ -243,8 +243,7 @@ single_region_em <- function(sim_env, y, sim, srv_idx_se = 0.2, age_lag = 1, lls
                                            "none_Fleet_2",
                                            "none_Fleet_3"),
                                        srv_sel_blocks =
-                                         c("Block_1_Year_1-56_Fleet_1",
-                                           "Block_2_Year_57-terminal_Fleet_1",
+                                         c("none_Fleet_1",
                                            "none_Fleet_2",
                                            "none_Fleet_3"
                                          ),

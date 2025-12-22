@@ -26,10 +26,10 @@
   sd_rep <- om_values$sd_rep
 
   # Define operating model parameters
-  closed_loop_yrs <- 30      # Years to project forward
+  closed_loop_yrs <- 1      # Years to project forward
   n_years <- length(data$years)  # number of years
   burnin_years <- 1:n_years  # Historical conditioning period
-  n_sims <- 5               # Number of replicate simulations
+  n_sims <- 1               # Number of replicate simulations
   assess_freq <- 1           # Assessment frequency
   data_yr_freq <- 1          # Data collection frequency
   n_regions <- 5             # number of regions
@@ -87,8 +87,32 @@
   # Single-region, sample all regions
   sim_env_all <- Setup_sim_env(sim_list_rand)
   sim_env_all <- add_aggregated_obj_to_simenv(sim_env_all)
-  sim_env_all <- run_single_rg_closedloop_parallel(sim_env_hist, n_sims, fleet_allocation, "all", 8)
+  sim_env_all <- run_single_rg_closedloop_parallel(sim_env = sim_env_all, n_sims, fleet_allocation, lls_design_type = "all", 8)
   saveRDS(sim_env_all, here("outputs", "mse_results", "single_region_rand_all.RDS"))
+
+  sim_env_current <- readRDS( here("outputs", "mse_results", "single_region_rand_current.RDS"))
+  sim_env_hist <- readRDS( here("outputs", "mse_results", "single_region_rand_all.RDS"))
+  sim_env_all <- readRDS( here("outputs", "mse_results", "single_region_highregime_current.RDS"))
+
+  scenarios <- list(sim_env_current, sim_env_hist, sim_env_all)
+  res <- array(NA, c(3, 95,100))
+  for(j in 1:length(scenarios)) {
+    for(i in 1:100) {
+      res[j,,i] <- (t(scenarios[[j]]$models[[i]]$rep$SSB) -
+                    colSums(scenarios[[j]]$SSB[,,i]) ) / colSums(scenarios[[j]]$SSB[,,i])
+
+    }
+  }
+
+  reshape2::melt(res) %>%
+    group_by(Var2, Var1) %>%
+    summarize(value = median(value)) %>%
+    ggplot(aes(x = Var2, y = value, color = factor(Var1))) +
+    geom_line()
+
+  lines(apply(res, 1, median), col = 'red', lty = 2, lwd = 3)
+  abline(h = 0, lty = 2, lwd = 3, col = 'blue')
+  plot(  apply(res, 1, median)[-c(1:65)], col = 'red', lty = 2, lwd = 3)
 
   reshape2::melt(sim_env_hist$SSB) %>%
     mutate(period = ifelse(Var2 <= 65, 'H', 'P')) %>%
@@ -100,9 +124,27 @@
     ggplot(aes(x = Var2, y = median,  ymin = lwr, ymax = upr)) +
     geom_line() +
     geom_ribbon(alpha = 0.5, color = NA) +
-    facet_wrap(~paste("Region", Var1), nrow = 1) +
+    facet_wrap(~paste("Region", Var1), nrow = 1, scales = 'free') +
     geom_vline(xintercept = 65, lty = 2) +
     labs(x = 'Year', y = 'SSB') +
+    ylim(0,NA) +
+    theme_bw(base_size = 20) +
+    theme(legend.position = 'none')
+
+  reshape2::melt(sim_env_current$SSB) %>%
+    mutate(period = ifelse(Var2 <= 65, 'H', 'P')) %>%
+    filter(period != 'H' | Var3 == 1, value != 0) %>%
+    group_by(Var1, Var2, period) %>%
+    summarize(median = median(value),
+              lwr = quantile(value, 0.025),
+              upr = quantile(value, 0.975)) %>%
+    ggplot(aes(x = Var2, y = median,  ymin = lwr, ymax = upr)) +
+    geom_line() +
+    geom_ribbon(alpha = 0.5, color = NA) +
+    facet_wrap(~paste("Region", Var1), nrow = 1, scales = 'free') +
+    geom_vline(xintercept = 65, lty = 2) +
+    labs(x = 'Year', y = 'SSB') +
+    ylim(0,NA) +
     theme_bw(base_size = 20) +
     theme(legend.position = 'none')
 
@@ -119,13 +161,51 @@
     geom_line() +
     geom_ribbon(alpha = 0.5, color = NA) +
     geom_vline(xintercept = 65, lty = 2) +
-    geom_hline(yintercept = sum(global_spr$b_ref_pt)) +
+    # geom_hline(yintercept = sum(global_spr$b_ref_pt)) +
     labs(x = 'Year', y = 'SSB') +
     theme_bw(base_size = 20) +
     ylim(0, NA) +
     theme(legend.position = 'none')
 
-  reshape2::melt(sim_env_hist$Rec) %>%
+  reshape2::melt(sim_env_current$SSB) %>%
+    group_by(Var2, Var3) %>%
+    mutate(value = sum(value)) %>%
+    mutate(period = ifelse(Var2 <= 65, 'H', 'P')) %>%
+    filter(period != 'H' | Var3 == 1, value != 0) %>%
+    group_by(Var2, period) %>%
+    summarize(median = median(value),
+              lwr = quantile(value, 0.025),
+              upr = quantile(value, 0.975)) %>%
+    ggplot(aes(x = Var2, y = median, ymin = lwr, ymax = upr)) +
+    geom_line() +
+    geom_ribbon(alpha = 0.5, color = NA) +
+    geom_vline(xintercept = 65, lty = 2) +
+    # geom_hline(yintercept = sum(global_spr$b_ref_pt)) +
+    labs(x = 'Year', y = 'SSB') +
+    theme_bw(base_size = 20) +
+    ylim(0, NA) +
+    theme(legend.position = 'none')
+
+  reshape2::melt(sim_env_all$SSB) %>%
+    group_by(Var2, Var3) %>%
+    mutate(value = sum(value)) %>%
+    mutate(period = ifelse(Var2 <= 65, 'H', 'P')) %>%
+    filter(period != 'H' | Var3 == 1, value != 0) %>%
+    group_by(Var2, period) %>%
+    summarize(median = median(value),
+              lwr = quantile(value, 0.025),
+              upr = quantile(value, 0.975)) %>%
+    ggplot(aes(x = Var2, y = median, ymin = lwr, ymax = upr)) +
+    geom_line() +
+    geom_ribbon(alpha = 0.5, color = NA) +
+    geom_vline(xintercept = 65, lty = 2) +
+    # geom_hline(yintercept = sum(global_spr$b_ref_pt)) +
+    labs(x = 'Year', y = 'SSB') +
+    theme_bw(base_size = 20) +
+    ylim(0, NA) +
+    theme(legend.position = 'none')
+
+  reshape2::melt(sim_env_all$Rec) %>%
     mutate(period = ifelse(Var2 <= 65, 'H', 'P')) %>%
     filter(period != 'H' | Var3 == 1, value != 0) %>%
     group_by(Var1, Var2, period) %>%
@@ -205,8 +285,8 @@
     theme(legend.position = 'none')
 
 
-  truesrv <- array(apply(sim_env$TrueSrvIdx, 2:4, sum), dim = c(1, dim(apply(sim_env$TrueSrvIdx, 2:4, sum))))
-  reshape2::melt((sim_env$Agg_TrueSrvIdx - truesrv) / truesrv) %>%
+  truesrv <- array(apply(sim_env_current$TrueSrvIdx, 2:4, sum), dim = c(1, dim(apply(sim_env_current$TrueSrvIdx, 2:4, sum))))
+  reshape2::melt((sim_env_current$Agg_TrueSrvIdx - truesrv) / truesrv) %>%
     filter(Var3 == 1) %>%
     group_by(Var2) %>%
     summarize(median = median(value),

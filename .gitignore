@@ -6,3 +6,4 @@ R/.DS_Store
 data/.DS_Store
 .DS_Store
 /outputs/mse_results
+*.RDS
