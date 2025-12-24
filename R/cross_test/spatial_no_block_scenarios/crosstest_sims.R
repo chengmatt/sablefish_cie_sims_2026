@@ -42,6 +42,14 @@ fleet_allocation <- array(NA, dim = c(n_regions, n_fish_fleets))
 fleet_allocation[,1] <- c(0.5,0.75,0.8,0.8,0.95) # from fmp
 fleet_allocation[,2] <- 1 - fleet_allocation[,1] # trawl gear allocation
 
+# To simulate more tags or resimulate tags with new sample sizes
+# data$tag_release_indicator <- rbind(data$tag_release_indicator,
+#       as.matrix(
+#         data.frame(regions = 1:n_regions,
+#                    tag_yrs = rep(n_years:(n_years + closed_loop_yrs), each = n_regions))
+#       )
+#   )
+
 # Condition closed-loop simulations, mean recruitment
 sim_list_lowsamp <- condition_closed_loop_simulations(
   closed_loop_yrs = closed_loop_yrs,
@@ -54,12 +62,13 @@ sim_list_lowsamp <- condition_closed_loop_simulations(
   random = NULL,
   recruitment_opt = 'resample_from_input',
   # setup variances
-  ISS_FishAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
-  ISS_FishLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
-  ISS_SrvAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
-  ISS_SrvLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ISS_FishAgeComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_FishLenComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_SrvAgeComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ISS_SrvLenComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
-  ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets))
+  ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
+  n_tags_rel_input = rep(100, nrow(data$tag_release_indicator))
 )
 
 # Condition closed-loop simulations, mean recruitment with time-varying movement
@@ -78,12 +87,13 @@ sim_list_lowsamp_tvmove <- condition_closed_loop_simulations(
   random = NULL,
   recruitment_opt = 'resample_from_input',
   # setup variances
-  ISS_FishAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
-  ISS_FishLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
-  ISS_SrvAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
-  ISS_SrvLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ISS_FishAgeComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_FishLenComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_SrvAgeComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ISS_SrvLenComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
-  ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets))
+  ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
+  n_tags_rel_input = rep(100, nrow(data$tag_release_indicator))
 )
 
 # Run MSEs to get "data" ----------------------------------------------------------------

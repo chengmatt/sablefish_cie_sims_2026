@@ -419,112 +419,6 @@ single_region_use_indicators <- function(y, n_fish_fleets, n_srv_fleets, age_lag
 
 }
 
-#' Run a Single-Region Closed-Loop Simulation Iteration
-#'
-#' This function executes one full closed-loop simulation for a single replicate
-#' under a single-region assessment framework. For each simulation year, the
-#' function updates population dynamics, performs stock assessment (when within
-#' the feedback period), computes reference points, applies a harvest control
-#' rule, conducts short-term projections to derive a TAC, apportions that TAC
-#' across fleets, and solves for the fishing mortality rates needed to achieve
-#' those catches in the operating model.
-#'
-#' @param sim_env An environment or list containing all operating-model state
-#'   variables, true quantities, storage arrays, and simulation settings.
-#' @param sim Integer. Simulation replicate index to run.
-#' @param fleet_allocation Numeric vector giving the proportion of regional TAC
-#'   assigned to each fishery fleet.
-#' @param lls_design_type Character string specifying the longline survey design:
-#'   `"current"`, `"historical"`, or `"all"`. Passed to the assessment model
-#'   builder for appropriate survey imputation logic.
-#'
-#' @return The function updates `sim_env` in place (population states, catches,
-#'   F rates, and assessment outputs). No value is returned.
-run_single_rg_closedloop_i <- function(sim_env, sim, fleet_allocation, lls_design_type) {
-
-  # Run Closed Loop ---------------------------------------------------------
-  for(y in 1:sim_env$n_yrs) {
-
-    # Execute annual population dynamics
-    run_annual_cycle(y, sim, sim_env)
-
-    # Run feedback
-    if(y >= sim_env$feedback_start_yr) {
-
-      ### Assessment --------------------------------------------------------------
-      asmt_list <- single_region_em(sim_env = sim_env, y = y, sim = sim, srv_idx_se = 0.2, age_lag = 1, lls_design_type) # get assessment data
-      model <- fit_model(asmt_list$data, asmt_list$par, asmt_list$map, NULL, 2, silent = TRUE) # get model
-
-      ### Reference Points --------------------------------------------------------
-      ref_pts <- get_closed_loop_reference_points(
-        use_true_values = FALSE,
-        sim_env = sim_env,
-        asmt_data = asmt_list$data,
-        asmt_rep = model$rep,
-        y = y,
-        sim = sim,
-
-        # single region reference points
-        reference_points_opt = list(
-          n_avg_yrs = 1,
-          SPR_x = 0.4,
-          calc_rec_st_yr = 3,
-          rec_age = 4,
-          type = 'single_region',
-          what = "SPR",
-          B_x = 0.4
-        ),
-        n_proj_yrs = 2
-      )
-
-      ### HCR ---------------------------------------------------------------------
-      agg_ssb <- model$rep$SSB[,y] # get ssb
-      exp_frate <- HCR_threshold(x = agg_ssb, frp = ref_pts$f_ref_pt[,2], brp = ref_pts$b_ref_pt[,2], alpha = 0.05) # get prescribed f
-
-      ### Projection --------------------------------------------------------------
-      projection <- get_population_projection(data = asmt_list$data, rep = model$rep, y = y, n_proj_yrs = 2, f_ref_pt = ref_pts$f_ref_pt) # get 1 year projection
-      tac <- sum(projection$proj_Catch[,2,]) # get tac
-
-      ### Apportionment -----------------------------------------------------------
-      # get survey apportionment (survey biomass)
-      tmp_Srv_BiomIA <- sim_env$SrvIAA[,((y - 4): y),,,1,sim] * sim_env$WAA_srv[,((y - 4): y),,,1,sim]
-      tmp_srvidx_biom <- apply(tmp_Srv_BiomIA, 1:2, sum) # get biomass
-      apportionment <- get_single_region_survey_apportionment(feedback_start_yr = sim_env$feedback_start_yr,
-                                                              n_yrs = sim_env$n_yrs, y = y,
-                                                              srv_idx = tmp_srvidx_biom, # using true survey biomass values to do apportionment
-                                                              rolling_avg_yrs = 5,
-                                                              lls_design_type = lls_design_type)
-      tac_r <- tac * apportionment # get regional tac
-      tac_rf <- tac_r * fleet_allocation # allocate regional tac by fleet
-
-      ### TAC to F ----------------------------------------------------------------
-      if (y < sim_env$n_yrs) {
-
-        rf_grid <- expand.grid(r = seq_len(sim_env$n_regions), f = seq_len(sim_env$n_fish_fleets)) # set up region, fleet grid to bisection across
-        tmp_f <- mapply(function(r, f) { # do bisection to go from region and fleet specific catch to region and fleet specific F rates
-          bisection_F(
-            f_guess = 0.05, # guess for fishing mortality rate
-            catch = tac_rf[r,f], # catch values to use
-            NAA = sim_env$NAA[r, y+1, , , sim], # numbers at age in simulation (truth)
-            WAA = sim_env$WAA[r, y+1, , , sim], # weight-at-age in simulation (truth)
-            natmort  = sim_env$natmort[r, y+1, , , sim], # natural mortality in simulation (truth)
-            fish_sel = sim_env$fish_sel[r, y+1, , , f, sim] # fishery selectivity in simulation (truth)
-          )
-        }, r = rf_grid$r, f = rf_grid$f)
-
-        # assign bisection values back into simulation
-        sim_env$Fmort[,y+1,,sim] <- array(tmp_f, dim = c(sim_env$n_regions, sim_env$n_fish_fleets))
-      }
-
-    } # end feedback
-
-    # save models
-    if(y == sim_env$n_yrs) sim_env$models[[sim]] <- model
-
-  } # end y loop
-
-}
-
 #' Run Single-Region Closed-Loop Simulations in Parallel
 #'
 #' This function executes multiple single-region closed-loop simulations in
@@ -630,6 +524,21 @@ add_aggregated_obj_to_simenv <- function(sim_env, type = 'sgl_rg', faa_n_fish_fl
     sim_env$Agg_ISS_FishLenComps <- array(NA, dim = c(1, sim_env$n_yrs, sim_env$n_sexes, faa_n_fish_fleets, n_sims))
     sim_env$Agg_ISS_SrvAgeComps <- array(NA, dim = c(1, sim_env$n_yrs, sim_env$n_sexes, faa_n_srv_fleets, n_sims))
     sim_env$Agg_ISS_SrvLenComps <- array(NA, dim = c(1, sim_env$n_yrs, sim_env$n_sexes, faa_n_srv_fleets, n_sims))
+  }
+
+  if(type == 'three_rg') {
+    # allow for aggregated catches, indices, and compositions
+    sim_env$Agg_ObsCatch <- array(NA, dim = c(3, sim_env$n_yrs, sim_env$n_fish_fleets, n_sims))
+    sim_env$Agg_ObsSrvIdx <- array(NA, dim = c(3, sim_env$n_yrs, sim_env$n_srv_fleets, n_sims))
+    sim_env$Agg_TrueSrvIdx <- array(NA, dim = c(3, sim_env$n_yrs, sim_env$n_srv_fleets, n_sims))
+    sim_env$Agg_ObsFishAgeComps <- array(NA, dim = c(3, sim_env$n_yrs, sim_env$n_ages, sim_env$n_sexes, sim_env$n_fish_fleets, n_sims))
+    sim_env$Agg_ObsFishLenComps <- array(NA, dim = c(3, sim_env$n_yrs, sim_env$n_lens, sim_env$n_sexes, sim_env$n_fish_fleets, n_sims))
+    sim_env$Agg_ObsSrvAgeComps <- array(NA, dim = c(3, sim_env$n_yrs, sim_env$n_ages, sim_env$n_sexes, sim_env$n_srv_fleets, n_sims))
+    sim_env$Agg_ObsSrvLenComps <- array(NA, dim = c(3, sim_env$n_yrs, sim_env$n_lens, sim_env$n_sexes, sim_env$n_srv_fleets, n_sims))
+    sim_env$Agg_ISS_FishAgeComps <- array(NA, dim = c(3, sim_env$n_yrs, sim_env$n_sexes, sim_env$n_fish_fleets, n_sims))
+    sim_env$Agg_ISS_FishLenComps <- array(NA, dim = c(3, sim_env$n_yrs, sim_env$n_sexes, sim_env$n_fish_fleets, n_sims))
+    sim_env$Agg_ISS_SrvAgeComps <- array(NA, dim = c(3, sim_env$n_yrs, sim_env$n_sexes, sim_env$n_srv_fleets, n_sims))
+    sim_env$Agg_ISS_SrvLenComps <- array(NA, dim = c(3, sim_env$n_yrs, sim_env$n_sexes, sim_env$n_srv_fleets, n_sims))
   }
 
   return(sim_env)
@@ -1566,7 +1475,7 @@ agg_data_to_faa <- function(sim_data,
 
         # figure out which regions have catches
         if(f == 1) idx_prop <- idx_domestic_prop
-        if(f == 2) idx_prop <- idx_jp_prop
+        if(f == 3) idx_prop <- idx_jp_prop
 
         # age comps
         if(f == 1) { # domestic
@@ -1631,7 +1540,7 @@ agg_data_to_faa <- function(sim_data,
             denominator_age <- sum(idx_prop[regions_offset,yr]^2 * (1 / regional_n_age) * apply(regional_p_age * (1 - regional_p_age), 1, sum))
             sim_env$Agg_ISS_SrvAgeComps[,yr,1,6,sim] <- numerator_age / denominator_age
           } else {
-            sim_env$Agg_ISS_SrvAgeComps[,yr,1,6,sim] <- sum(sim_data$ObsSrvAgeComps[regions,yr,,,2])
+            sim_env$Agg_ISS_SrvAgeComps[,yr,1,6,sim] <- sum(sim_data$ObsSrvAgeComps[regions,yr,,,3])
           }
         }
 
@@ -1855,8 +1764,8 @@ faa_use_indicators <- function(sim_env,
     bs_age_indicator <- even_yrs[even_yrs <= y - age_lag]
     ai_age_indicator <- odd_yrs[odd_yrs <= y - age_lag]
 
-    if(sum(bs_idx_indicator) != 0) usesrvidx[,bs_indicator,1] <- 1 # use bs domestic fleet in even years
-    if(sum(ai_idx_indicator) != 0) usesrvidx[,ai_indicator,2] <- 1 # use ai domestic fleet in odd years
+    if(sum(bs_idx_indicator) != 0) usesrvidx[,bs_idx_indicator,1] <- 1 # use bs domestic fleet in even years
+    if(sum(ai_idx_indicator) != 0) usesrvidx[,ai_idx_indicator,2] <- 1 # use ai domestic fleet in odd years
     if(sum(bs_age_indicator) != 0) usesrvage[,bs_age_indicator,1] <- 1 # use bs domestic fleet in even years
     if(sum(ai_age_indicator) != 0) usesrvage[,ai_age_indicator,2] <- 1 # use ai domestic fleet in odd years
   }
@@ -1947,4 +1856,832 @@ build_selex_prior <- function(fleets_blocks, sex_par, region = 1, mu = 1, sd = 2
 
   rownames(out) <- NULL
   return(out)
+}
+
+
+
+#' Aggregate simulated data to three assessment regions
+#'
+#' Aggregates simulated fishery, survey, and tagging data from the full spatial
+#' resolution to three assessment regions: Bering Sea (BS), Aleutian Islands (AI),
+#' and Gulf of Alaska (GOA). GOA data are formed by aggregating regions 3–5 using
+#' either biomass- or numbers-based weighting, depending on user specification.
+#'
+#' The function updates the \code{sim_env} object in place by creating aggregated
+#' observations, true values, effective sample sizes, and tag-release structures.
+#' Observation error is applied to aggregated catches and survey indices.
+#'
+#' @param sim_data A list containing simulated observation-level data, including
+#'   age and length compositions, survey indices, and tagging information.
+#'
+#' @param sim_env A list containing simulation settings and true underlying values.
+#'   This object is modified in place to include aggregated quantities.
+#'
+#' @param y Integer. The terminal year of data to be aggregated.
+#'
+#' @param sim Integer. Simulation replicate index.
+#'
+#' @param srv_wgt Character string specifying survey aggregation weights.
+#'   Either \code{"numbers"} or \code{"biomass"}.
+#'
+#' @param fish_wgt Character string specifying fishery aggregation weights.
+#'   Either \code{"numbers"} or \code{"biomass"}.
+#'
+#' @param srv_idx_se Numeric. Log-scale standard error used to generate observation
+#'   error for aggregated survey indices.
+#'
+agg_data_to_three_rg <- function(sim_data,
+                                 sim_env,
+                                 y,
+                                 sim,
+                                 srv_wgt = 'numbers',
+                                 fish_wgt = 'biomass',
+                                 srv_idx_se) {
+
+
+  # get years in simulation
+  x <- (sim_env$feedback_start_yr + 1):sim_env$n_yrs
+  odd_yrs <- x[x %% 2 == 1] # bsai years
+  even_yrs <- x[x %% 2 == 0] # goa years
+
+  # dimensions
+  n_regions <- 3
+  n_yrs <- length(1:y)
+  n_sexes <- sim_env$n_sexes
+  n_ages <- sim_env$n_ages
+  n_lens <- sim_env$n_lens
+  n_fish_fleets <- sim_env$n_fish_fleets
+  n_srv_fleets <- sim_env$n_srv_fleets
+
+  # Catches (using true catches, and then applying error to aggregated true catches)
+  if(y == sim_env$feedback_start_yr) {
+    aggregated_true_catch <- array(0, dim = c(3, length(1:y), n_fish_fleets))
+    aggregated_true_catch[1,,] <- sim_env$TrueCatch[1,1:y,,sim] # BS
+    aggregated_true_catch[2,,] <- sim_env$TrueCatch[2,1:y,,sim] # AI
+    aggregated_true_catch[3,,] <- apply(sim_env$TrueCatch[3:5,1:y,,sim], 2:3, sum) # GOA
+    sim_env$Agg_ObsCatch[,1:y,,sim] <- aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0, mean(exp(sim_data$ln_sigmaC)))) # add error
+  } else{
+    aggregated_true_catch <- array(0, dim = c(n_regions, n_fish_fleets))
+    aggregated_true_catch[1,] <- sim_env$TrueCatch[1,y,,sim] # BS Gear
+    aggregated_true_catch[2,] <- sim_env$TrueCatch[2,y,,sim] # AI
+    aggregated_true_catch[3,] <- colSums(sim_env$TrueCatch[3:5,y,,sim]) # GOA
+    sim_env$Agg_ObsCatch[,y,,sim] <- aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0, mean(exp(sim_data$ln_sigmaC))))
+  }
+
+  if(fish_wgt == 'biomass') {
+    # Get fixed gear weights
+    fixed_gear_wts <- sim_env$TrueCatch[3:5,1:y,1,sim] # only weighting GOA for fixed-gear weights
+    total_fixed_gear_catches <- colSums(fixed_gear_wts)
+    catch_fixed_gear_prop <- sweep(fixed_gear_wts, 2, total_fixed_gear_catches, '/')
+
+    # get trawl gear weights
+    trawl_gear_wts <- sim_env$TrueCatch[3:5,1:y,2,sim] # only weighting GOA
+    total_trawl_gear_catches <- colSums(trawl_gear_wts)
+    catch_trawl_gear_prop <- sweep(trawl_gear_wts, 2, total_trawl_gear_catches, '/')
+  }
+
+  if(fish_wgt == 'numbers') {
+    # Get fixed gear weights
+    fixed_gear_wts <- sim_env$CAA[3:5,1:y,,,1,sim] # only weighting GOA for fixed-gear weights
+    fixed_gear_wts <- apply(fixed_gear_wts, c(1,2), sum) # sum numbers up
+    total_fixed_gear_catches <- colSums(fixed_gear_wts)
+    catch_fixed_gear_prop <- sweep(fixed_gear_wts, 2, total_fixed_gear_catches, '/')
+
+    # get trawl gear weights
+    trawl_gear_wts <- sim_env$CAA[3:5,1:y,,,2,sim] # only weighting GOA
+    trawl_gear_wts <- apply(trawl_gear_wts, c(1,2), sum) # sum numbers up
+    total_trawl_gear_catches <- colSums(trawl_gear_wts)
+    catch_trawl_gear_prop <- sweep(trawl_gear_wts, 2, total_trawl_gear_catches, '/')
+  }
+
+  for(yr in 1:n_yrs) {
+    for(f in 1:n_fish_fleets) {
+
+      # figure out which regions have catches
+      if(f == 1) catch_prop <- catch_fixed_gear_prop
+      if(f == 2) catch_prop <- catch_trawl_gear_prop
+
+      # age comps
+      if(f == 1) { # fixed gear
+
+        regions <- (3:5)[-which(catch_prop[,yr] == 0)]
+        if(length(regions) == 0) regions <- 3:5
+        regions_offset <- regions - 2 # get offset for indexing catch_prop
+
+        # input BS, AI, into appropriate fleets for fixed-gear fishery (no weighting)
+        sim_env$Agg_ObsFishAgeComps[1,yr,,,1,sim] <- sim_data$ObsFishAgeComps[1,yr,,,1] # BS
+        sim_env$Agg_ObsFishAgeComps[2,yr,,,1,sim] <- sim_data$ObsFishAgeComps[2,yr,,,1] # AI
+        sim_env$Agg_ObsFishAgeComps[1,yr,,,1,sim] <- sim_env$Agg_ObsFishAgeComps[1,yr,,,1,sim] / sum(sim_env$Agg_ObsFishAgeComps[1,yr,,,1,sim])
+        sim_env$Agg_ObsFishAgeComps[2,yr,,,1,sim] <- sim_env$Agg_ObsFishAgeComps[2,yr,,,1,sim] / sum(sim_env$Agg_ObsFishAgeComps[2,yr,,,1,sim])
+
+        # input GOA fleet weighting by proportions
+        sim_env$Agg_ObsFishAgeComps[3,yr,,,1,sim] <- apply(sim_data$ObsFishAgeComps[3:5,yr,,,1] * catch_prop[,yr], c(2,3), sum)
+        sim_env$Agg_ObsFishAgeComps[3,yr,,,1,sim] <- sim_env$Agg_ObsFishAgeComps[3,yr,,,1,sim] / sum(sim_env$Agg_ObsFishAgeComps[3,yr,,,1,sim])
+
+        # Calculate n_eff for age comps
+        sim_env$Agg_ISS_FishAgeComps[1,yr,1,1,sim] <- sum(sim_data$ObsFishAgeComps[1,yr,,,1]) # sum ISS for BS fixed gear
+        sim_env$Agg_ISS_FishAgeComps[2,yr,1,1,sim] <- sum(sim_data$ObsFishAgeComps[2,yr,,,1]) # sum ISS for AI fixed gear
+
+        # get n_eff for GOA fixed gear
+        if(length(regions) > 1) {
+          regional_n_age <- apply(sim_data$ObsFishAgeComps[regions,yr,,,1], 1, sum)
+          regional_p_age <- sweep(sim_data$ObsFishAgeComps[regions,yr,,,1], 1, regional_n_age, "/")
+          pooled_comp_age <- colSums(sweep(regional_p_age, 1, catch_prop[regions_offset,yr], "*")) / sum(catch_prop[,yr])
+          numerator_age <- sum(pooled_comp_age * (1 - pooled_comp_age))
+          denominator_age <- sum(catch_prop[regions_offset,yr]^2 * (1 / regional_n_age) * apply(regional_p_age * (1 - regional_p_age), 1, sum))
+          sim_env$Agg_ISS_FishAgeComps[3,yr,1,1,sim] <- numerator_age / denominator_age
+        } else {
+          sim_env$Agg_ISS_FishAgeComps[3,yr,1,1,sim] <- sum(sim_data$ObsFishAgeComps[regions,yr,,,1])
+        }
+      }
+
+      # trawl age comps (not used)
+      if(f == 2) {
+        regions <- (3:5)[-which(catch_prop[,yr] == 0)]
+        if(length(regions) == 0) regions <- 3:5
+        regions_offset <- regions - 2 # get offset for indexing catch_prop
+
+        # input BS, AI, into appropriate fleets for fixed-gear fishery (no weighting)
+        sim_env$Agg_ObsFishAgeComps[1,yr,,,2,sim] <- sim_data$ObsFishAgeComps[1,yr,,,2] # BS
+        sim_env$Agg_ObsFishAgeComps[2,yr,,,2,sim] <- sim_data$ObsFishAgeComps[2,yr,,,2] # AI
+        sim_env$Agg_ObsFishAgeComps[1,yr,,,2,sim] <- sim_env$Agg_ObsFishAgeComps[1,yr,,,2,sim] / sum(sim_env$Agg_ObsFishAgeComps[1,yr,,,2,sim])
+        sim_env$Agg_ObsFishAgeComps[2,yr,,,2,sim] <- sim_env$Agg_ObsFishAgeComps[2,yr,,,2,sim] / sum(sim_env$Agg_ObsFishAgeComps[2,yr,,,2,sim])
+
+        # input GOA fleet weighting by proportions
+        sim_env$Agg_ObsFishAgeComps[3,yr,,,2,sim] <- apply(sim_data$ObsFishAgeComps[3:5,yr,,,2] * catch_prop[,yr], c(2,3), sum)
+        sim_env$Agg_ObsFishAgeComps[3,yr,,,2,sim] <- sim_env$Agg_ObsFishAgeComps[3,yr,,,2,sim] / sum(sim_env$Agg_ObsFishAgeComps[3,yr,,,2,sim])
+
+        # Calculate n_eff for age comps
+        sim_env$Agg_ISS_FishAgeComps[1,yr,1,2,sim] <- sum(sim_data$ObsFishAgeComps[1,yr,,,2]) # sum ISS for BS fixed gear
+        sim_env$Agg_ISS_FishAgeComps[2,yr,1,2,sim] <- sum(sim_data$ObsFishAgeComps[2,yr,,,2]) # sum ISS for AI fixed gear
+
+        # get n_eff for GOA fixed gear
+        if(length(regions) > 1) {
+          regional_n_age <- apply(sim_data$ObsFishAgeComps[regions,yr,,,2], 1, sum)
+          regional_p_age <- sweep(sim_data$ObsFishAgeComps[regions,yr,,,2], 1, regional_n_age, "/")
+          pooled_comp_age <- colSums(sweep(regional_p_age, 1, catch_prop[regions_offset,yr], "*")) / sum(catch_prop[,yr])
+          numerator_age <- sum(pooled_comp_age * (1 - pooled_comp_age))
+          denominator_age <- sum(catch_prop[regions_offset,yr]^2 * (1 / regional_n_age) * apply(regional_p_age * (1 - regional_p_age), 1, sum))
+          sim_env$Agg_ISS_FishAgeComps[3,yr,1,2,sim] <- numerator_age / denominator_age
+        } else {
+          sim_env$Agg_ISS_FishAgeComps[3,yr,1,2,sim] <- sum(sim_data$ObsFishAgeComps[regions,yr,,,2])
+        }
+      }
+
+      # len comps
+      if(f == 1) { # fixed gear
+
+        regions <- (3:5)[-which(catch_prop[,yr] == 0)]
+        if(length(regions) == 0) regions <- 3:5
+        regions_offset <- regions - 2 # get offset for indexing catch_prop
+
+        # input BS, AI, into appropriate fleets for fixed-gear fishery (no weighting)
+        sim_env$Agg_ObsFishLenComps[1,yr,,,1,sim] <- sim_data$ObsFishLenComps[1,yr,,,1] # BS
+        sim_env$Agg_ObsFishLenComps[2,yr,,,1,sim] <- sim_data$ObsFishLenComps[2,yr,,,1] # AI
+        sim_env$Agg_ObsFishLenComps[1,yr,,,1,sim] <- sim_env$Agg_ObsFishLenComps[1,yr,,,1,sim] / sum(sim_env$Agg_ObsFishLenComps[1,yr,,,1,sim])
+        sim_env$Agg_ObsFishLenComps[2,yr,,,1,sim] <- sim_env$Agg_ObsFishLenComps[2,yr,,,1,sim] / sum(sim_env$Agg_ObsFishLenComps[2,yr,,,1,sim])
+
+        # input GOA fleet weighting by proportions
+        sim_env$Agg_ObsFishLenComps[3,yr,,,1,sim] <- apply(sim_data$ObsFishLenComps[3:5,yr,,,1] * catch_prop[,yr], c(2,3), sum)
+        sim_env$Agg_ObsFishLenComps[3,yr,,,1,sim] <- sim_env$Agg_ObsFishLenComps[3,yr,,,1,sim] / sum(sim_env$Agg_ObsFishLenComps[3,yr,,,1,sim])
+
+        # Calculate n_eff for len comps
+        sim_env$Agg_ISS_FishLenComps[1,yr,1,1,sim] <- sum(sim_data$ObsFishLenComps[1,yr,,,1]) # sum ISS for BS fixed gear
+        sim_env$Agg_ISS_FishLenComps[2,yr,1,1,sim] <- sum(sim_data$ObsFishLenComps[2,yr,,,1]) # sum ISS for AI fixed gear
+
+        # get n_eff for GOA fixed gear
+        if(length(regions) > 1) {
+          regional_n_len <- apply(sim_data$ObsFishLenComps[regions,yr,,,1], 1, sum)
+          regional_p_len <- sweep(sim_data$ObsFishLenComps[regions,yr,,,1], 1, regional_n_len, "/")
+          pooled_comp_len <- colSums(sweep(regional_p_len, 1, catch_prop[regions_offset,yr], "*")) / sum(catch_prop[,yr])
+          numerator_len <- sum(pooled_comp_len * (1 - pooled_comp_len))
+          denominator_len <- sum(catch_prop[regions_offset,yr]^2 * (1 / regional_n_len) * apply(regional_p_len * (1 - regional_p_len), 1, sum))
+          sim_env$Agg_ISS_FishLenComps[3,yr,1,1,sim] <- numerator_len / denominator_len
+        } else {
+          sim_env$Agg_ISS_FishLenComps[3,yr,1,1,sim] <- sum(sim_data$ObsFishLenComps[regions,yr,,,1])
+        }
+      }
+
+      # trawl len comps (not used)
+      if(f == 2) {
+        regions <- (3:5)[-which(catch_prop[,yr] == 0)]
+        if(length(regions) == 0) regions <- 3:5
+        regions_offset <- regions - 2 # get offset for indexing catch_prop
+
+        # input BS, AI, into appropriate fleets for fixed-gear fishery (no weighting)
+        sim_env$Agg_ObsFishLenComps[1,yr,,,2,sim] <- sim_data$ObsFishLenComps[1,yr,,,2] # BS
+        sim_env$Agg_ObsFishLenComps[2,yr,,,2,sim] <- sim_data$ObsFishLenComps[2,yr,,,2] # AI
+        sim_env$Agg_ObsFishLenComps[1,yr,,,2,sim] <- sim_env$Agg_ObsFishLenComps[1,yr,,,2,sim] / sum(sim_env$Agg_ObsFishLenComps[1,yr,,,2,sim])
+        sim_env$Agg_ObsFishLenComps[2,yr,,,2,sim] <- sim_env$Agg_ObsFishLenComps[2,yr,,,2,sim] / sum(sim_env$Agg_ObsFishLenComps[2,yr,,,2,sim])
+
+        # input GOA fleet weighting by proportions
+        sim_env$Agg_ObsFishLenComps[3,yr,,,2,sim] <- apply(sim_data$ObsFishLenComps[3:5,yr,,,2] * catch_prop[,yr], c(2,3), sum)
+        sim_env$Agg_ObsFishLenComps[3,yr,,,2,sim] <- sim_env$Agg_ObsFishLenComps[3,yr,,,2,sim] / sum(sim_env$Agg_ObsFishLenComps[3,yr,,,2,sim])
+
+        # Calculate n_eff for len comps
+        sim_env$Agg_ISS_FishLenComps[1,yr,1,2,sim] <- sum(sim_data$ObsFishLenComps[1,yr,,,2]) # sum ISS for BS fixed gear
+        sim_env$Agg_ISS_FishLenComps[2,yr,1,2,sim] <- sum(sim_data$ObsFishLenComps[2,yr,,,2]) # sum ISS for AI fixed gear
+
+        # get n_eff for GOA fixed gear
+        if(length(regions) > 1) {
+          regional_n_len <- apply(sim_data$ObsFishLenComps[regions,yr,,,2], 1, sum)
+          regional_p_len <- sweep(sim_data$ObsFishLenComps[regions,yr,,,2], 1, regional_n_len, "/")
+          pooled_comp_len <- colSums(sweep(regional_p_len, 1, catch_prop[regions_offset,yr], "*")) / sum(catch_prop[,yr])
+          numerator_len <- sum(pooled_comp_len * (1 - pooled_comp_len))
+          denominator_len <- sum(catch_prop[regions_offset,yr]^2 * (1 / regional_n_len) * apply(regional_p_len * (1 - regional_p_len), 1, sum))
+          sim_env$Agg_ISS_FishLenComps[3,yr,1,2,sim] <- numerator_len / denominator_len
+        } else {
+          sim_env$Agg_ISS_FishLenComps[3,yr,1,2,sim] <- sum(sim_data$ObsFishLenComps[regions,yr,,,2])
+        }
+      }
+    } # end f loop
+  } # end yr loop
+
+  # Survey Index
+  if(y == sim_env$feedback_start_yr) {
+    true_srvidx <- sim_env$TrueSrvIdx[,1:y,,sim] # get true survey index
+    sim_env$Agg_TrueSrvIdx[1,1:y,1,sim] <- true_srvidx[1,1:y,1] # BS Domestic
+    sim_env$Agg_TrueSrvIdx[2,1:y,1,sim] <- true_srvidx[2,1:y,1] # AI Domestic
+    sim_env$Agg_TrueSrvIdx[3,1:y,1,sim] <- colSums(true_srvidx[3:5,1:y,1]) # GOA Domestic
+    sim_env$Agg_TrueSrvIdx[1,1:y,3,sim] <- true_srvidx[1,1:y,3] # BS JP
+    sim_env$Agg_TrueSrvIdx[2,1:y,3,sim] <- true_srvidx[2,1:y,3] # AI JP
+    sim_env$Agg_TrueSrvIdx[3,1:y,3,sim] <- colSums(true_srvidx[3:5,1:y,3]) # GOA JP
+    # add devs
+    sim_env$Agg_ObsSrvIdx[,1:y,,sim] <- sim_env$Agg_TrueSrvIdx[,1:y,,sim] * exp(rnorm(length(sim_env$Agg_TrueSrvIdx[,1:y,,sim]), 0, srv_idx_se)) # simulate devs
+  } else {
+    true_srvidx <- sim_env$TrueSrvIdx[,y,,sim] # get true survey index
+    agg_true_srvidx <- array(NA, dim = c(n_regions, n_srv_fleets))
+    agg_true_srvidx[1,1] <- true_srvidx[1,1] # BS Domestic
+    agg_true_srvidx[2,1] <- true_srvidx[2,1] # AI Domestic
+    agg_true_srvidx[3,1] <- sum(true_srvidx[3:5,1]) # GOA Domestic
+    agg_true_srvidx[1,3] <- true_srvidx[1,3] # BS JP
+    agg_true_srvidx[2,3] <- true_srvidx[2,3] # AI JP
+    agg_true_srvidx[3,3] <- sum(true_srvidx[3:5,3]) # GOA JP
+    # save true aggregated index
+    sim_env$Agg_TrueSrvIdx[,y,,sim] <- agg_true_srvidx # save "true index"
+    sim_env$Agg_ObsSrvIdx[,y,,sim] <- agg_true_srvidx * exp(rnorm(length(agg_true_srvidx), 0, srv_idx_se))
+  }
+
+  if(srv_wgt == 'biomass') {
+    # Get domestic weights
+    domestic_wts <- apply(sim_env$SrvIAA[3:5,1:y,,,1,sim] * sim_env$WAA_srv[3:5,1:y,,,1,sim], c(1,2), sum)  # only weighting GOA for domestic weights
+    total_domestic_idx <- colSums(domestic_wts)
+    idx_domestic_prop <- sweep(domestic_wts, 2, total_domestic_idx, '/')
+
+    # get jp weights
+    jp_wts <- apply(sim_env$SrvIAA[3:5,1:y,,,3,sim] * sim_env$WAA_srv[3:5,1:y,,,3,sim], c(1,2), sum)
+    total_jp_idx <- colSums(jp_wts)
+    idx_jp_prop <- sweep(jp_wts, 2, total_jp_idx, '/')
+  }
+
+  if(srv_wgt == 'numbers') {
+    # Get domestic weights
+    domestic_wts <- sim_env$SrvIAA[3:5,1:y,,,1,sim] # only weighting GOA for domestic weights
+    domestic_wts <- apply(domestic_wts, c(1,2), sum) # sum numbers up
+    total_domestic_idx <- colSums(domestic_wts)
+    idx_domestic_prop <- sweep(domestic_wts, 2, total_domestic_idx, '/')
+
+    # get jp weights
+    jp_wts <- sim_env$SrvIAA[3:5,1:y,,,3,sim]
+    jp_wts <- apply(jp_wts, c(1,2), sum) # sum numbers up
+    total_jp_idx <- colSums(jp_wts)
+    idx_jp_prop <- sweep(jp_wts, 2, total_jp_idx, '/')
+  }
+
+  for(yr in 1:n_yrs) {
+    for(f in c(1,3)) { # loop through only domestic and jp
+
+      # figure out which regions have catches
+      if(f == 1) idx_prop <- idx_domestic_prop
+      if(f == 2) idx_prop <- idx_jp_prop
+
+      # age comps
+      if(f == 1) { # domestic
+
+        regions <- (3:5)[-which(idx_prop[,yr] == 0)]
+        if(length(regions) == 0) regions <- 3:5
+        regions_offset <- regions - 2 # get offset for indexing idx_prop
+
+        # input BS, AI, into appropriate fleets for domestic srvery (no weighting)
+        sim_env$Agg_ObsSrvAgeComps[1,yr,,,1,sim] <- sim_data$ObsSrvAgeComps[1,yr,,,1] # BS
+        sim_env$Agg_ObsSrvAgeComps[2,yr,,,1,sim] <- sim_data$ObsSrvAgeComps[2,yr,,,1] # AI
+        sim_env$Agg_ObsSrvAgeComps[1,yr,,,1,sim] <- sim_env$Agg_ObsSrvAgeComps[1,yr,,,1,sim] / sum(sim_env$Agg_ObsSrvAgeComps[1,yr,,,1,sim])
+        sim_env$Agg_ObsSrvAgeComps[2,yr,,,1,sim] <- sim_env$Agg_ObsSrvAgeComps[2,yr,,,1,sim] / sum(sim_env$Agg_ObsSrvAgeComps[2,yr,,,1,sim])
+
+        # input GOA fleet weighting by proportions
+        sim_env$Agg_ObsSrvAgeComps[3,yr,,,1,sim] <- apply(sim_data$ObsSrvAgeComps[3:5,yr,,,1] * idx_prop[,yr], c(2,3), sum)
+        sim_env$Agg_ObsSrvAgeComps[3,yr,,,1,sim] <- sim_env$Agg_ObsSrvAgeComps[3,yr,,,1,sim] / sum(sim_env$Agg_ObsSrvAgeComps[3,yr,,,1,sim])
+
+        # Calculate n_eff for age comps
+        sim_env$Agg_ISS_SrvAgeComps[1,yr,1,1,sim] <- sum(sim_data$ObsSrvAgeComps[1,yr,,,1]) # sum ISS for BS domestic
+        sim_env$Agg_ISS_SrvAgeComps[2,yr,1,1,sim] <- sum(sim_data$ObsSrvAgeComps[2,yr,,,1]) # sum ISS for AI domestic
+
+        # get n_eff for GOA domestic
+        if(length(regions) > 1) {
+          regional_n_age <- apply(sim_data$ObsSrvAgeComps[regions,yr,,,1], 1, sum)
+          regional_p_age <- sweep(sim_data$ObsSrvAgeComps[regions,yr,,,1], 1, regional_n_age, "/")
+          pooled_comp_age <- colSums(sweep(regional_p_age, 1, idx_prop[regions_offset,yr], "*")) / sum(idx_prop[,yr])
+          numerator_age <- sum(pooled_comp_age * (1 - pooled_comp_age))
+          denominator_age <- sum(idx_prop[regions_offset,yr]^2 * (1 / regional_n_age) * apply(regional_p_age * (1 - regional_p_age), 1, sum))
+          sim_env$Agg_ISS_SrvAgeComps[3,yr,1,1,sim] <- numerator_age / denominator_age
+        } else {
+          sim_env$Agg_ISS_SrvAgeComps[3,yr,1,1,sim] <- sum(sim_data$ObsSrvAgeComps[regions,yr,,,1])
+        }
+      }
+
+      # jp age comps
+      if(f == 3) {
+        regions <- (3:5)[-which(idx_prop[,yr] == 0)]
+        if(length(regions) == 0) regions <- 3:5
+        regions_offset <- regions - 2 # get offset for indexing idx_prop
+
+        # input BS, AI, into appropriate fleets for jp-gear srvery (no weighting)
+        sim_env$Agg_ObsSrvAgeComps[1,yr,,,3,sim] <- sim_data$ObsSrvAgeComps[1,yr,,,3] # BS
+        sim_env$Agg_ObsSrvAgeComps[2,yr,,,3,sim] <- sim_data$ObsSrvAgeComps[2,yr,,,3] # AI
+        sim_env$Agg_ObsSrvAgeComps[1,yr,,,3,sim] <- sim_env$Agg_ObsSrvAgeComps[1,yr,,,3,sim] / sum(sim_env$Agg_ObsSrvAgeComps[1,yr,,,3,sim])
+        sim_env$Agg_ObsSrvAgeComps[2,yr,,,3,sim] <- sim_env$Agg_ObsSrvAgeComps[2,yr,,,3,sim] / sum(sim_env$Agg_ObsSrvAgeComps[2,yr,,,3,sim])
+
+        # input GOA fleet weighting by proportions
+        sim_env$Agg_ObsSrvAgeComps[3,yr,,,3,sim] <- apply(sim_data$ObsSrvAgeComps[3:5,yr,,,3] * idx_prop[,yr], c(2,3), sum)
+        sim_env$Agg_ObsSrvAgeComps[3,yr,,,3,sim] <- sim_env$Agg_ObsSrvAgeComps[3,yr,,,3,sim] / sum(sim_env$Agg_ObsSrvAgeComps[,yr,,,3,sim])
+
+        # Calculate n_eff for age comps
+        sim_env$Agg_ISS_SrvAgeComps[1,yr,1,3,sim] <- sum(sim_data$ObsSrvAgeComps[1,yr,,,3]) # sum ISS for BS jp
+        sim_env$Agg_ISS_SrvAgeComps[2,yr,1,3,sim] <- sum(sim_data$ObsSrvAgeComps[2,yr,,,3]) # sum ISS for AI jp
+
+        # get n_eff for GOA jp
+        if(length(regions) > 1) {
+          regional_n_age <- apply(sim_data$ObsSrvAgeComps[regions,yr,,,3], 1, sum)
+          regional_p_age <- sweep(sim_data$ObsSrvAgeComps[regions,yr,,,3], 1, regional_n_age, "/")
+          pooled_comp_age <- colSums(sweep(regional_p_age, 1, idx_prop[regions_offset,yr], "*")) / sum(idx_prop[,yr])
+          numerator_age <- sum(pooled_comp_age * (1 - pooled_comp_age))
+          denominator_age <- sum(idx_prop[regions_offset,yr]^2 * (1 / regional_n_age) * apply(regional_p_age * (1 - regional_p_age), 1, sum))
+          sim_env$Agg_ISS_SrvAgeComps[3,yr,1,3,sim] <- numerator_age / denominator_age
+        } else {
+          sim_env$Agg_ISS_SrvAgeComps[3,yr,1,3,sim] <- sum(sim_data$ObsSrvAgeComps[regions,yr,,,3])
+        }
+      }
+
+      # len comps (not used)
+      if(f == 1) { # domestic
+
+        regions <- (3:5)[-which(idx_prop[,yr] == 0)]
+        if(length(regions) == 0) regions <- 3:5
+        regions_offset <- regions - 2 # get offset for indexing idx_prop
+
+        # input BS, AI, into appropriate fleets for domestic srvery (no weighting)
+        sim_env$Agg_ObsSrvLenComps[1,yr,,,1,sim] <- sim_data$ObsSrvLenComps[1,yr,,,1] # BS
+        sim_env$Agg_ObsSrvLenComps[2,yr,,,1,sim] <- sim_data$ObsSrvLenComps[2,yr,,,1] # AI
+        sim_env$Agg_ObsSrvLenComps[1,yr,,,1,sim] <- sim_env$Agg_ObsSrvLenComps[1,yr,,,1,sim] / sum(sim_env$Agg_ObsSrvLenComps[1,yr,,,1,sim])
+        sim_env$Agg_ObsSrvLenComps[2,yr,,,1,sim] <- sim_env$Agg_ObsSrvLenComps[2,yr,,,1,sim] / sum(sim_env$Agg_ObsSrvLenComps[2,yr,,,1,sim])
+
+        # input GOA fleet weighting by proportions
+        sim_env$Agg_ObsSrvLenComps[3,yr,,,1,sim] <- apply(sim_data$ObsSrvLenComps[3:5,yr,,,1] * idx_prop[,yr], c(2,3), sum)
+        sim_env$Agg_ObsSrvLenComps[3,yr,,,1,sim] <- sim_env$Agg_ObsSrvLenComps[3,yr,,,1,sim] / sum(sim_env$Agg_ObsSrvLenComps[3,yr,,,1,sim])
+
+        # Calculate n_eff for len comps
+        sim_env$Agg_ISS_SrvLenComps[1,yr,1,1,sim] <- sum(sim_data$ObsSrvLenComps[1,yr,,,1]) # sum ISS for BS domestic
+        sim_env$Agg_ISS_SrvLenComps[2,yr,1,1,sim] <- sum(sim_data$ObsSrvLenComps[2,yr,,,1]) # sum ISS for AI domestic
+
+        # get n_eff for GOA domestic
+        if(length(regions) > 1) {
+          regional_n_len <- apply(sim_data$ObsSrvLenComps[regions,yr,,,1], 1, sum)
+          regional_p_len <- sweep(sim_data$ObsSrvLenComps[regions,yr,,,1], 1, regional_n_len, "/")
+          pooled_comp_len <- colSums(sweep(regional_p_len, 1, idx_prop[regions_offset,yr], "*")) / sum(idx_prop[,yr])
+          numerator_len <- sum(pooled_comp_len * (1 - pooled_comp_len))
+          denominator_len <- sum(idx_prop[regions_offset,yr]^2 * (1 / regional_n_len) * apply(regional_p_len * (1 - regional_p_len), 1, sum))
+          sim_env$Agg_ISS_SrvLenComps[3,yr,1,1,sim] <- numerator_len / denominator_len
+        } else {
+          sim_env$Agg_ISS_SrvLenComps[3,yr,1,1,sim] <- sum(sim_data$ObsSrvLenComps[regions,yr,,,1])
+        }
+      }
+
+      # jp len comps
+      if(f == 3) {
+        regions <- (3:5)[-which(idx_prop[,yr] == 0)]
+        if(length(regions) == 0) regions <- 3:5
+        regions_offset <- regions - 2 # get offset for indexing idx_prop
+
+        # input BS, AI, into appropriate fleets for jp-gear srvery (no weighting)
+        sim_env$Agg_ObsSrvLenComps[1,yr,,,3,sim] <- sim_data$ObsSrvLenComps[1,yr,,,3] # BS
+        sim_env$Agg_ObsSrvLenComps[2,yr,,,3,sim] <- sim_data$ObsSrvLenComps[2,yr,,,3] # AI
+        sim_env$Agg_ObsSrvLenComps[1,yr,,,3,sim] <- sim_env$Agg_ObsSrvLenComps[1,yr,,,3,sim] / sum(sim_env$Agg_ObsSrvLenComps[1,yr,,,3,sim])
+        sim_env$Agg_ObsSrvLenComps[2,yr,,,3,sim] <- sim_env$Agg_ObsSrvLenComps[2,yr,,,3,sim] / sum(sim_env$Agg_ObsSrvLenComps[2,yr,,,3,sim])
+
+        # input GOA fleet weighting by proportions
+        sim_env$Agg_ObsSrvLenComps[3,yr,,,3,sim] <- apply(sim_data$ObsSrvLenComps[3:5,yr,,,3] * idx_prop[,yr], c(2,3), sum)
+        sim_env$Agg_ObsSrvLenComps[3,yr,,,3,sim] <- sim_env$Agg_ObsSrvLenComps[3,yr,,,3,sim] / sum(sim_env$Agg_ObsSrvLenComps[3,yr,,,1,sim])
+
+        # Calculate n_eff for len comps
+        sim_env$Agg_ISS_SrvLenComps[1,yr,1,3,sim] <- sum(sim_data$ObsSrvLenComps[1,yr,,,3]) # sum ISS for BS jp
+        sim_env$Agg_ISS_SrvLenComps[2,yr,1,3,sim] <- sum(sim_data$ObsSrvLenComps[2,yr,,,3]) # sum ISS for AI jp
+
+        # get n_eff for GOA jp
+        if(length(regions) > 1) {
+          regional_n_len <- apply(sim_data$ObsSrvLenComps[regions,yr,,,3], 1, sum)
+          regional_p_len <- sweep(sim_data$ObsSrvLenComps[regions,yr,,,3], 1, regional_n_len, "/")
+          pooled_comp_len <- colSums(sweep(regional_p_len, 1, idx_prop[regions_offset,yr], "*")) / sum(idx_prop[,yr])
+          numerator_len <- sum(pooled_comp_len * (1 - pooled_comp_len))
+          denominator_len <- sum(idx_prop[regions_offset,yr]^2 * (1 / regional_n_len) * apply(regional_p_len * (1 - regional_p_len), 1, sum))
+          sim_env$Agg_ISS_SrvLenComps[3,yr,1,3,sim] <- numerator_len / denominator_len
+        } else {
+          sim_env$Agg_ISS_SrvLenComps[3,yr,1,3,sim] <- sum(sim_data$ObsSrvLenComps[regions,yr,,,3])
+        }
+      }
+
+    } # end f loop
+  } # end yr loop
+
+  # Tag Releases (modifieds sim_data)
+  # GOA processing
+  goa_releases <- sim_data$tag_release_indicator[sim_data$tag_release_indicator[,1] %in% c(3:5),]
+  goa_cohorts <- which(sim_data$tag_release_indicator[,1] %in% c(3:5))
+  unique_goa_yrs <- unique(goa_releases[,2])
+
+  # Aggregated GOA Tagged Fish and indicators
+  agg_goa_tagged_fish <- array(NA, dim = c(length(unique_goa_yrs), 30, 2))
+  agg_goa_recap <- array(NA, dim = c(15, length(unique_goa_yrs), 3, 30, 2))
+  agg_goa_indicator <- matrix(NA, nrow = length(unique_goa_yrs), ncol = 2)
+
+  for(i in 1:length(unique_goa_yrs)) {
+    tmp_goa_cohort <- goa_releases[which(goa_releases[,2] == unique_goa_yrs[i]),]
+    tag_cohort_match <- which(sim_data$tag_release_indicator[,1] %in% tmp_goa_cohort[,1] &
+                                sim_data$tag_release_indicator[,2] %in% tmp_goa_cohort[,2])
+    agg_goa_tagged_fish[i,,] <- apply(sim_data$Tagged_Fish[tag_cohort_match,,], c(2:3), sum)
+    # aggregate recaptures
+    agg_goa_recap[,i,1,,] <- apply(sim_data$Obs_Tag_Recap[,tag_cohort_match,1,,], c(1,3,4), sum)
+    agg_goa_recap[,i,2,,] <- apply(sim_data$Obs_Tag_Recap[,tag_cohort_match,2,,], c(1,3,4), sum)
+    agg_goa_recap[,i,3,,] <- apply(sim_data$Obs_Tag_Recap[,tag_cohort_match,3:5,,], c(1,4,5), sum)
+    # Create consolidated GOA indicator row
+    agg_goa_indicator[i,] <- c(3, unique_goa_yrs[i])
+  }
+
+  # Non-GOA cohorts (keep as-is)
+  non_goa_cohorts <- which(!sim_data$tag_release_indicator[,1] %in% c(3:5))
+  non_goa_indicator <- sim_data$tag_release_indicator[non_goa_cohorts,]
+  non_goa_tagged_fish <- sim_data$Tagged_Fish[non_goa_cohorts,,]
+  non_goa_recap <- sim_data$Obs_Tag_Recap[,non_goa_cohorts,,,]
+
+  # Consolidate non-GOA regions to match GOA structure
+  non_goa_recap_consolidated <- array(NA, dim = c(15, length(non_goa_cohorts), 3, 30, 2))
+  non_goa_recap_consolidated[,,1,,] <- non_goa_recap[,,1,,]
+  non_goa_recap_consolidated[,,2,,] <- non_goa_recap[,,2,,]
+  non_goa_recap_consolidated[,,3,,] <- apply(non_goa_recap[,,3:5,,], c(1,2,4,5), sum)
+
+  # Combine aggregated GOA + non-GOA
+  sim_env$Agg_tag_release_indicator <- rbind(agg_goa_indicator, non_goa_indicator)
+  sim_env$Agg_Tagged_Fish <- abind::abind(agg_goa_tagged_fish, non_goa_tagged_fish, along = 1)
+  sim_env$Agg_Obs_Tag_Recap <- abind::abind(agg_goa_recap, non_goa_recap_consolidated, along = 2)
+
+}
+
+#' Generate data-use indicators for three-region assessment models
+#'
+#' Constructs binary indicators specifying which observations are available for
+#' fitting in a three-region (BS, AI, GOA) assessment model. Indicators are created
+#' for catches, survey indices, and fishery and survey composition data.
+#'
+#' The survey data availability pattern depends on the specified longline survey
+#' design type and accounts for alternating survey schedules and age-composition
+#' lags.
+#'
+#' @param sim_env A list containing simulation settings, including the feedback
+#'   start year and total number of years.
+#'
+#' @param y Integer. Terminal assessment year.
+#'
+#' @param age_lag Integer. Number of years between observation year and the most
+#'   recent age available for composition data. Default is 1.
+#'
+#' @param lls_design_type Character string specifying the survey design.
+#'   Must be one of \code{"all"}, \code{"historical"}, or \code{"current"}.
+#'
+#' @return A named list of logical indicator arrays:
+#' \itemize{
+#'   \item \code{usefishage}: Fishery age-composition indicators
+#'   \item \code{usefishlen}: Fishery length-composition indicators
+#'   \item \code{usesrvage}: Survey age-composition indicators
+#'   \item \code{usesrvlen}: Survey length-composition indicators
+#'   \item \code{usecatch}: Catch indicators
+#'   \item \code{usesrvidx}: Survey index indicators
+#' }
+#'
+threerg_use_indicators <- function(sim_env,
+                               y,
+                               age_lag = 1,
+                               lls_design_type) {
+
+  # get years in simulation
+  x <- (sim_env$feedback_start_yr + 1):sim_env$n_yrs
+  odd_yrs <- x[x %% 2 == 1] # bsai years
+  even_yrs <- x[x %% 2 == 0] # goa years
+
+  # Data indicators
+  usecatch <- array(0, dim = c(3, y, 2))
+  usesrvidx <- array(0, dim = c(3, y, 3))
+  usefishage <- array(0, c(3, y, 2))
+  usefishlen <- array(0, c(3, y, 2))
+  usesrvage <- array(0, c(3, y, 3))
+  usesrvlen <- array(0, c(3, y, 3)) # not used at all
+
+  usecatch[1,,1] <- 1 # BS fixed gear catch availiable every year
+  usecatch[2,-c(1:3),1] <- 1 # AI fixed gear catch not availiable in first three years
+  usecatch[3,,1] <- 1 # GOA fixed gear catch availaible in every year
+  usecatch[1,,2] <- 1 # BS trawl gear catch availiable every year
+  usecatch[2,-c(1:3),2] <- 1 # AI trawl gear catch not availiable in first three years
+  usecatch[3,,2] <- 1 # aggregated GOA trawl gear catch availaible in every year
+
+  # Fish Comps
+  usefishage[1:3,40:(y-age_lag),1] <- 1 # use data starting year 40, with age lag for all fixed gear
+  usefishage[1,55,1] <- 0 # no samples in BS fleet in year 55
+  usefishlen[1:3,31:39,1] <- 1 # use data only from 31 - 39 for all fixed gear
+  usefishlen[1,c(31,32,35,36,40:43, 45:51, 53, 54, 57:y),2] <- 1 # BS trawl
+  usefishlen[2,c(31, 35, 36, 44, 46, 58, 61:y),2] <- 1 # AI trawl
+  usefishlen[3,c(31,32,35:37, 39:y),2] <- 1 # GOA trawl
+
+  # Survey Index
+  if(lls_design_type == 'all') { # if design = all, then fitting data for all fleets
+    usesrvage[1:3,31:(y-age_lag),1] <- usesrvidx[1:3,31:y,1] <- 1
+    usesrvage[1:3,65,1] <- usesrvidx[1:3,65,1] <- 0 # no data in year 65
+  }
+
+  if(lls_design_type == 'historical') {
+    usesrvage[1,seq(38, 64, 2),1] <- usesrvidx[1,seq(38, 64, 2),1] <- 1 # use data in bs domestic fleet in even years
+    usesrvage[2,seq(37, 64, 2),1] <- usesrvidx[2,seq(37, 64, 2),1] <- 1 # use data in ai domestic fleet in odd years
+    usesrvidx[3,31:y,1] <- 1 # use data in goa domestic fleet every single year
+    usesrvage[3,37:(y-age_lag),1] <- 1 # use data in goa domestic fleet every single year
+    usesrvidx[,65,] <- usesrvage[,65,] <- 0 # no survey in 65
+
+    # use indicators in subsequent years
+    bs_idx_indicator <- even_yrs[even_yrs <= y]
+    ai_idx_indicator <- odd_yrs[odd_yrs <= y]
+    bs_age_indicator <- even_yrs[even_yrs <= y - age_lag]
+    ai_age_indicator <- odd_yrs[odd_yrs <= y - age_lag]
+
+    if(sum(bs_idx_indicator) != 0) usesrvidx[1,bs_idx_indicator,1] <- 1 # use bs domestic fleet in even years
+    if(sum(ai_idx_indicator) != 0) usesrvidx[2,ai_idx_indicator,1] <- 1 # use ai domestic fleet in odd years
+    if(sum(bs_age_indicator) != 0) usesrvage[1,bs_age_indicator,1] <- 1 # use bs domestic fleet in even years
+    if(sum(ai_age_indicator) != 0) usesrvage[2,ai_age_indicator,1] <- 1 # use ai domestic fleet in odd years
+  }
+
+  if(lls_design_type == 'current') {
+    # set up the historical indicators first
+    usesrvage[1,seq(38, 64, 2),1] <- usesrvidx[1,seq(38, 64, 2),1] <- 1 # use data in bs domestic fleet in even years
+    usesrvage[2,seq(37, 64, 2),1] <- usesrvidx[2,seq(37, 64, 2),1] <- 1 # use data in ai domestic fleet in odd years
+    usesrvidx[3,31:64,1] <- 1 # use data in goa domestic fleet every single year
+    usesrvage[3,37:64,1] <- 1 # use data in goa domestic fleet every single year
+    usesrvidx[,65,] <- usesrvage[,65,] <- 0 # no survey in 65
+
+    # setup current indicators
+    goa_idx_indicator <- even_yrs[even_yrs <= y]
+    bsai_idx_indicator <- odd_yrs[odd_yrs <= y]
+    goa_age_indicator <- even_yrs[even_yrs <= y - age_lag]
+    bsai_age_indicator <- odd_yrs[odd_yrs <= y - age_lag]
+
+    if(sum(goa_idx_indicator) != 0) usesrvidx[3,goa_idx_indicator,1] <- 1 # use goa domestic fleet in even years
+    if(sum(bsai_idx_indicator) != 0) usesrvidx[c(1,2),bsai_age_indicator,1] <- 1 # use bsai domestic fleet in odd years
+    if(sum(goa_age_indicator) != 0) usesrvage[3,goa_age_indicator,1] <- 1 # use goa domestic fleet in even years
+    if(sum(bsai_age_indicator) != 0) usesrvage[c(1,2),bsai_age_indicator,1] <- 1 # use bsai domestic fleet in odd years
+  }
+
+  # compositions
+  usesrvage[1,c(26, 30, 34),3] <- 1 # BS
+  usesrvage[2,c(26, 28, 45),3] <- 1 # AI
+  usesrvage[3,c(22, seq(26, 34, 2)),3] <- 1 # GOA
+  usesrvidx[1:3,20:35,3] <- 1 # survey index
+
+  return(list(usefishage = usefishage, usefishlen = usefishlen,
+              usesrvage = usesrvage, usesrvlen = usesrvlen,
+              usecatch = usecatch, usesrvidx = usesrvidx))
+
+}
+
+#' Construct data-availability indicators for the five-region model
+#'
+#' Creates logical indicator arrays specifying which data streams are used
+#' by region, year, and fleet for the five-region estimation model. Indicators
+#' are constructed for catch, fishery age and length compositions, survey
+#' indices, and survey age and length compositions. Availability depends on
+#' region-specific historical sampling patterns, an optional age lag, and the
+#' specified longline survey design.
+#'
+#' The five regions are assumed to follow the ordering:
+#' Bering Sea (BS), Aleutian Islands (AI), Western GOA (WGOA),
+#' Central GOA (CGOA), and Eastern GOA (EGOA).
+#'
+#' @param sim_env Simulation environment containing the number of years,
+#'   feedback start year, and other operating model settings.
+#' @param y Terminal assessment year.
+#' @param age_lag Integer specifying the lag (in years) between observation and
+#'   recruitment year for age-composition data.
+#' @param lls_design_type Character string specifying the longline survey design.
+#'   Supported values are:
+#'   \itemize{
+#'     \item \code{"all"}: all regions sampled every year,
+#'     \item \code{"historical"}: alternating BS/AI sampling with continuous GOA,
+#'     \item \code{"current"}: current alternating BS/AI versus GOA design.
+#'   }
+#'
+fiverg_use_indicators <- function(sim_env,
+                                  y,
+                                  age_lag = 1,
+                                  lls_design_type
+) {
+
+  # get years in simulation
+  x <- (sim_env$feedback_start_yr + 1):sim_env$n_yrs
+  odd_yrs <- x[x %% 2 == 1] # bsai years
+  even_yrs <- x[x %% 2 == 0] # goa years
+
+  # Data indicators
+  usecatch <- array(0, dim = c(5, y, 2))
+  usesrvidx <- array(0, dim = c(5, y, 3))
+  usefishage <- array(0, c(5, y, 2))
+  usefishlen <- array(0, c(5, y, 2))
+  usesrvage <- array(0, c(5, y, 3))
+  usesrvlen <- array(0, c(5, y, 3)) # not used at all
+
+  usecatch[1,,1] <- 1 # BS fixed gear catch availiable every year
+  usecatch[2,-c(1:3),1] <- 1 # AI fixed gear catch not availiable in first three years
+  usecatch[3,-c(1:3),1] <- 1 # WGOA fixed gear catch
+  usecatch[4,-c(1:3),1] <- 1 # CGOA fixed gear catch
+  usecatch[5,,1] <- 1 # EGOA fixed gear catch availaible in every year
+  usecatch[1,,2] <- 1 # BS trawl gear catch availiable every year
+  usecatch[2,-c(1:3),2] <- 1 # AI trawl gear catch not availiable in first three years
+  usecatch[3,-c(1:3),2] <- 1 # WGOA trawl gear catch
+  usecatch[4,-c(1:3),2] <- 1 # CGOA trawl gear catch
+  usecatch[5,-c(23:25),2] <- 1 # EGOA trawl gear catch
+
+  # Fish Comps
+  usefishage[1:5,40:(y-age_lag),1] <- 1 # use data starting year 40, with age lag for all fixed gear
+  usefishage[1,55,1] <- 0 # no samples in BS fleet in year 55
+  usefishlen[1:5,31:39,1] <- 1 # use data only from 31 - 39 for all fixed gear
+  usefishlen[1,c(31,32,35,36,40:43, 45:51, 53, 54, 57:y),2] <- 1 # BS trawl
+  usefishlen[2,c(31, 35, 36, 44, 46, 58, 61:y),2] <- 1 # AI trawl
+  usefishlen[3,c(31,42,43,44,45,46,47,48,50,54,56,59:y),2] <- 1 # WGOA trawl
+  usefishlen[4,c(31,32,36:y),2] <- 1 # CGOA trawl
+  usefishlen[5,c(31,35,40,42:y),2] <- 1 # CGOA trawl
+
+  # Survey Index
+  if(lls_design_type == 'all') { # if design = all, then fitting data for all fleets
+    usesrvage[1:5,31:(y-age_lag),1] <- usesrvidx[1:5,31:y,1] <- 1
+    usesrvage[1:5,65,1] <- usesrvidx[1:5,65,1] <- 0 # no data in year 65
+  }
+
+  if(lls_design_type == 'historical') {
+    usesrvage[1,seq(38, 64, 2),1] <- usesrvidx[1,seq(38, 64, 2),1] <- 1 # use data in bs domestic fleet in even years
+    usesrvage[2,seq(37, 64, 2),1] <- usesrvidx[2,seq(37, 64, 2),1] <- 1 # use data in ai domestic fleet in odd years
+    usesrvidx[3:5,31:y,1] <- 1 # use data in goa domestic fleet every single year
+    usesrvage[3:5,37:(y-age_lag),1] <- 1 # use data in goa domestic fleet every single year
+    usesrvidx[,65,] <- usesrvage[,65,] <- 0 # no survey in 65
+
+    # use indicators in subsequent years
+    bs_idx_indicator <- even_yrs[even_yrs <= y]
+    ai_idx_indicator <- odd_yrs[odd_yrs <= y]
+    bs_age_indicator <- even_yrs[even_yrs <= y - age_lag]
+    ai_age_indicator <- odd_yrs[odd_yrs <= y - age_lag]
+
+    if(sum(bs_idx_indicator) != 0) usesrvidx[1,bs_idx_indicator,1] <- 1 # use bs domestic fleet in even years
+    if(sum(ai_idx_indicator) != 0) usesrvidx[2,ai_idx_indicator,1] <- 1 # use ai domestic fleet in odd years
+    if(sum(bs_age_indicator) != 0) usesrvage[1,bs_age_indicator,1] <- 1 # use bs domestic fleet in even years
+    if(sum(ai_age_indicator) != 0) usesrvage[2,ai_age_indicator,1] <- 1 # use ai domestic fleet in odd years
+  }
+
+  if(lls_design_type == 'current') {
+    # set up the historical indicators first
+    usesrvage[1,seq(38, 64, 2),1] <- usesrvidx[1,seq(38, 64, 2),1] <- 1 # use data in bs domestic fleet in even years
+    usesrvage[2,seq(37, 64, 2),1] <- usesrvidx[2,seq(37, 64, 2),1] <- 1 # use data in ai domestic fleet in odd years
+    usesrvidx[3:5,31:64,1] <- 1 # use data in goa domestic fleet every single year
+    usesrvage[3:5,37:64,1] <- 1 # use data in goa domestic fleet every single year
+    usesrvidx[,65,] <- usesrvage[,65,] <- 0 # no survey in 65
+
+    # setup current indicators
+    goa_idx_indicator <- even_yrs[even_yrs <= y]
+    bsai_idx_indicator <- odd_yrs[odd_yrs <= y]
+    goa_age_indicator <- even_yrs[even_yrs <= y - age_lag]
+    bsai_age_indicator <- odd_yrs[odd_yrs <= y - age_lag]
+
+    if(sum(goa_idx_indicator) != 0) usesrvidx[3:5,goa_idx_indicator,1] <- 1 # use goa domestic fleet in even years
+    if(sum(bsai_idx_indicator) != 0) usesrvidx[c(1,2),bsai_age_indicator,1] <- 1 # use bsai domestic fleet in odd years
+    if(sum(goa_age_indicator) != 0) usesrvage[3:5,goa_age_indicator,1] <- 1 # use goa domestic fleet in even years
+    if(sum(bsai_age_indicator) != 0) usesrvage[c(1,2),bsai_age_indicator,1] <- 1 # use bsai domestic fleet in odd years
+  }
+
+  # compositions
+  usesrvage[1,c(26, 30, 34),3] <- 1 # BS
+  usesrvage[2,c(26, 28, 45),3] <- 1 # AI
+  usesrvage[3:5,c(22, seq(26, 34, 2)),3] <- 1 # GOA
+  usesrvidx[1:5,20:35,3] <- 1 # survey index
+
+  return(list(usefishage = usefishage, usefishlen = usefishlen,
+              usesrvage = usesrvage, usesrvlen = usesrvlen,
+              usecatch = usecatch, usesrvidx = usesrvidx))
+
+}
+
+#' Run a Single-Region Closed-Loop Simulation Iteration
+#'
+#' This function executes one full closed-loop simulation for a single replicate
+#' under a single-region assessment framework. For each simulation year, the
+#' function updates population dynamics, performs stock assessment (when within
+#' the feedback period), computes reference points, applies a harvest control
+#' rule, conducts short-term projections to derive a TAC, apportions that TAC
+#' across fleets, and solves for the fishing mortality rates needed to achieve
+#' those catches in the operating model.
+#'
+#' @param sim_env An environment or list containing all operating-model state
+#'   variables, true quantities, storage arrays, and simulation settings.
+#' @param sim Integer. Simulation replicate index to run.
+#' @param fleet_allocation Numeric vector giving the proportion of regional TAC
+#'   assigned to each fishery fleet.
+#' @param lls_design_type Character string specifying the longline survey design:
+#'   `"current"`, `"historical"`, or `"all"`. Passed to the assessment model
+#'   builder for appropriate survey imputation logic.
+#'
+#' @return The function updates `sim_env` in place (population states, catches,
+#'   F rates, and assessment outputs). No value is returned.
+run_single_rg_closedloop_i <- function(sim_env, sim, fleet_allocation, lls_design_type) {
+
+  # Run Closed Loop ---------------------------------------------------------
+  for(y in 1:sim_env$n_yrs) {
+
+    # Execute annual population dynamics
+    run_annual_cycle(y, sim, sim_env)
+
+
+    # Run feedback
+    if(y >= sim_env$feedback_start_yr) {
+
+      ### Assessment --------------------------------------------------------------
+      asmt_list <- single_region_em(sim_env = sim_env, y = y, sim = sim, srv_idx_se = 0.2, age_lag = 1, lls_design_type) # get assessment data
+      model <- fit_model(asmt_list$data, asmt_list$par, asmt_list$map, NULL, 2, silent = TRUE) # get model
+
+      ### Reference Points --------------------------------------------------------
+      ref_pts <- get_closed_loop_reference_points(
+        use_true_values = FALSE,
+        sim_env = sim_env,
+        asmt_data = asmt_list$data,
+        asmt_rep = model$rep,
+        y = y,
+        sim = sim,
+
+        # single region reference points
+        reference_points_opt = list(
+          n_avg_yrs = 1,
+          SPR_x = 0.4,
+          calc_rec_st_yr = 3,
+          rec_age = 4,
+          type = 'single_region',
+          what = "SPR",
+          B_x = 0.4
+        ),
+        n_proj_yrs = 2
+      )
+
+      ### HCR ---------------------------------------------------------------------
+      agg_ssb <- model$rep$SSB[,y] # get ssb
+      exp_frate <- HCR_threshold(x = agg_ssb, frp = ref_pts$f_ref_pt[,2], brp = ref_pts$b_ref_pt[,2], alpha = 0.05) # get prescribed f
+
+      ### Projection --------------------------------------------------------------
+      projection <- get_population_projection(data = asmt_list$data, rep = model$rep, y = y, n_proj_yrs = 2, f_ref_pt = ref_pts$f_ref_pt) # get 1 year projection
+      tac <- sum(projection$proj_Catch[,2,]) # get tac
+
+      ### Apportionment -----------------------------------------------------------
+      # get survey apportionment (survey biomass)
+      tmp_Srv_BiomIA <- sim_env$SrvIAA[,((y - 4): y),,,1,sim] * sim_env$WAA_srv[,((y - 4): y),,,1,sim]
+      tmp_srvidx_biom <- apply(tmp_Srv_BiomIA, 1:2, sum) # get biomass
+      apportionment <- get_single_region_survey_apportionment(feedback_start_yr = sim_env$feedback_start_yr,
+                                                              n_yrs = sim_env$n_yrs, y = y,
+                                                              srv_idx = tmp_srvidx_biom, # using true survey biomass values to do apportionment
+                                                              rolling_avg_yrs = 5,
+                                                              lls_design_type = lls_design_type)
+      tac_r <- tac * apportionment # get regional tac
+      tac_rf <- tac_r * fleet_allocation # allocate regional tac by fleet
+
+      ### TAC to F ----------------------------------------------------------------
+      if (y < sim_env$n_yrs) {
+
+        rf_grid <- expand.grid(r = seq_len(sim_env$n_regions), f = seq_len(sim_env$n_fish_fleets)) # set up region, fleet grid to bisection across
+        tmp_f <- mapply(function(r, f) { # do bisection to go from region and fleet specific catch to region and fleet specific F rates
+          bisection_F(
+            f_guess = 0.05, # guess for fishing mortality rate
+            catch = tac_rf[r,f], # catch values to use
+            NAA = sim_env$NAA[r, y+1, , , sim], # numbers at age in simulation (truth)
+            WAA = sim_env$WAA[r, y+1, , , sim], # weight-at-age in simulation (truth)
+            natmort  = sim_env$natmort[r, y+1, , , sim], # natural mortality in simulation (truth)
+            fish_sel = sim_env$fish_sel[r, y+1, , , f, sim] # fishery selectivity in simulation (truth)
+          )
+        }, r = rf_grid$r, f = rf_grid$f)
+
+        # assign bisection values back into simulation
+        sim_env$Fmort[,y+1,,sim] <- array(tmp_f, dim = c(sim_env$n_regions, sim_env$n_fish_fleets))
+      }
+
+    } # end feedback
+
+    # save models
+    if(y == sim_env$n_yrs) sim_env$models[[sim]] <- model
+
+  } # end y loop
+
 }

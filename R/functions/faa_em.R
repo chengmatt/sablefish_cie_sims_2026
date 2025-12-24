@@ -1,28 +1,46 @@
-#' Title
+#' Set up a single-region FAA estimation model
 #'
-#' @param sim_env
-#' @param y
-#' @param sim
-#' @param srv_idx_se
-#' @param age_lag
-#' @param lls_design_type
-#' @param faa_n_fish_fleets
-#' @param faa_n_srv_fleets
-#' @param srv_wgt
-#' @param fish_wgt
-#' @param fish_sel_blocks
-#' @param fish_sel_model
-#' @param fish_fixed_sel_pars_spec
-#' @param fish_selex_prior
-#' @param srv_sel_blocks
-#' @param srv_sel_model
-#' @param srv_fixed_sel_pars_spec
-#' @param srv_selex_prior
+#' Constructs and returns an SPoRC input list for a single-region,
+#' fleet-aggregated age-structured (FAA) estimation model using simulated data.
+#' The function aggregates simulated observations to the specified number of
+#' fishery and survey fleets, configures data availability indicators, and
+#' initializes all major model components including recruitment, biology,
+#' fishing mortality, indices, composition data, and selectivity. Fishery and
+#' survey selectivity structures are fully user-specified via function
+#' arguments.
 #'
-#' @returns
-#' @export
+#' @param sim_env Simulation environment containing operating model outputs and
+#'   aggregated observation objects.
+#' @param y Terminal assessment year.
+#' @param sim Simulation replicate index.
+#' @param srv_idx_se Observation error (CV) applied to all survey indices.
+#' @param age_lag Integer specifying the lag (in years) between observation and
+#'   recruitment year used when constructing data availability indicators.
+#' @param lls_design_type Character string specifying the longline survey design
+#'   used to determine which data streams are available.
+#' @param faa_n_fish_fleets Number of aggregated fishery fleets in the FAA model.
+#' @param faa_n_srv_fleets Number of aggregated survey fleets in the FAA model.
+#' @param srv_wgt Weighting type used when aggregating survey observations
+#'   (e.g., \code{"numbers"} or \code{"biomass"}).
+#' @param fish_wgt Weighting type used when aggregating fishery observations
+#'   (e.g., \code{"numbers"} or \code{"biomass"}).
+#' @param fish_sel_blocks Character vector defining fishery selectivity blocks
+#'   passed to \code{Setup_Mod_Fishsel_and_Q}.
+#' @param fish_sel_model Character vector specifying the functional form of
+#'   fishery selectivity by fleet.
+#' @param fish_fixed_sel_pars_spec Character vector specifying parameter sharing
+#'   for fishery selectivity (e.g., shared or fleet-specific).
+#' @param fish_selex_prior Data frame defining prior distributions for fishery
+#'   selectivity parameters.
+#' @param srv_sel_blocks Character vector defining survey selectivity blocks
+#'   passed to \code{Setup_Mod_Srvsel_and_Q}.
+#' @param srv_sel_model Character vector specifying the functional form of survey
+#'   selectivity by fleet.
+#' @param srv_fixed_sel_pars_spec Character vector specifying parameter sharing
+#'   for survey selectivity.
+#' @param srv_selex_prior Data frame defining prior distributions for survey
+#'   selectivity parameters.
 #'
-#' @examples
 faa_em <- function(sim_env,
                    y,
                    sim,
