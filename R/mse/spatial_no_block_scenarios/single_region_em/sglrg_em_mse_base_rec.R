@@ -40,7 +40,7 @@ fleet_allocation[,1] <- c(0.5,0.75,0.8,0.8,0.95) # from fmp
 fleet_allocation[,2] <- 1 - fleet_allocation[,1] # trawl gear allocation
 
 # Condition closed-loop simulations, random recruitment
-sim_list_rand <- condition_closed_loop_simulations(
+sim_list <- condition_closed_loop_simulations(
   closed_loop_yrs = closed_loop_yrs,
   n_sims = n_sims,
   data = data,
@@ -72,7 +72,7 @@ global_spr <- Get_Reference_Points(data = om_values$data,
 # Run MSEs ----------------------------------------------------------------
 
 # Single-region, current design
-sim_env_current <- Setup_sim_env(sim_list = sim_list_rand)
+sim_env_current <- Setup_sim_env(sim_list = sim_list)
 sim_env_current <- add_aggregated_obj_to_simenv(sim_env = sim_env_current)
 sim_env_current <- run_single_rg_closedloop_parallel(sim_env = sim_env_current, n_sims = n_sims,
                                                      fleet_allocation = fleet_allocation,

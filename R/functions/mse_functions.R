@@ -570,6 +570,222 @@ run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
   return(sim_env)
 }
 
+#' Run Three-Region Closed-Loop Simulations in Parallel
+#'
+#' This function executes multiple single-region closed-loop simulations in
+#' parallel using `future` and `furrr`. Each simulation replicate is run with
+#' its own index and the results are merged back into the shared simulation
+#' environment. Arrays whose final dimension corresponds to simulation number
+#' are updated appropriately.
+#'
+#' @param sim_env An environment or list containing all operating-model truth,
+#'   state variables, and storage arrays modified during simulation.
+#' @param n_sims Integer. Number of simulation replicates to run.
+#' @param fleet_allocation Numeric vector giving TAC allocation fractions across
+#'   fleets for each region.
+#' @param lls_design_type Character string specifying the longline survey design:
+#'   `"current"`, `"historical"`, or `"all"`. Passed to the inner simulation.
+#' @param n_cores Integer. Number of parallel workers to use.
+#' @param srv_idx_se Survey idnex SE
+#' @param age_lag Age lag
+#' @param srv_wgt numbers or biomass comp weighting
+#' @param fish_wgt numbers or biomass comp weighting
+#'
+#' @return The updated `sim_env` object containing results across all simulation
+#'   replicates. The function modifies `sim_env` in place and also returns it.
+run_three_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, lls_design_type, srv_idx_se,
+                                             age_lag, srv_wgt, fish_wgt, n_cores) {
+
+
+  plan(multisession, workers = n_cores)
+  options(future.globals.maxSize = 5e9)
+  handlers(handler_progress(format = "[:bar] :percent"))
+
+  # run in parrallel and return simulation environment
+  with_progress({
+    env_list <- future_map(
+      1:n_sims,
+      ~{
+        run_three_rg_closedloop_i(sim_env, .x, fleet_allocation,
+                                  lls_design_type, srv_idx_se,
+                                  age_lag, srv_wgt, fish_wgt)
+        sim_env
+      },
+      .progress = TRUE
+    )
+  })
+
+  # Merge results back in
+  for(i in 1:n_sims) {
+    for(var_name in ls(sim_env, all.names = TRUE)) { # loop through sim_env to get variable names
+      arr <- env_list[[i]][[var_name]] # get array
+      if(is.array(arr)) { # check if array
+        ndim <- length(dim(arr)) # check array dimensions
+        last_dim <- dim(arr)[ndim] # get last dimension
+        if(last_dim == n_sims) { # if last dimension matches number of sims
+          comma_str <- paste(rep(",", ndim - 1), collapse = "") # build comma structure, e.g., 3d array gives ,,,
+          expr <- paste0("sim_env[[\"", var_name, "\"]][", comma_str, "i] <- env_list[[i]][[\"", var_name, "\"]][", comma_str, "i]") # write expression for array
+          eval(parse(text = expr)) # parse expression
+        }
+      }
+    }
+  }
+
+  # Merge model results back in
+  for(i in 1:n_sims) sim_env$models[[i]] <- env_list[[i]]$models[[i]]
+
+  return(sim_env)
+}
+
+
+#' Run Three-Region Closed-Loop Simulations in Parallel
+#'
+#' This function executes multiple single-region closed-loop simulations in
+#' parallel using `future` and `furrr`. Each simulation replicate is run with
+#' its own index and the results are merged back into the shared simulation
+#' environment. Arrays whose final dimension corresponds to simulation number
+#' are updated appropriately.
+#'
+#' @param sim_env A list or environment containing the simulation environment, including population dynamics,
+#'   survey data, movement matrices, natural mortality, and other model parameters.
+#' @param sim Integer. Index of the simulation replicate.
+#' @param fleet_allocation Numeric vector. Proportions used to allocate regional TAC to fleets.
+#' @param lls_design_type Character. Type of longline survey design used for apportionment.
+#' @param srv_idx_se Numeric. Standard error of survey indices.
+#' @param age_lag Integer. Age lag between recruitment and survey observation.
+#' @param srv_wgt Character Weighting applied to survey data (e.g., "numbers" or "biomass").
+#' @param fish_wgt Character Weighting applied to fishery data (e.g., "numbers" or "biomass").
+#' @param faa_n_fish_fleets Integer. Number of fishing fleets in the feedback assessment.
+#' @param faa_n_srv_fleets Integer. Number of survey fleets in the feedback assessment. Typically 4.
+#' @param fish_sel_model Character vector. Fleet-specific selectivity models for the fishing fleets.
+#' @param srv_sel_model Character vector. Fleet-specific selectivity models for survey fleets.
+#' @param fish_selex_prior LPriors for fishing fleet selectivity parameters. Constructed based on
+#'   fleet blocks, sex, and region.
+#' @param srv_selex_prior  Priors for survey fleet selectivity parameters.
+#' @param n_cores Number of cores
+#'
+#' @return The updated `sim_env` object containing results across all simulation
+#'   replicates. The function modifies `sim_env` in place and also returns it.
+run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, lls_design_type, srv_idx_se,
+                                        age_lag, srv_wgt,
+                                        fish_wgt, faa_n_fish_fleets,
+                                        faa_n_srv_fleets,
+                                        fish_sel_model,
+                                        srv_sel_model,
+                                        fish_selex_prior,
+                                        srv_selex_prior,
+                                        n_cores) {
+
+
+  plan(multisession, workers = n_cores)
+  options(future.globals.maxSize = 5e9)
+  handlers(handler_progress(format = "[:bar] :percent"))
+
+  # run in parrallel and return simulation environment
+  with_progress({
+    env_list <- future_map(
+      1:n_sims,
+      ~{
+        run_faa_closedloop_i(sim_env, .x,
+                             fleet_allocation,
+                             lls_design_type,
+                             srv_idx_se,
+                             age_lag,
+                             srv_wgt,
+                             fish_wgt,
+                             faa_n_fish_fleets,
+                             faa_n_srv_fleets,
+                             fish_sel_model,
+                             srv_sel_model,
+                             fish_selex_prior,
+                             srv_selex_prior)
+        sim_env
+      },
+      .progress = TRUE
+    )
+  })
+
+  # Merge results back in
+  for(i in 1:n_sims) {
+    for(var_name in ls(sim_env, all.names = TRUE)) { # loop through sim_env to get variable names
+      arr <- env_list[[i]][[var_name]] # get array
+      if(is.array(arr)) { # check if array
+        ndim <- length(dim(arr)) # check array dimensions
+        last_dim <- dim(arr)[ndim] # get last dimension
+        if(last_dim == n_sims) { # if last dimension matches number of sims
+          comma_str <- paste(rep(",", ndim - 1), collapse = "") # build comma structure, e.g., 3d array gives ,,,
+          expr <- paste0("sim_env[[\"", var_name, "\"]][", comma_str, "i] <- env_list[[i]][[\"", var_name, "\"]][", comma_str, "i]") # write expression for array
+          eval(parse(text = expr)) # parse expression
+        }
+      }
+    }
+  }
+
+  # Merge model results back in
+  for(i in 1:n_sims) sim_env$models[[i]] <- env_list[[i]]$models[[i]]
+
+  return(sim_env)
+}
+
+
+#' Run Five-Region Closed-Loop Simulations in Parallel
+#'
+#' This function executes multiple single-region closed-loop simulations in
+#' parallel using `future` and `furrr`. Each simulation replicate is run with
+#' its own index and the results are merged back into the shared simulation
+#' environment. Arrays whose final dimension corresponds to simulation number
+#' are updated appropriately.
+#'
+#' @param sim_env A list or environment containing the simulation environment, including population dynamics,
+#'   survey data, movement matrices, natural mortality, and other model parameters.
+#' @param fleet_allocation Numeric vector. Proportions used to allocate regional TAC to fleets.
+#' @param n_cores Number of cores
+#' @param n_sims Number of simulations
+#'
+#' @return The updated `sim_env` object containing results across all simulation
+#'   replicates. The function modifies `sim_env` in place and also returns it.
+run_five_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, n_cores) {
+
+
+  plan(multisession, workers = n_cores)
+  options(future.globals.maxSize = 5e9)
+  handlers(handler_progress(format = "[:bar] :percent"))
+
+  # run in parrallel and return simulation environment
+  with_progress({
+    env_list <- future_map(
+      1:n_sims,
+      ~{
+        run_five_rg_closedloop_i(sim_env, .x,
+                                 fleet_allocation)
+        sim_env
+      },
+      .progress = TRUE
+    )
+  })
+
+  # Merge results back in
+  for(i in 1:n_sims) {
+    for(var_name in ls(sim_env, all.names = TRUE)) { # loop through sim_env to get variable names
+      arr <- env_list[[i]][[var_name]] # get array
+      if(is.array(arr)) { # check if array
+        ndim <- length(dim(arr)) # check array dimensions
+        last_dim <- dim(arr)[ndim] # get last dimension
+        if(last_dim == n_sims) { # if last dimension matches number of sims
+          comma_str <- paste(rep(",", ndim - 1), collapse = "") # build comma structure, e.g., 3d array gives ,,,
+          expr <- paste0("sim_env[[\"", var_name, "\"]][", comma_str, "i] <- env_list[[i]][[\"", var_name, "\"]][", comma_str, "i]") # write expression for array
+          eval(parse(text = expr)) # parse expression
+        }
+      }
+    }
+  }
+
+  # Merge model results back in
+  for(i in 1:n_sims) sim_env$models[[i]] <- env_list[[i]]$models[[i]]
+
+  return(sim_env)
+}
+
 #' Add Aggregated Observation Objects to the Simulation Environment
 #'
 #' This function initializes storage arrays within the simulation environment
@@ -2735,8 +2951,8 @@ run_single_rg_closedloop_i <- function(sim_env,
         reference_points_opt = list(
           n_avg_yrs = 1,
           SPR_x = 0.4,
-          calc_rec_st_yr = 3,
-          rec_age = 4,
+          calc_rec_st_yr = 20,
+          rec_age = 2,
           type = 'single_region',
           what = "SPR",
           B_x = 0.4
@@ -2892,8 +3108,8 @@ run_faa_closedloop_i <- function(sim_env,
         reference_points_opt = list(
           n_avg_yrs = 1,
           SPR_x = 0.4,
-          calc_rec_st_yr = 3,
-          rec_age = 4,
+          calc_rec_st_yr = 20,
+          rec_age = 2,
           type = 'single_region',
           what = "SPR",
           B_x = 0.4
@@ -3024,8 +3240,8 @@ run_three_rg_closedloop_i <- function(sim_env,
         reference_points_opt = list(
           n_avg_yrs = 1,
           SPR_x = 0.4,
-          calc_rec_st_yr = 3,
-          rec_age = 4,
+          calc_rec_st_yr = 20,
+          rec_age = 2,
           type = 'multi_region',
           what = "global_SPR",
           B_x = 0.4
@@ -3100,16 +3316,14 @@ run_three_rg_closedloop_i <- function(sim_env,
 #'   survey data, movement matrices, natural mortality, and other model parameters.
 #' @param sim Integer. Index of the simulation replicate.
 #' @param fleet_allocation Numeric vector. Proportions used to allocate regional TAC to fleets.
-#' @param lls_design_type Character. Type of longline survey design used for apportionment - only for the GOA
 #'
 #' @returns None. The function updates `sim_env` in-place with population dynamics,
 #'   fishing mortality, and assessment model outputs. The last year's model object
 #'   is stored in `sim_env$models[[sim]]`.
 #'
-run_three_rg_closedloop_i <- function(sim_env,
+run_five_rg_closedloop_i <- function(sim_env,
                                       sim,
-                                      fleet_allocation,
-                                      lls_design_type
+                                      fleet_allocation
 ) {
 
   # Run Closed Loop ---------------------------------------------------------
@@ -3122,27 +3336,14 @@ run_three_rg_closedloop_i <- function(sim_env,
     if(y >= sim_env$feedback_start_yr) {
 
       ### Assessment --------------------------------------------------------------
-      # get three region data
-      asmt_list <- three_rg_em(
-        sim_env = sim_env,
-        y = y,
-        sim = sim,
-        srv_idx_se = srv_idx_se,
-        age_lag = age_lag,
-        lls_design_type = lls_design_type,
-        srv_wgt = srv_wgt,
-        fish_wgt = fish_wgt,
-        UseTagging = 1
-      )
-
-      model <- fit_model(asmt_list$data, asmt_list$par, asmt_list$map, NULL, 2, silent = TRUE) # get model
+      # Not using assessment
 
       ### Reference Points --------------------------------------------------------
       ref_pts <- get_closed_loop_reference_points(
-        use_true_values = FALSE,
+        use_true_values = TRUE,
         sim_env = sim_env,
-        asmt_data = asmt_list$data,
-        asmt_rep = model$rep,
+        asmt_data = NULL,
+        asmt_rep = NULL,
         y = y,
         sim = sim,
 
@@ -3150,8 +3351,8 @@ run_three_rg_closedloop_i <- function(sim_env,
         reference_points_opt = list(
           n_avg_yrs = 1,
           SPR_x = 0.4,
-          calc_rec_st_yr = 3,
-          rec_age = 4,
+          calc_rec_st_yr = 20,
+          rec_age = 2,
           type = 'multi_region',
           what = "global_SPR",
           B_x = 0.4
