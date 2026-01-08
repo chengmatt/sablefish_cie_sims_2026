@@ -146,8 +146,8 @@ for (i in 1:nrow(ems_grid)) {
       fleets_blocks = fish_struct$fish_prior_blocks,
       sex_par = expand.grid(sex = 1:2, par = 1:2),
       region = 1,
-      mu = 2,
-      sd = 3
+      mu = 3.5,
+      sd = 2
     ),
 
     # Survey selectivity
@@ -162,8 +162,8 @@ for (i in 1:nrow(ems_grid)) {
       ),
       sex_par = expand.grid(sex = 1:2, par = 1:2),
       region = 1,
-      mu = 2,
-      sd = 3
+      mu = 3.5,
+      sd = 2
     )
   )
 }
@@ -207,7 +207,7 @@ with_progress({
                           srv_selex_prior = ems[[j]]$srv_selex_prior
       )
 
-      asmt_list$par$ln_fish_fixed_sel_pars[,,,,1] <- log(4)
+      asmt_list$par$ln_fish_fixed_sel_pars[] <- log(8)
       asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
 
       # fit model
@@ -221,6 +221,9 @@ with_progress({
           3,
           silent = F
         )
+
+        plot(model$rep$fish_sel[1,1,,1,4], ylim = c(0,1))
+
         model$data <- asmt_list$data # save data
         model$sd_rep <- sdreport(model)
         model
@@ -277,7 +280,7 @@ with_progress({
                           srv_selex_prior = ems[[j]]$srv_selex_prior
       )
 
-      asmt_list$par$ln_fish_fixed_sel_pars[,,,,1] <- log(4)
+      asmt_list$par$ln_fish_fixed_sel_pars[] <- log(10)
       asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
 
       # fit model
@@ -318,7 +321,7 @@ with_progress({
 
   model_list_lowsamp <- future_lapply(1:n_sims, function(i) {
 
-    j <- 20 # 3F_2T, BS_Gamm (Srv), BS_Gamma (Srv)
+    j <- 19 # 3F_1T, BS_Gamm (Srv), BS_Gamma (Srv)
 
     # get faa data
     asmt_list <- faa_em(sim_env = lowsamp,
@@ -341,7 +344,7 @@ with_progress({
                         srv_selex_prior = ems[[j]]$srv_selex_prior
     )
 
-    asmt_list$par$ln_fish_fixed_sel_pars[,,,,1] <- log(4)
+    asmt_list$par$ln_fish_fixed_sel_pars[] <- log(10)
     asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
 
     model <- tryCatch(
@@ -384,7 +387,7 @@ with_progress({
 
   model_list_lowsamp <- future_lapply(1:n_sims, function(i) {
 
-    j <- 20 # 3F_2T, BS_Gamm (Srv), BS_Gamma (Srv)
+    j <- 19 # 3F_1T, BS_Gamm (Srv), BS_Gamma (Srv)
 
     # get faa data
     asmt_list <- faa_em(sim_env = lowsamp_movesense,
@@ -407,7 +410,7 @@ with_progress({
                         srv_selex_prior = ems[[j]]$srv_selex_prior
     )
 
-    asmt_list$par$ln_fish_fixed_sel_pars[,,,,1] <- log(4)
+    asmt_list$par$ln_fish_fixed_sel_pars[] <- log(10)
     asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
 
     # fit model
@@ -446,7 +449,7 @@ with_progress({
 
   model_list_lowsamp <- future_lapply(1:n_sims, function(i) {
 
-    j <- 20 # 3F_2T, BS_Gamm (Srv), BS_Gamma (Srv)
+    j <- 19 # 3F_1T, BS_Gamm (Srv), BS_Gamma (Srv)
 
     # get faa data
     asmt_list <- faa_em(sim_env = lowsamp_movesense,
@@ -469,7 +472,7 @@ with_progress({
                         srv_selex_prior = ems[[j]]$srv_selex_prior
     )
 
-    asmt_list$par$ln_fish_fixed_sel_pars[,,,,1] <- log(4)
+    asmt_list$par$ln_fish_fixed_sel_pars[] <- log(10)
     asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
 
     model <- tryCatch(
@@ -512,7 +515,7 @@ with_progress({
 
   retros_wo_francis <- future_lapply(1:n_sims, function(i) {
 
-    j <- 20 # 3F_2T, BS_Gamm (Srv), BS_Gamma (Srv)
+    j <- 19 # 3F_1T, BS_Gamm (Srv), BS_Gamma (Srv)
 
     # get faa data
     asmt_list <- faa_em(sim_env = lowsamp,
@@ -535,7 +538,7 @@ with_progress({
                         srv_selex_prior = ems[[j]]$srv_selex_prior
     )
 
-    asmt_list$par$ln_fish_fixed_sel_pars[,,,,1] <- log(4)
+    asmt_list$par$ln_fish_fixed_sel_pars[] <- log(10)
     asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
 
     retros <- tryCatch(
@@ -566,6 +569,7 @@ with_progress({
   })
 })
 
+retros_wo_francis <- retros_wo_francis[!is.na(retros_wo_francis)]
 retros_wo_francis_df <- data.table::rbindlist(retros_wo_francis)
 write.csv(retros_wo_francis_df, here("outputs", "cross_test", "spatial_no_block_scenarios", "faa_finalized_cross_test_retro.csv"))
 
@@ -578,9 +582,9 @@ options(future.globals.maxSize = 15e9)
 with_progress({
   p <- progressor(steps = n_sims)
 
-  retros_wo_francis <- future_lapply(1:n_sims, function(i) {
+  retros_w_francis <- future_lapply(1:n_sims, function(i) {
 
-    j <- 20 # 3F_2T, BS_Gamm (Srv), BS_Gamma (Srv)
+    j <- 19 # 3F_1T, BS_Gamm (Srv), BS_Gamma (Srv)
 
     # get faa data
     asmt_list <- faa_em(sim_env = lowsamp,
@@ -603,7 +607,7 @@ with_progress({
                         srv_selex_prior = ems[[j]]$srv_selex_prior
     )
 
-    asmt_list$par$ln_fish_fixed_sel_pars[,,,,1] <- log(4)
+    asmt_list$par$ln_fish_fixed_sel_pars[] <- log(10)
     asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
 
     retros <- tryCatch(
@@ -635,8 +639,9 @@ with_progress({
   })
 })
 
-retros_wo_francis_df <- data.table::rbindlist(retros_wo_francis)
-write.csv(retros_wo_francis_df, here("outputs", "cross_test", "spatial_no_block_scenarios", "faa_finalized_cross_test_retro_francis.csv"))
+retros_w_francis <- retros_wo_francis[!is.na(retros_w_francis)]
+retros_w_francis_df <- data.table::rbindlist(retros_w_francis)
+write.csv(retros_w_francis_df, here("outputs", "cross_test", "spatial_no_block_scenarios", "faa_finalized_cross_test_retro_francis.csv"))
 
 # Process Results ---------------------------------------------------------
 model_list_all <- vector('list', 100)
@@ -907,8 +912,8 @@ for(i in 1:n_sims) {
   # get EM results
   ssb_em_results[1,,i] <- t(model_list_lowsamp[[i]]$rep$SSB)
   rec_em_results[1,,i] <- t(model_list_lowsamp[[i]]$rep$Rec)
-  ssb_em_results[2,,i] <- t(model_list_lowsamp_francis[[i]]$rep$SSB)
-  rec_em_results[2,,i] <- t(model_list_lowsamp_francis[[i]]$rep$Rec)
+  if(length(model_list_lowsamp_francis[[i]]) > 1) ssb_em_results[2,,i] <- t(model_list_lowsamp_francis[[i]]$rep$SSB)
+  if(length(model_list_lowsamp_francis[[i]]) > 1) rec_em_results[2,,i] <- t(model_list_lowsamp_francis[[i]]$rep$Rec)
 } # end i
 
 

@@ -42,14 +42,6 @@ fleet_allocation <- array(NA, dim = c(n_regions, n_fish_fleets))
 fleet_allocation[,1] <- c(0.5,0.75,0.8,0.8,0.95) # from fmp
 fleet_allocation[,2] <- 1 - fleet_allocation[,1] # trawl gear allocation
 
-# To simulate more tags or resimulate tags with new sample sizes
-# data$tag_release_indicator <- rbind(data$tag_release_indicator,
-#       as.matrix(
-#         data.frame(regions = 1:n_regions,
-#                    tag_yrs = rep(n_years:(n_years + closed_loop_yrs), each = n_regions))
-#       )
-#   )
-
 # Condition closed-loop simulations, mean recruitment
 sim_list_lowsamp <- condition_closed_loop_simulations(
   closed_loop_yrs = closed_loop_yrs,
@@ -68,7 +60,7 @@ sim_list_lowsamp <- condition_closed_loop_simulations(
   ISS_SrvLenComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
   ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
-  n_tags_rel_input = rep(100, nrow(data$tag_release_indicator))
+  n_tags_rel_input = rep(2e3, nrow(data$tag_release_indicator))
 )
 
 # Condition closed-loop simulations, mean recruitment with time-varying movement
@@ -93,8 +85,35 @@ sim_list_lowsamp_tvmove <- condition_closed_loop_simulations(
   ISS_SrvLenComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
   ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
-  n_tags_rel_input = rep(100, nrow(data$tag_release_indicator))
+  n_tags_rel_input = rep(2e3, nrow(data$tag_release_indicator))
 )
+
+# Condition closed-loop simulations, mean recruitment (high sample sizes)
+# To simulate more tags or resimulate tags with new sample sizes
+data$tag_release_indicator <- expand.grid(
+  regions = 1:5, tag_yrs = 1:(n_years + closed_loop_yrs)
+)
+
+sim_list_highsamp <- condition_closed_loop_simulations(
+  closed_loop_yrs = closed_loop_yrs,
+  n_sims = n_sims,
+  data = data,
+  parameters = parameters,
+  mapping = mapping,
+  sd_rep = sd_rep,
+  rep = rep,
+  random = NULL,
+  recruitment_opt = 'resample_from_input',
+  # setup variances
+  ISS_FishAgeComps = array(200, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_FishLenComps = array(200, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_SrvAgeComps = array(200, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ISS_SrvLenComps = array(200, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
+  ObsSrvIdx_SE = array(0.1, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
+  n_tags_rel_input = rep(2e3, nrow(data$tag_release_indicator))
+)
+
 
 # Run MSEs to get "data" ----------------------------------------------------------------
 # Single-region low sample size
@@ -102,13 +121,21 @@ sim_env_lowsamp <- Setup_sim_env(sim_list = sim_list_lowsamp)
 sim_env_lowsamp <- add_aggregated_obj_to_simenv(sim_env = sim_env_lowsamp)
 sim_env_lowsamp <- run_single_rg_closedloop_parallel(sim_env = sim_env_lowsamp, n_sims = n_sims,
                                                      fleet_allocation = fleet_allocation,
-                                                     lls_design_type = "historical", n_cores = 7)
+                                                     lls_design_type = "historical", n_cores = 8)
 saveRDS(sim_env_lowsamp, here("outputs", "cross_test", "spatial_no_block_scenarios", "spt_rand_OM_lowsamp.RDS"))
 
-# Single-region low sample size
+# Single-region low sample size (tv movement)
 sim_env_lowsamp_tvmove <- Setup_sim_env(sim_list = sim_list_lowsamp_tvmove)
 sim_env_lowsamp_tvmove <- add_aggregated_obj_to_simenv(sim_env = sim_env_lowsamp_tvmove)
 sim_env_lowsamp_tvmove <- run_single_rg_closedloop_parallel(sim_env = sim_env_lowsamp_tvmove, n_sims = n_sims,
                                                      fleet_allocation = fleet_allocation,
-                                                     lls_design_type = "historical", n_cores = 7)
+                                                     lls_design_type = "historical", n_cores = 8)
 saveRDS(sim_env_lowsamp_tvmove, here("outputs", "cross_test", "spatial_no_block_scenarios", "spt_rand_OM_lowsamp_tvmove_sens.RDS"))
+
+# Single-region high sample size
+sim_env_highsamp <- Setup_sim_env(sim_list = sim_list_highsamp)
+sim_env_highsamp <- add_aggregated_obj_to_simenv(sim_env = sim_env_highsamp)
+sim_env_highsamp <- run_single_rg_closedloop_parallel(sim_env = sim_env_highsamp, n_sims = n_sims,
+                                                      fleet_allocation = fleet_allocation,
+                                                      lls_design_type = "historical", n_cores = 8)
+saveRDS(sim_env_highsamp, here("outputs", "cross_test", "spatial_no_block_scenarios", "spt_rand_OM_highsamp.RDS"))

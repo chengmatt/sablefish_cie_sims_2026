@@ -1,3 +1,48 @@
+#' Solve for fishing mortality rates that achieve target catches for multiple fleets
+#'
+#' @param target_catch Numeric vector of target catch values for each fleet
+#' @param NAA Matrix of numbers-at-age (ages x sexes)
+#' @param WAA Matrix of weight-at-age (ages x sexes)
+#' @param natmort Matrix of natural mortality (ages x sexes)
+#' @param fish_sel 3D array of fishery selectivity (ages x sexes x fleets)
+#' @param f_init Initial guess for F values (scalar or vector)
+#' @param control List of control parameters for nleqslv
+#' @return Numeric vector of F values for each fleet
+solve_multifleet_F <- function(target_catch, NAA, WAA, natmort, fish_sel,
+                               f_init = 0.05, control = list(btol = 1e-6)) {
+
+  n_fleets <- length(target_catch)
+
+  # Expand f_init if scalar
+  if(length(f_init) == 1) f_init <- rep(f_init, n_fleets)
+
+  # Function to minimize: difference between predicted and target catch for all fleets
+  catch_diff <- function(f_vec) {
+    pred_catches <- numeric(n_fleets)
+
+    for(f in 1:n_fleets) {
+      # F-at-age for this fleet
+      FAA <- f_vec[f] * fish_sel[, , f]
+
+      # Total Z includes F from ALL fleets
+      ZAA_total <- natmort
+      for(ff in 1:n_fleets) {
+        ZAA_total <- ZAA_total + f_vec[ff] * fish_sel[, , ff]
+      }
+
+      # Predicted catch for this fleet (Baranov catch equation)
+      pred_catches[f] <- sum((FAA / ZAA_total * NAA * (1 - exp(-ZAA_total))) * WAA)
+    }
+
+    return(pred_catches - target_catch)  # Difference from target
+  }
+
+  # Solve for F vector
+  result <- nleqslv::nleqslv(f_init, catch_diff, control = control)
+
+  return(result$x)
+}
+
 #' Threshold Harvest Control Rule
 #'
 #' Implements a threshold HCR where F is reduced linearly as biomass declines
@@ -34,6 +79,7 @@ HCR_threshold <- function(x, frp, brp, alpha = 0.05) {
 #' @param y Integer. The current year for which apportionment is computed.
 #' @param srv_idx Numeric matrix. Survey index values by region and year.
 #' @param rolling_avg_yrs Integer. Column index of the rolling-average year.
+#' @param lls_design_type Either historical or current design or all (if all, doesn't do any imputing)
 #'
 #' @return A numeric vector of apportionment proportions across regions.
 get_single_region_survey_apportionment <- function(feedback_start_yr, n_yrs, y, srv_idx, rolling_avg_yrs, lls_design_type) {
@@ -56,8 +102,46 @@ get_single_region_survey_apportionment <- function(feedback_start_yr, n_yrs, y, 
   }
 
   # get rolling average apportionment
-  apportionment <- colMeans(srv_idx / rowSums(srv_idx))
+  prop_yr <- sweep(srv_idx, 2, colSums(srv_idx, na.rm = TRUE), FUN = "/")
+  apportionment <- rowMeans(prop_yr, na.rm = TRUE)
   return(apportionment)
+}
+
+#' Compute Three-Region Model Survey Apportionment
+#'
+#' This function calculates survey-based regional apportionment for a given year
+#' by imputing missing survey observations (based on alternating survey timing)
+#' and then computing rolling-average apportionment across the GOA regions.
+#'
+#' @param feedback_start_yr Integer. First year of the feedback simulation.
+#' @param n_yrs Integer. Total number of years in the simulation.
+#' @param y Integer. The current year for which apportionment is computed.
+#' @param srv_idx Numeric matrix. Survey index values by region and year.
+#' @param rolling_avg_yrs Integer. Column index of the rolling-average year.
+#' @param lls_design_type Either historical or current design or all (if all or historical, doesn't do any imputing for the GOA since sampled every year)
+#'
+#' @return A numeric vector of apportionment proportions across the GOA regions.
+get_three_rg_survey_apportionment <- function(feedback_start_yr, n_yrs, y, srv_idx, rolling_avg_yrs, lls_design_type) {
+
+  # get years in simulation
+  x <- (feedback_start_yr + 1):n_yrs
+  # get goa years (odd)
+  odd_yrs <- x[x %% 2 == 1]
+  # get bsai years (even)
+  even_yrs <- x[x %% 2 == 0]
+
+  srv_idx_3 <- srv_idx[3:5, , drop = FALSE]
+
+  # get survey index
+  if(lls_design_type == 'current') {
+    if(y %in% odd_yrs) srv_idx_3[,rolling_avg_yrs] <- srv_idx_3[,rolling_avg_yrs - 1] # odd years, impute goa
+  }
+
+  # get rolling average apportionment
+  prop_yr <- sweep(srv_idx_3, 2, colSums(srv_idx_3, na.rm = TRUE), FUN = "/")
+  apportionment <- rowMeans(prop_yr, na.rm = TRUE)
+  return(apportionment)
+
 }
 
 #' Generate a Forward Population Projection
@@ -435,10 +519,16 @@ single_region_use_indicators <- function(y, n_fish_fleets, n_srv_fleets, age_lag
 #' @param lls_design_type Character string specifying the longline survey design:
 #'   `"current"`, `"historical"`, or `"all"`. Passed to the inner simulation.
 #' @param n_cores Integer. Number of parallel workers to use.
+#' @param srv_idx_se Survey idnex SE
+#' @param age_lag Age lag
+#' @param srv_wgt numbers or biomass comp weighting
+#' @param fish_wgt numbers or biomass comp weighting
 #'
 #' @return The updated `sim_env` object containing results across all simulation
 #'   replicates. The function modifies `sim_env` in place and also returns it.
-run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, lls_design_type, n_cores) {
+run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, lls_design_type, srv_idx_se,
+                                              age_lag, srv_wgt, fish_wgt, n_cores) {
+
 
   plan(multisession, workers = n_cores)
   options(future.globals.maxSize = 5e9)
@@ -449,7 +539,9 @@ run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
     env_list <- future_map(
       1:n_sims,
       ~{
-        run_single_rg_closedloop_i(sim_env, .x, fleet_allocation, lls_design_type)
+        run_single_rg_closedloop_i(sim_env, .x, fleet_allocation,
+                                   lls_design_type, srv_idx_se,
+                                   age_lag, srv_wgt, fish_wgt)
         sim_env
       },
       .progress = TRUE
@@ -2329,6 +2421,7 @@ agg_data_to_three_rg <- function(sim_data,
   non_goa_recap_consolidated[,,3,,] <- apply(non_goa_recap[,,3:5,,], c(1,2,4,5), sum)
 
   # Combine aggregated GOA + non-GOA
+  colnames(agg_goa_indicator) <- c("regions", "tag_yrs")
   sim_env$Agg_tag_release_indicator <- rbind(agg_goa_indicator, non_goa_indicator)
   sim_env$Agg_Tagged_Fish <- abind::abind(agg_goa_tagged_fish, non_goa_tagged_fish, along = 1)
   sim_env$Agg_Obs_Tag_Recap <- abind::abind(agg_goa_recap, non_goa_recap_consolidated, along = 2)
@@ -2597,10 +2690,22 @@ fiverg_use_indicators <- function(sim_env,
 #' @param lls_design_type Character string specifying the longline survey design:
 #'   `"current"`, `"historical"`, or `"all"`. Passed to the assessment model
 #'   builder for appropriate survey imputation logic.
+#' @param srv_idx_se Survey idnex SE
+#' @param age_lag Age lag
+#' @param srv_wgt numbers or biomass comp weighting
+#' @param fish_wgt numbers or biomass comp weighting
 #'
 #' @return The function updates `sim_env` in place (population states, catches,
 #'   F rates, and assessment outputs). No value is returned.
-run_single_rg_closedloop_i <- function(sim_env, sim, fleet_allocation, lls_design_type) {
+run_single_rg_closedloop_i <- function(sim_env,
+                                       sim,
+                                       fleet_allocation,
+                                       lls_design_type,
+                                       srv_idx_se,
+                                       age_lag,
+                                       srv_wgt,
+                                       fish_wgt
+                                       ) {
 
   # Run Closed Loop ---------------------------------------------------------
   for(y in 1:sim_env$n_yrs) {
@@ -2608,12 +2713,13 @@ run_single_rg_closedloop_i <- function(sim_env, sim, fleet_allocation, lls_desig
     # Execute annual population dynamics
     run_annual_cycle(y, sim, sim_env)
 
-
     # Run feedback
     if(y >= sim_env$feedback_start_yr) {
 
       ### Assessment --------------------------------------------------------------
-      asmt_list <- single_region_em(sim_env = sim_env, y = y, sim = sim, srv_idx_se = 0.2, age_lag = 1, lls_design_type) # get assessment data
+      asmt_list <- single_region_em(sim_env = sim_env, y = y, sim = sim, srv_idx_se = srv_idx_se,
+                                    age_lag = age_lag, lls_design_type = lls_design_type,
+                                    srv_wgt = srv_wgt, fish_wgt = fish_wgt) # get assessment data
       model <- fit_model(asmt_list$data, asmt_list$par, asmt_list$map, NULL, 2, silent = TRUE) # get model
 
       ### Reference Points --------------------------------------------------------
@@ -2660,27 +2766,455 @@ run_single_rg_closedloop_i <- function(sim_env, sim, fleet_allocation, lls_desig
 
       ### TAC to F ----------------------------------------------------------------
       if (y < sim_env$n_yrs) {
+        move_age <- if(sim_env$do_recruits_move == 0) 2 else 1
+        tmp_naa_moved <- array(NA, dim = dim(sim_env$NAA[, y+1, , , sim]))
+        for(a in move_age:sim_env$n_ages) for(s in 1:sim_env$n_sexes)
+          tmp_naa_moved[,a,s] <- t(sim_env$NAA[,y+1,a,s,sim]) %*% sim_env$Movement[,,y+1,a,s,sim]
+        if(move_age == 2) tmp_naa_moved[,1,] <- sim_env$NAA[, y+1,1, , sim]
 
-        rf_grid <- expand.grid(r = seq_len(sim_env$n_regions), f = seq_len(sim_env$n_fish_fleets)) # set up region, fleet grid to bisection across
-        tmp_f <- mapply(function(r, f) { # do bisection to go from region and fleet specific catch to region and fleet specific F rates
-          bisection_F(
-            f_guess = 0.05, # guess for fishing mortality rate
-            catch = tac_rf[r,f], # catch values to use
-            NAA = sim_env$NAA[r, y+1, , , sim], # numbers at age in simulation (truth)
-            WAA = sim_env$WAA[r, y+1, , , sim], # weight-at-age in simulation (truth)
-            natmort  = sim_env$natmort[r, y+1, , , sim], # natural mortality in simulation (truth)
-            fish_sel = sim_env$fish_sel[r, y+1, , , f, sim] # fishery selectivity in simulation (truth)
+        # Solve for all F simultaneously for each region
+        for(r in 1:sim_env$n_regions) {
+          sim_env$Fmort[r, y+1, , sim] <- solve_multifleet_F(
+            target_catch = tac_rf[r, ],
+            NAA = tmp_naa_moved[r, , ],
+            WAA = sim_env$WAA[r, y+1, , , sim],
+            natmort = sim_env$natmort[r, y+1, , , sim],
+            fish_sel = sim_env$fish_sel[r, y+1, , , , sim],
+            f_init = 0.05
           )
-        }, r = rf_grid$r, f = rf_grid$f)
-
-        # assign bisection values back into simulation
-        sim_env$Fmort[,y+1,,sim] <- array(tmp_f, dim = c(sim_env$n_regions, sim_env$n_fish_fleets))
-      }
+        } # end r loop
+      } # end if
 
     } # end feedback
 
     # save models
-    if(y == sim_env$n_yrs) sim_env$models[[sim]] <- model
+    if(y == sim_env$n_yrs) {
+      model$sd_rep <- RTMB::sdreport(model)
+      sim_env$models[[sim]] <- model
+    }
+
+  } # end y loop
+
+}
+
+#' Run a Closed-Loop Feedback FAA Assessment
+#'
+#' This function simulates a fishery over multiple years using a closed-loop
+#' framework. It performs annual population dynamics, feedback assessments,
+#' calculates reference points, applies harvest control rules, projects
+#' population and catch, and allocates total allowable catch (TAC) across regions
+#' and fleets.
+#'
+#' @param sim_env A list or environment containing the simulation environment, including population dynamics,
+#'   survey data, movement matrices, natural mortality, and other model parameters.
+#' @param sim Integer. Index of the simulation replicate.
+#' @param fleet_allocation Numeric vector. Proportions used to allocate regional TAC to fleets.
+#' @param lls_design_type Character. Type of longline survey design used for apportionment.
+#' @param srv_idx_se Numeric. Standard error of survey indices.
+#' @param age_lag Integer. Age lag between recruitment and survey observation.
+#' @param srv_wgt Character Weighting applied to survey data (e.g., "numbers" or "biomass").
+#' @param fish_wgt Character Weighting applied to fishery data (e.g., "numbers" or "biomass").
+#' @param faa_n_fish_fleets Integer. Number of fishing fleets in the feedback assessment.
+#' @param faa_n_srv_fleets Integer. Number of survey fleets in the feedback assessment. Typically 4.
+#' @param fish_sel_model Character vector. Fleet-specific selectivity models for the fishing fleets.
+#' @param srv_sel_model Character vector. Fleet-specific selectivity models for survey fleets.
+#' @param fish_selex_prior LPriors for fishing fleet selectivity parameters. Constructed based on
+#'   fleet blocks, sex, and region.
+#' @param srv_selex_prior  Priors for survey fleet selectivity parameters.
+#'
+#' @returns None. The function updates `sim_env` in-place with population dynamics,
+#'   fishing mortality, and assessment model outputs. The last year's model object
+#'   is stored in `sim_env$models[[sim]]`.
+#'
+run_faa_closedloop_i <- function(sim_env,
+                                 sim,
+                                 fleet_allocation,
+                                 lls_design_type,
+                                 srv_idx_se,
+                                 age_lag,
+                                 srv_wgt,
+                                 fish_wgt,
+                                 faa_n_fish_fleets,
+                                 faa_n_srv_fleets,
+                                 fish_sel_model,
+                                 srv_sel_model,
+                                 fish_selex_prior,
+                                 srv_selex_prior
+) {
+
+  # Run Closed Loop ---------------------------------------------------------
+  for(y in 1:sim_env$n_yrs) {
+
+    # Execute annual population dynamics
+    run_annual_cycle(y, sim, sim_env)
+
+    # Run feedback
+    if(y >= sim_env$feedback_start_yr) {
+
+      ### Assessment --------------------------------------------------------------
+      # get faa data
+      asmt_list <- faa_em(sim_env = sim_env,
+                          y = y,
+                          sim = sim,
+                          srv_idx_se = srv_idx_se,
+                          age_lag = age_lag,
+                          lls_design_type = lls_design_type,
+                          faa_n_fish_fleets = faa_n_fish_fleets,
+                          faa_n_srv_fleets = faa_n_srv_fleets,
+                          srv_wgt = srv_wgt,
+                          fish_wgt = fish_wgt,
+                          fish_sel_blocks = paste('none_Fleet_',1:faa_n_fish_fleets, sep = ''),
+                          fish_sel_model = fish_sel_model,
+                          fish_fixed_sel_pars_spec = rep("est_all", faa_n_fish_fleets),
+                          fish_selex_prior = fish_selex_prior,
+                          srv_sel_blocks =  paste('none_Fleet_',1:faa_n_srv_fleets, sep = ''),
+                          srv_sel_model = srv_sel_model,
+                          srv_fixed_sel_pars_spec = rep("est_all", faa_n_srv_fleets),
+                          srv_selex_prior = srv_selex_prior
+      )
+
+      # some starting values
+      asmt_list$par$ln_fish_fixed_sel_pars[] <- log(8)
+      asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
+
+      model <- fit_model(asmt_list$data, asmt_list$par, asmt_list$map, NULL, 2, silent = TRUE) # get model
+
+      ### Reference Points --------------------------------------------------------
+      ref_pts <- get_closed_loop_reference_points(
+        use_true_values = FALSE,
+        sim_env = sim_env,
+        asmt_data = asmt_list$data,
+        asmt_rep = model$rep,
+        y = y,
+        sim = sim,
+
+        # single region reference points
+        reference_points_opt = list(
+          n_avg_yrs = 1,
+          SPR_x = 0.4,
+          calc_rec_st_yr = 3,
+          rec_age = 4,
+          type = 'single_region',
+          what = "SPR",
+          B_x = 0.4
+        ),
+        n_proj_yrs = 2
+      )
+
+      ### HCR ---------------------------------------------------------------------
+      agg_ssb <- model$rep$SSB[,y] # get ssb
+      exp_frate <- HCR_threshold(x = agg_ssb, frp = ref_pts$f_ref_pt[,2], brp = ref_pts$b_ref_pt[,2], alpha = 0.05) # get prescribed f
+
+      ### Projection --------------------------------------------------------------
+      projection <- get_population_projection(data = asmt_list$data, rep = model$rep, y = y, n_proj_yrs = 2, f_ref_pt = ref_pts$f_ref_pt) # get 1 year projection
+      tac <- sum(projection$proj_Catch[,2,]) # get tac
+
+      ### Apportionment -----------------------------------------------------------
+      # get survey apportionment (survey biomass)
+      tmp_Srv_BiomIA <- sim_env$SrvIAA[,((y - 4): y),,,1,sim] * sim_env$WAA_srv[,((y - 4): y),,,1,sim]
+      tmp_srvidx_biom <- apply(tmp_Srv_BiomIA, 1:2, sum) # get biomass
+      apportionment <- get_single_region_survey_apportionment(feedback_start_yr = sim_env$feedback_start_yr,
+                                                              n_yrs = sim_env$n_yrs, y = y,
+                                                              srv_idx = tmp_srvidx_biom, # using true survey biomass values to do apportionment
+                                                              rolling_avg_yrs = 5,
+                                                              lls_design_type = lls_design_type)
+      tac_r <- tac * apportionment # get regional tac
+      tac_rf <- tac_r * fleet_allocation # allocate regional tac by fleet
+
+      ### TAC to F ----------------------------------------------------------------
+      if (y < sim_env$n_yrs) {
+        move_age <- if(sim_env$do_recruits_move == 0) 2 else 1
+        tmp_naa_moved <- array(NA, dim = dim(sim_env$NAA[, y+1, , , sim]))
+        for(a in move_age:sim_env$n_ages) for(s in 1:sim_env$n_sexes)
+          tmp_naa_moved[,a,s] <- t(sim_env$NAA[,y+1,a,s,sim]) %*% sim_env$Movement[,,y+1,a,s,sim]
+        if(move_age == 2) tmp_naa_moved[,1,] <- sim_env$NAA[, y+1,1, , sim]
+
+        # Solve for all F simultaneously for each region
+        for(r in 1:sim_env$n_regions) {
+          sim_env$Fmort[r, y+1, , sim] <- solve_multifleet_F(
+            target_catch = tac_rf[r, ],
+            NAA = tmp_naa_moved[r, , ],
+            WAA = sim_env$WAA[r, y+1, , , sim],
+            natmort = sim_env$natmort[r, y+1, , , sim],
+            fish_sel = sim_env$fish_sel[r, y+1, , , , sim],
+            f_init = 0.05
+          )
+        } # end r loop
+      } # end if
+
+    } # end feedback
+
+    # save models
+    if(y == sim_env$n_yrs) {
+      model$sd_rep <- RTMB::sdreport(model)
+      sim_env$models[[sim]] <- model
+    }
+
+  } # end y loop
+
+}
+
+#' Run a Closed-Loop Feedback Three Region Assessment
+#'
+#' This function simulates a fishery over multiple years using a closed-loop
+#' framework. It performs annual population dynamics, feedback assessments,
+#' calculates reference points, applies harvest control rules, projects
+#' population and catch, and allocates total allowable catch (TAC) across regions
+#' and fleets.
+#'
+#' @param sim_env A list or environment containing the simulation environment, including population dynamics,
+#'   survey data, movement matrices, natural mortality, and other model parameters.
+#' @param sim Integer. Index of the simulation replicate.
+#' @param fleet_allocation Numeric vector. Proportions used to allocate regional TAC to fleets.
+#' @param lls_design_type Character. Type of longline survey design used for apportionment - only for the GOA
+#' @param srv_idx_se Numeric. Standard error of survey indices.
+#' @param age_lag Integer. Age lag between recruitment and survey observation.
+#' @param srv_wgt Character Weighting applied to survey data for the GOA (e.g., "numbers" or "biomass").
+#' @param fish_wgt Character Weighting applied to fishery data for the GOA (e.g., "numbers" or "biomass").
+#'
+#' @returns None. The function updates `sim_env` in-place with population dynamics,
+#'   fishing mortality, and assessment model outputs. The last year's model object
+#'   is stored in `sim_env$models[[sim]]`.
+#'
+run_three_rg_closedloop_i <- function(sim_env,
+                                      sim,
+                                      fleet_allocation,
+                                      lls_design_type,
+                                      srv_idx_se,
+                                      age_lag,
+                                      srv_wgt,
+                                      fish_wgt
+) {
+
+  # Run Closed Loop ---------------------------------------------------------
+  for(y in 1:sim_env$n_yrs) {
+
+    # Execute annual population dynamics
+    run_annual_cycle(y, sim, sim_env)
+
+    # Run feedback
+    if(y >= sim_env$feedback_start_yr) {
+
+      ### Assessment --------------------------------------------------------------
+      # get three region data
+      asmt_list <- three_rg_em(
+        sim_env = sim_env,
+        y = y,
+        sim = sim,
+        srv_idx_se = srv_idx_se,
+        age_lag = age_lag,
+        lls_design_type = lls_design_type,
+        srv_wgt = srv_wgt,
+        fish_wgt = fish_wgt,
+        UseTagging = 1
+      )
+
+      model <- fit_model(asmt_list$data, asmt_list$par, asmt_list$map, NULL, 2, silent = TRUE) # get model
+
+      ### Reference Points --------------------------------------------------------
+      ref_pts <- get_closed_loop_reference_points(
+        use_true_values = FALSE,
+        sim_env = sim_env,
+        asmt_data = asmt_list$data,
+        asmt_rep = model$rep,
+        y = y,
+        sim = sim,
+
+        # single region reference points
+        reference_points_opt = list(
+          n_avg_yrs = 1,
+          SPR_x = 0.4,
+          calc_rec_st_yr = 3,
+          rec_age = 4,
+          type = 'multi_region',
+          what = "global_SPR",
+          B_x = 0.4
+        ),
+        n_proj_yrs = 2
+      )
+
+      ### HCR ---------------------------------------------------------------------
+      agg_ssb <- sum(model$rep$SSB[,y]) # get ssb
+      exp_frate <- HCR_threshold(x = agg_ssb, frp = unique(ref_pts$f_ref_pt[,2]), brp = sum(ref_pts$b_ref_pt[,2]), alpha = 0.05) # get prescribed f
+
+      ### Projection --------------------------------------------------------------
+      projection <- get_population_projection(data = asmt_list$data, rep = model$rep, y = y, n_proj_yrs = 2, f_ref_pt = ref_pts$f_ref_pt) # get 1 year projection
+      tac <- rowSums(projection$proj_Catch[,2,]) # get tac by region
+
+      ### Apportionment -----------------------------------------------------------
+      # get survey apportionment only for the GOA (survey biomass)
+      tmp_Srv_BiomIA <- sim_env$SrvIAA[,((y - 4): y),,,1,sim] * sim_env$WAA_srv[,((y - 4): y),,,1,sim]
+      tmp_srvidx_biom <- apply(tmp_Srv_BiomIA, 1:2, sum) # get biomass
+      apportionment <- get_three_rg_survey_apportionment(
+        feedback_start_yr = sim_env$feedback_start_yr,
+        n_yrs = sim_env$n_yrs, y = y,
+        srv_idx = tmp_srvidx_biom, # using true survey biomass values to do apportionment
+        rolling_avg_yrs = 5,
+        lls_design_type = lls_design_type
+      )
+      tac_r <- c(tac[1:2], tac[3] * apportionment) # get regional tac (use f40 regional abc for bs and ai, and then apportion goa)
+      tac_rf <- tac_r * fleet_allocation # allocate regional tac by fleet
+
+      ### TAC to F ----------------------------------------------------------------
+      if (y < sim_env$n_yrs) {
+        move_age <- if(sim_env$do_recruits_move == 0) 2 else 1
+        tmp_naa_moved <- array(NA, dim = dim(sim_env$NAA[, y+1, , , sim]))
+        for(a in move_age:sim_env$n_ages) for(s in 1:sim_env$n_sexes)
+          tmp_naa_moved[,a,s] <- t(sim_env$NAA[,y+1,a,s,sim]) %*% sim_env$Movement[,,y+1,a,s,sim]
+        if(move_age == 2) tmp_naa_moved[,1,] <- sim_env$NAA[, y+1,1, , sim]
+
+        # Solve for all F simultaneously for each region
+        for(r in 1:sim_env$n_regions) {
+          sim_env$Fmort[r, y+1, , sim] <- solve_multifleet_F(
+            target_catch = tac_rf[r, ],
+            NAA = tmp_naa_moved[r, , ],
+            WAA = sim_env$WAA[r, y+1, , , sim],
+            natmort = sim_env$natmort[r, y+1, , , sim],
+            fish_sel = sim_env$fish_sel[r, y+1, , , , sim],
+            f_init = 0.05
+          )
+        } # end r loop
+      } # end if
+
+    } # end feedback
+
+    # save models
+    if(y == sim_env$n_yrs) {
+      model$sd_rep <- RTMB::sdreport(model)
+      sim_env$models[[sim]] <- model
+    }
+
+  } # end y loop
+
+}
+
+#' Run a Closed-Loop Feedback Five Region Model using true values
+#'
+#' This function simulates a fishery over multiple years using a closed-loop
+#' framework. It performs annual population dynamics, feedback assessments,
+#' calculates reference points, applies harvest control rules, projects
+#' population and catch, and allocates total allowable catch (TAC) across regions
+#' and fleets.
+#'
+#' @param sim_env A list or environment containing the simulation environment, including population dynamics,
+#'   survey data, movement matrices, natural mortality, and other model parameters.
+#' @param sim Integer. Index of the simulation replicate.
+#' @param fleet_allocation Numeric vector. Proportions used to allocate regional TAC to fleets.
+#' @param lls_design_type Character. Type of longline survey design used for apportionment - only for the GOA
+#'
+#' @returns None. The function updates `sim_env` in-place with population dynamics,
+#'   fishing mortality, and assessment model outputs. The last year's model object
+#'   is stored in `sim_env$models[[sim]]`.
+#'
+run_three_rg_closedloop_i <- function(sim_env,
+                                      sim,
+                                      fleet_allocation,
+                                      lls_design_type
+) {
+
+  # Run Closed Loop ---------------------------------------------------------
+  for(y in 1:sim_env$n_yrs) {
+
+    # Execute annual population dynamics
+    run_annual_cycle(y, sim, sim_env)
+
+    # Run feedback
+    if(y >= sim_env$feedback_start_yr) {
+
+      ### Assessment --------------------------------------------------------------
+      # get three region data
+      asmt_list <- three_rg_em(
+        sim_env = sim_env,
+        y = y,
+        sim = sim,
+        srv_idx_se = srv_idx_se,
+        age_lag = age_lag,
+        lls_design_type = lls_design_type,
+        srv_wgt = srv_wgt,
+        fish_wgt = fish_wgt,
+        UseTagging = 1
+      )
+
+      model <- fit_model(asmt_list$data, asmt_list$par, asmt_list$map, NULL, 2, silent = TRUE) # get model
+
+      ### Reference Points --------------------------------------------------------
+      ref_pts <- get_closed_loop_reference_points(
+        use_true_values = FALSE,
+        sim_env = sim_env,
+        asmt_data = asmt_list$data,
+        asmt_rep = model$rep,
+        y = y,
+        sim = sim,
+
+        # single region reference points
+        reference_points_opt = list(
+          n_avg_yrs = 1,
+          SPR_x = 0.4,
+          calc_rec_st_yr = 3,
+          rec_age = 4,
+          type = 'multi_region',
+          what = "global_SPR",
+          B_x = 0.4
+        ),
+        n_proj_yrs = 2
+      )
+
+      ### HCR ---------------------------------------------------------------------
+      agg_ssb <- sum(model$rep$SSB[,y]) # get ssb
+      exp_frate <- HCR_threshold(x = agg_ssb, frp = unique(ref_pts$f_ref_pt[,2]), brp = sum(ref_pts$b_ref_pt[,2]), alpha = 0.05) # get prescribed f
+
+      ### Projection --------------------------------------------------------------
+      # create asmt_list and model to store true values in
+      asmt_list <- list()
+      model <- list()
+      asmt_list$data <- list()
+      model$rep <- list()
+
+      # make inputs for projection
+      model$rep$NAA <- sim_env$NAA[,,,,sim]
+      model$rep$NAA0 <- sim_env$NAA0[,,,,sim]
+      asmt_list$data$WAA <- sim_env$WAA[,,,,sim]
+      asmt_list$data$WAA_fish <- sim_env$WAA_fish[,,,,,sim]
+      asmt_list$data$MatAA <- sim_env$MatAA[,,,,sim]
+      model$rep$fish_sel <- sim_env$fish_sel[,,,,,sim]
+      model$rep$Fmort <- sim_env$Fmort[,,,sim]
+      model$rep$natmort <- sim_env$natmort[,,,,sim]
+      model$rep$Rec <- sim_env$Rec[,,sim]
+      model$rep$sexratio <- sim_env$sexratio[,,,sim]
+      model$rep$Movement <- sim_env$Movement[,,,,,sim]
+      asmt_list$data$n_regions <- sim_env$n_regions
+      asmt_list$data$ages <- 1:sim_env$n_ages
+      asmt_list$data$n_sexes <- sim_env$n_sexes
+      asmt_list$data$n_fish_fleets <- sim_env$n_fish_fleets
+
+      projection <- get_population_projection(data = asmt_list$data, rep = model$rep, y = y, n_proj_yrs = 2, f_ref_pt = ref_pts$f_ref_pt) # get 1 year projection
+      tac_r <- rowSums(projection$proj_Catch[,2,]) # get tac by region
+
+      ### Apportionment -----------------------------------------------------------
+      tac_rf <- tac_r * fleet_allocation # allocate regional tac by fleet
+
+      ### TAC to F ----------------------------------------------------------------
+      if (y < sim_env$n_yrs) {
+        move_age <- if(sim_env$do_recruits_move == 0) 2 else 1
+        tmp_naa_moved <- array(NA, dim = dim(sim_env$NAA[, y+1, , , sim]))
+        for(a in move_age:sim_env$n_ages) for(s in 1:sim_env$n_sexes)
+          tmp_naa_moved[,a,s] <- t(sim_env$NAA[,y+1,a,s,sim]) %*% sim_env$Movement[,,y+1,a,s,sim]
+        if(move_age == 2) tmp_naa_moved[,1,] <- sim_env$NAA[, y+1,1, , sim]
+
+        # Solve for all F simultaneously for each region
+        for(r in 1:sim_env$n_regions) {
+          sim_env$Fmort[r, y+1, , sim] <- solve_multifleet_F(
+            target_catch = tac_rf[r, ],
+            NAA = tmp_naa_moved[r, , ],
+            WAA = sim_env$WAA[r, y+1, , , sim],
+            natmort = sim_env$natmort[r, y+1, , , sim],
+            fish_sel = sim_env$fish_sel[r, y+1, , , , sim],
+            f_init = 0.05
+          )
+        } # end r loop
+      } # end if
+
+    } # end feedback
 
   } # end y loop
 

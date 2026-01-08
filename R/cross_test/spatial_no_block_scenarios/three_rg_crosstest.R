@@ -17,6 +17,7 @@ source(here("R", "functions", "three_rg_em.R"))
 
 # Read in OMs
 lowsamp <- readRDS(here("outputs", 'cross_test', "spatial_no_block_scenarios", "spt_rand_OM_lowsamp.RDS"))
+highsamp <- readRDS(here("outputs", 'cross_test', "spatial_no_block_scenarios", "spt_rand_OM_highsamp.RDS"))
 
 # Simulation dimensions
 y <- 65 # terminal year prior to MSE (no feedback)
@@ -24,7 +25,7 @@ n_sims <- 100 # number of sims
 
 # Run EMs, low sample OM -----------------------------------------------------------------
 handlers(global = TRUE)  # progress bar
-plan(multisession, workers = 6)
+plan(multisession, workers = 7)
 options(future.globals.maxSize = 15e9)
 
 # loop through
@@ -33,7 +34,7 @@ with_progress({
 
   model_list_lowsamp <- future_lapply(1:n_sims, function(i) {
 
-    # get five region data
+    # get three region data
     asmt_list <- three_rg_em(
       sim_env = lowsamp,
       y = y,
@@ -74,7 +75,6 @@ with_progress({
 # Sim, EM list dimension
 saveRDS(model_list_lowsamp, here("outputs", "cross_test", "spatial_no_block_scenarios", "three_region_crosstest_lowsamp.RDS"))
 
-
 # Process Results ---------------------------------------------------------
 model_list_lowsamp <- readRDS(here("outputs", "cross_test", "spatial_no_block_scenarios", "three_region_crosstest_lowsamp.RDS"))
 
@@ -95,5 +95,139 @@ for(i in 1:100) {
   }
 }
 
-plot(apply(agg_ssb_store, 1, median, na.rm = T))
-plot(apply(agg_rec_store, 1, median, na.rm = T), type = 'l')
+plot(apply(agg_ssb_store, 1, quantile, na.rm = T)[2,], type = 'l', ylim = c(-0.5, 0.5))
+lines(apply(agg_ssb_store, 1, median, na.rm = T), lty = 2)
+lines(apply(agg_ssb_store, 1, quantile, na.rm = T)[4,], type = 'l')
+
+
+plot(apply(agg_rec_store, 1, quantile, na.rm = T)[1,], type = 'l', ylim = c(-2, 2))
+lines(apply(agg_rec_store, 1, median, na.rm = T), lty = 2)
+lines(apply(agg_rec_store, 1, quantile, na.rm = T)[4,], type = 'l')
+
+for(i in 1:100) {
+  if(length(model_list_lowsamp[[i]]) > 1) {
+    if(i == 1) plot(colSums(model_list_lowsamp[[i]]$rep$SSB), type = 'l', ylim = c(0, 320))
+    else lines(colSums(model_list_lowsamp[[i]]$rep$SSB), type = 'l', ylim = c(0, 320))
+  }
+}
+
+lines(colSums(lowsamp$SSB[,-66,1]), lty = 2, col = 'red', lwd = 3)
+
+
+for(i in 1:100) {
+  if(length(model_list_lowsamp[[i]]) > 1) {
+    if(i == 1) plot(colSums(model_list_lowsamp[[i]]$rep$Rec[1,,drop = F]), type = 'l', ylim = c(0, 130))
+    else lines(colSums(model_list_lowsamp[[i]]$rep$Rec[1,,drop = F]), type = 'l', ylim = c(0, 130))
+  }
+}
+
+lines(colSums(lowsamp$Rec[1,,1, drop = F]), lty = 2, col = 'red', lwd = 3)
+
+# Run EMs, high sample EM -----------------------------------------------------------------
+handlers(global = TRUE)  # progress bar
+plan(multisession, workers = 7)
+options(future.globals.maxSize = 15e9)
+
+# loop through
+with_progress({
+  p <- progressor(steps = n_sims)
+
+  model_list_highsamp <- future_lapply(1:n_sims, function(i) {
+
+    # get three region data
+    asmt_list <- three_rg_em(
+      sim_env = highsamp,
+      y = y,
+      sim = i,
+      srv_idx_se = 0.1,
+      age_lag = 0,
+      lls_design_type = 'all',
+      srv_wgt = 'numbers',
+      fish_wgt = 'numbers',
+      UseTagging = 1
+    )
+
+    # Use data every year
+    asmt_list$data$UseFishAgeComps[,,1] <- 1
+    asmt_list$data$UseFishLenComps[,,c(1,2)] <- 1
+    asmt_list$data$UseFishLenComps[2,1:3,1:2] <- asmt_list$data$UseFishAgeComps[2,1:3,1:2] <- 0
+    asmt_list$data$UseSrvIdx[,,c(1,3)] <- 1
+    asmt_list$data$UseSrvAgeComps[,,c(1,3)] <- 1
+
+    model <- tryCatch(
+      {
+
+       # fit model
+        model <- fit_model(
+          asmt_list$data,
+          asmt_list$par,
+          asmt_list$map,
+          NULL,
+          2,
+          silent = F, do_optim = T
+        )
+
+        model$data <- asmt_list$data    # save data
+        model$sd_rep <- sdreport(model)
+        model
+      },
+      error = function(e) {
+        NA
+      }
+    )
+    p()
+    model
+  })
+})
+
+# Sim, EM list dimension
+saveRDS(model_list_highsamp, here("outputs", "cross_test", "spatial_no_block_scenarios", "three_region_crosstest_highsamp.RDS"))
+
+# Process Results ---------------------------------------------------------
+model_list_highsamp <- readRDS(here("outputs", "cross_test", "spatial_no_block_scenarios", "three_region_crosstest_highsamp.RDS"))
+
+# storage containers
+ssb_store <- array(NA, dim = c(3, 65, 100))
+rec_store <- array(NA, dim = c(3, 65, 100))
+dep_store <- array(NA, dim = c(3, 65, 100))
+agg_ssb_store <- array(NA, dim = c(65, 100))
+agg_rec_store <- array(NA, dim = c(65, 100))
+agg_dep_store <- array(NA, dim = c(65, 100))
+
+counter <- 0
+for(i in 1:100) {
+  if(length(model_list_highsamp[[i]]) > 1) {
+    counter <- counter + 1
+    agg_ssb_store[,i] <- (colSums(model_list_highsamp[[i]]$rep$SSB) - colSums(highsamp$SSB[,-66,1])) / colSums(highsamp$SSB[,-66,1])
+    agg_rec_store[,i] <- (colSums(model_list_highsamp[[i]]$rep$Rec) - colSums(highsamp$Rec[,-66,1])) / colSums(highsamp$Rec[,-66,1])
+  }
+}
+
+plot(apply(agg_ssb_store, 1, quantile, na.rm = T)[2,], type = 'l', ylim = c(-0.5, 0.5))
+lines(apply(agg_ssb_store, 1, median, na.rm = T), lty = 2)
+lines(apply(agg_ssb_store, 1, quantile, na.rm = T)[4,], type = 'l')
+
+
+plot(apply(agg_rec_store, 1, quantile, na.rm = T)[1,], type = 'l', ylim = c(-2, 2))
+lines(apply(agg_rec_store, 1, median, na.rm = T), lty = 2)
+lines(apply(agg_rec_store, 1, quantile, na.rm = T)[4,], type = 'l')
+
+for(i in 1:100) {
+  if(length(model_list_highsamp[[i]]) > 1) {
+    if(i == 1) plot(colSums(model_list_highsamp[[i]]$rep$SSB), type = 'l', ylim = c(0, 320))
+    else lines(colSums(model_list_highsamp[[i]]$rep$SSB), type = 'l', ylim = c(0, 320))
+  }
+}
+
+lines(colSums(highsamp$SSB[,-66,1]), lty = 2, col = 'red', lwd = 3)
+
+
+for(i in 1:100) {
+  if(length(model_list_highsamp[[i]]) > 1) {
+    if(i == 1) plot(colSums(model_list_highsamp[[i]]$rep$Rec[1,,drop = F]), type = 'l', ylim = c(0, 130))
+    else lines(colSums(model_list_highsamp[[i]]$rep$Rec[1,,drop = F]), type = 'l', ylim = c(0, 130))
+  }
+}
+
+lines(colSums(highsamp$Rec[1,,1, drop = F]), lty = 2, col = 'red', lwd = 3)
+

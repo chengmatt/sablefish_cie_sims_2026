@@ -117,16 +117,16 @@ three_rg_em <- function(sim_env,
                               # but recruitment deviations are region specific
                               ln_sigmaR = log(c(0.4, 0.9)),
                               # values to fix sigmaR at, or starting values
-                              ln_global_R0 = log(25),
+                              ln_global_R0 = log(20),
                               Use_Rec_prop_Prior = 1,
-                              Rec_prop_prior = 5
+                              Rec_prop_prior = 1.5
   )
 
   # Setup biological stuff (using defaults for other stuff)
   input_list <- Setup_Mod_Biologicals(input_list = input_list,
                                       WAA = sim_data$WAA[1:3,,,], # weight at age
                                       MatAA = sim_data$MatAA[1:3,,,], # maturity at age
-                                      AgeingError = sim_data$AgeError,
+                                      AgeingError = sim_data$AgeingError,
                                       # ageing error matrix
                                       fit_lengths = 1, # fitting lengths
                                       SizeAgeTrans = sim_data$SizeAgeTrans[1:3,,,,],
@@ -144,7 +144,7 @@ three_rg_em <- function(sim_env,
     region_from = 1:3, # regions
     age = c(6,7,16), # age blocks
     sex = 1, # sex
-    alpha = I(list(rep(3, 3))) # prior alpha to each row
+    alpha = I(list(rep(5, 3))) # prior alpha to each row
   )
 
   input_list <- Setup_Mod_Movement(input_list = input_list,
@@ -194,8 +194,8 @@ three_rg_em <- function(sim_env,
                                   tag_natmort = "AgeSp_SexSp", # tagging natural mortality is age and sex-specific
                                   Use_TagRep_Prior = 1, # tag reporting rate priors are used
                                   TagRep_Prior = tag_prior,
-                                  move_age_tag_pool = list(c(1:6), c(7:15), c(16:30)), # whether or not to pool tagging data when fitting (for computational cost)
-                                  move_sex_tag_pool = list(c(1:2)), # whether or not to pool sex-specific data whezn fitting
+                                  move_age_tag_pool = as.list(1:30), # whether or not to pool tagging data when fitting (for computational cost)
+                                  move_sex_tag_pool = as.list(1:2), # whether or not to pool sex-specific data whezn fitting
                                   Init_Tag_Mort_spec = "fix", # fixing initial tag mortality
                                   Tag_Shed_spec = "fix", # fixing chronic shedding
                                   TagRep_spec = "est_shared_r", # tag reporting rates are not region specific
@@ -311,8 +311,8 @@ three_rg_em <- function(sim_env,
 
   # Merge to get all valid combinations
   fish_selex_structure <- merge(fleet_blocks, sex_par) %>%
-    dplyr::filter(!(fleet == 1 & block == 1 & sex == 2 & par == 2)) %>%              # remove priors for any unestimated pars -- par1=a50, par2=delta; NEEDS TO MATCH PARAMETER MAPPING
-    dplyr::filter(!(fleet == 2 & block == 1 & sex == 2 & par == 1))                  # remove priors for any unestimated pars -- par1=a50, par2=delta; NEEDS TO MATCH PARAMETER MAPPING
+    dplyr::filter(!(fleet == 1 & block == 1 & sex == 2 & par == 2)) %>%              # remove priors for any unestimated pars -- par1=a50, par2=delta; NEEDS TO MATCH PARAMETER input_list$map
+    dplyr::filter(!(fleet == 2 & block == 1 & sex == 2 & par == 1))                  # remove priors for any unestimated pars -- par1=a50, par2=delta; NEEDS TO MATCH PARAMETER input_list$map
 
   # Add the lognormal prior values - creates a dataframe, each row is a unique parameter combination to apply the prior to
   fish_selex_prior <- cbind(
@@ -353,7 +353,7 @@ three_rg_em <- function(sim_env,
                                           c("none_Fleet_1", "none_Fleet_2"),
                                         # no blocks since q is not estimated
 
-                                        # sharing fishery selex parameters
+                                        # sharing fishery selex input_list$par
                                         fish_fixed_sel_pars =
                                           c("est_shared_r", "est_shared_r"),
 
@@ -420,7 +420,7 @@ three_rg_em <- function(sim_env,
 
                                        # whether to estiamte all fixed effects
                                        # for survey selectivity and later
-                                       # modify to fix/share parameters
+                                       # modify to fix/share input_list$par
                                        srv_fixed_sel_pars_spec =
                                          c("est_shared_r",
                                            "fix",
@@ -437,6 +437,19 @@ three_rg_em <- function(sim_env,
                                        srv_selex_prior = srv_selex_prior
   )
 
+  # Map off early delta for fishery
+  map_fish_fixed <- array(input_list$map$ln_fish_fixed_sel_pars, dim = dim(input_list$par$ln_fish_fixed_sel_pars))
+  map_fish_fixed[,2,1,2,1]  <- map_fish_fixed[,2,1,1,1] # share deltas
+
+  # Map off bmax for trawl females
+  map_fish_fixed[,1,1,2,2]  <- map_fish_fixed[,1,1,1,2] # share deltas
+  input_list$map$ln_fish_fixed_sel_pars <- factor(map_fish_fixed)
+
+  # Map off delta for JP LLS
+  map_srv_fixed <- array(input_list$map$ln_srv_fixed_sel_pars, dim = dim(input_list$par$ln_srv_fixed_sel_pars))
+  map_srv_fixed[,2,1,2,3]  <- map_srv_fixed[,2,1,1,3] # share deltas
+  input_list$map$ln_srv_fixed_sel_pars <- factor(map_srv_fixed)
+
   # set up model weighting stuff
   input_list <- Setup_Mod_Weighting(input_list = input_list,
                                     Wt_Catch = 1,
@@ -444,7 +457,7 @@ three_rg_em <- function(sim_env,
                                     Wt_SrvIdx = 1,
                                     Wt_Rec = 1,
                                     Wt_F = 1,
-                                    Wt_Tagging = 1,
+                                    Wt_Tagging = 0.1,
                                     Wt_FishAgeComps =
                                       array(1, dim = c(input_list$data$n_regions,
                                                        length(input_list$data$years),
