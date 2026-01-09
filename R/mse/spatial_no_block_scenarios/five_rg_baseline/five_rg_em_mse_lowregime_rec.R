@@ -82,6 +82,7 @@ sim_env_current <- Setup_sim_env(sim_list = sim_list)
 sim_env_current <- add_aggregated_obj_to_simenv(sim_env = sim_env_current)
 sim_env_current <- run_five_rg_closedloop_parallel(sim_env = sim_env_current, n_sims = n_sims,
                                                    fleet_allocation = fleet_allocation,
+                                                   hcr_type = 'global_ssb_global_b40',
                                                    n_cores = 7)
 
 saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_no_block_scenarios", "five_region_lowregimerec.RDS"))

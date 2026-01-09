@@ -1,4 +1,4 @@
-# Purpose: To run a five region OM, with a three region EM (base recruitment)
+# Purpose: To run a five region OM, with a five region EM "true values" (base recruitment w/ local ssb local b40)
 # Creator: Matthew LH. Cheng (UAF - CFOS)
 # Date: 11/26/25
 
@@ -39,17 +39,6 @@ fleet_allocation <- array(NA, dim = c(n_regions, n_fish_fleets))
 fleet_allocation[,1] <- c(0.5,0.75,0.8,0.8,0.95) # from fmp
 fleet_allocation[,2] <- 1 - fleet_allocation[,1] # trawl gear allocation
 
-# To simulate more tags or resimulate tags with new sample sizes
-historical_tags <- rbind(data$tag_release_indicator,
-                         unname(as.matrix(data.frame(regions = c(2:5), tag_yr = 63))),
-                         unname(as.matrix(data.frame(regions = c(1,3:5), tag_yr = 64)))
-)
-
-# Get new simulated tags in
-new_goa_tags <- expand.grid(regions = 3:5, tag_yr = seq((n_years + 1), (n_years + closed_loop_yrs), 2))
-new_bsai_tags <- expand.grid(regions = 1:2, tag_yr = seq((n_years + 2), (n_years + closed_loop_yrs), 2))
-data$tag_release_indicator <- rbind(historical_tags, unname(as.matrix(new_goa_tags)), unname(as.matrix(new_bsai_tags)))
-
 # Condition closed-loop simulations, random recruitment
 sim_list <- condition_closed_loop_simulations(
   closed_loop_yrs = closed_loop_yrs,
@@ -67,8 +56,7 @@ sim_list <- condition_closed_loop_simulations(
   ISS_SrvAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ISS_SrvLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
-  ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
-  n_tags_rel_input = rep(2e3, nrow(data$tag_release_indicator))
+  ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets))
 )
 
 # Get constant B40 for comparison
@@ -82,17 +70,11 @@ global_spr <- Get_Reference_Points(data = om_values$data,
 )
 
 # Run MSEs ----------------------------------------------------------------
-
-# Single-region, current design
 sim_env_current <- Setup_sim_env(sim_list = sim_list)
 sim_env_current <- add_aggregated_obj_to_simenv(sim_env = sim_env_current)
-sim_env_current <- run_three_rg_closedloop_parallel(sim_env = sim_env_current, n_sims = n_sims,
-                                                     fleet_allocation = fleet_allocation,
-                                                     lls_design_type = "current",
-                                                     srv_idx_se = 0.2,
-                                                     age_lag = 1,
-                                                     srv_wgt = 'numbers',
-                                                     fish_wgt = 'numbers',
-                                                    n_cores = 7)
+sim_env_current <- run_five_rg_closedloop_parallel(sim_env = sim_env_current, n_sims = n_sims,
+                                                   fleet_allocation = fleet_allocation,
+                                                   hcr_type = 'global_ssb_global_b40',
+                                                   n_cores = 7)
 
-saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_no_block_scenarios", "three_region_base.RDS"))
+saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_no_block_scenarios", "five_region_local_ssb_local_b40.RDS"))

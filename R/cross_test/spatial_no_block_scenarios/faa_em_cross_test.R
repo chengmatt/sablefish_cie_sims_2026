@@ -614,7 +614,7 @@ with_progress({
       {
         # fit model via retros
         retros <- do_retrospective(
-          8,
+          n_retro = 8,
           data = asmt_list$data,
           parameters = asmt_list$par,
           mapping = asmt_list$map,
@@ -639,7 +639,7 @@ with_progress({
   })
 })
 
-retros_w_francis <- retros_wo_francis[!is.na(retros_w_francis)]
+retros_w_francis <- retros_w_francis[!is.na(retros_w_francis)]
 retros_w_francis_df <- data.table::rbindlist(retros_w_francis)
 write.csv(retros_w_francis_df, here("outputs", "cross_test", "spatial_no_block_scenarios", "faa_finalized_cross_test_retro_francis.csv"))
 

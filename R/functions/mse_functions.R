@@ -741,10 +741,11 @@ run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, lls_d
 #' @param fleet_allocation Numeric vector. Proportions used to allocate regional TAC to fleets.
 #' @param n_cores Number of cores
 #' @param n_sims Number of simulations
+#' @param hcr_type How HCR is implemented: global_ssb_global_b40, local_ssb_local_b40, local_ssb_global_b40
 #'
 #' @return The updated `sim_env` object containing results across all simulation
 #'   replicates. The function modifies `sim_env` in place and also returns it.
-run_five_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, n_cores) {
+run_five_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, hcr_type, n_cores) {
 
 
   plan(multisession, workers = n_cores)
@@ -757,7 +758,8 @@ run_five_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, n
       1:n_sims,
       ~{
         run_five_rg_closedloop_i(sim_env, .x,
-                                 fleet_allocation)
+                                 fleet_allocation,
+                                 hcr_type)
         sim_env
       },
       .progress = TRUE
@@ -2965,7 +2967,9 @@ run_single_rg_closedloop_i <- function(sim_env,
       exp_frate <- HCR_threshold(x = agg_ssb, frp = ref_pts$f_ref_pt[,2], brp = ref_pts$b_ref_pt[,2], alpha = 0.05) # get prescribed f
 
       ### Projection --------------------------------------------------------------
-      projection <- get_population_projection(data = asmt_list$data, rep = model$rep, y = y, n_proj_yrs = 2, f_ref_pt = ref_pts$f_ref_pt) # get 1 year projection
+      projection <- get_population_projection(data = asmt_list$data, rep = model$rep,
+                                              y = y, n_proj_yrs = 2,
+                                              f_ref_pt = array(exp_frate, c(asmt_list$data$n_regions, 2))) # get 1 year projection
       tac <- sum(projection$proj_Catch[,2,]) # get tac
 
       ### Apportionment -----------------------------------------------------------
@@ -3122,7 +3126,9 @@ run_faa_closedloop_i <- function(sim_env,
       exp_frate <- HCR_threshold(x = agg_ssb, frp = ref_pts$f_ref_pt[,2], brp = ref_pts$b_ref_pt[,2], alpha = 0.05) # get prescribed f
 
       ### Projection --------------------------------------------------------------
-      projection <- get_population_projection(data = asmt_list$data, rep = model$rep, y = y, n_proj_yrs = 2, f_ref_pt = ref_pts$f_ref_pt) # get 1 year projection
+      projection <- get_population_projection(data = asmt_list$data, rep = model$rep,
+                                              y = y, n_proj_yrs = 2,
+                                              f_ref_pt = array(exp_frate, c(asmt_list$data$n_regions, 2))) # get 1 year projection
       tac <- sum(projection$proj_Catch[,2,]) # get tac
 
       ### Apportionment -----------------------------------------------------------
@@ -3254,7 +3260,9 @@ run_three_rg_closedloop_i <- function(sim_env,
       exp_frate <- HCR_threshold(x = agg_ssb, frp = unique(ref_pts$f_ref_pt[,2]), brp = sum(ref_pts$b_ref_pt[,2]), alpha = 0.05) # get prescribed f
 
       ### Projection --------------------------------------------------------------
-      projection <- get_population_projection(data = asmt_list$data, rep = model$rep, y = y, n_proj_yrs = 2, f_ref_pt = ref_pts$f_ref_pt) # get 1 year projection
+      projection <- get_population_projection(data = asmt_list$data, rep = model$rep,
+                                              y = y, n_proj_yrs = 2,
+                                              f_ref_pt = array(exp_frate, c(asmt_list$data$n_regions, 2))) # get 1 year projection
       tac <- rowSums(projection$proj_Catch[,2,]) # get tac by region
 
       ### Apportionment -----------------------------------------------------------
@@ -3316,14 +3324,17 @@ run_three_rg_closedloop_i <- function(sim_env,
 #'   survey data, movement matrices, natural mortality, and other model parameters.
 #' @param sim Integer. Index of the simulation replicate.
 #' @param fleet_allocation Numeric vector. Proportions used to allocate regional TAC to fleets.
+#' @param hcr_type How HCR is implemented: global_ssb_global_b40, local_ssb_local_b40, local_ssb_global_b40
 #'
 #' @returns None. The function updates `sim_env` in-place with population dynamics,
 #'   fishing mortality, and assessment model outputs. The last year's model object
 #'   is stored in `sim_env$models[[sim]]`.
 #'
 run_five_rg_closedloop_i <- function(sim_env,
-                                      sim,
-                                      fleet_allocation
+                                    sim,
+                                    fleet_allocation,
+                                    hcr_type
+
 ) {
 
   # Run Closed Loop ---------------------------------------------------------
@@ -3361,8 +3372,32 @@ run_five_rg_closedloop_i <- function(sim_env,
       )
 
       ### HCR ---------------------------------------------------------------------
-      agg_ssb <- sum(model$rep$SSB[,y]) # get ssb
-      exp_frate <- HCR_threshold(x = agg_ssb, frp = unique(ref_pts$f_ref_pt[,2]), brp = sum(ref_pts$b_ref_pt[,2]), alpha = 0.05) # get prescribed f
+      f_ref_pt <- array(NA, c(sim_env$n_regions, 2))
+
+      # compare global ssb to global reference points
+      if(hcr_type == 'global_ssb_global_b40') {
+        agg_ssb <- sum(sim_env$SSB[,y,sim]) # get ssb
+        exp_frate <- HCR_threshold(x = agg_ssb, frp = unique(ref_pts$f_ref_pt[,2]), brp = sum(ref_pts$b_ref_pt[,2]), alpha = 0.05) # get prescribed f
+        f_ref_pt[] <- exp_frate
+      }
+
+      # compare local ssb to local reference points
+      if(hcr_type == 'local_ssb_local_b40') {
+        ssb_r <- sim_env$SSB[,y,sim] # get ssb
+        for(rr in 1:sim_env$n_regions) {
+          f_ref_pt[rr,] <- HCR_threshold(x = ssb_r[rr], frp = unique(ref_pts$f_ref_pt[,2]),
+                                        brp = ref_pts$b_ref_pt[rr,2], alpha = 0.05) # get prescribed f
+        }
+      }
+
+      # compare local ssb to global b40
+      if(hcr_type == 'local_ssb_global_b40') {
+        ssb_r <- sim_env$SSB[,y,sim] # get ssb
+        for(rr in 1:sim_env$n_regions) {
+          f_ref_pt[rr,] <- HCR_threshold(x = ssb_r[rr], frp = unique(ref_pts$f_ref_pt[,2]),
+                                         brp = sum(ref_pts$b_ref_pt[,2]), alpha = 0.05) # get prescribed f
+        }
+      }
 
       ### Projection --------------------------------------------------------------
       # create asmt_list and model to store true values in
@@ -3388,7 +3423,8 @@ run_five_rg_closedloop_i <- function(sim_env,
       asmt_list$data$n_sexes <- sim_env$n_sexes
       asmt_list$data$n_fish_fleets <- sim_env$n_fish_fleets
 
-      projection <- get_population_projection(data = asmt_list$data, rep = model$rep, y = y, n_proj_yrs = 2, f_ref_pt = ref_pts$f_ref_pt) # get 1 year projection
+      projection <- get_population_projection(data = asmt_list$data, rep = model$rep, y = y, n_proj_yrs = 2,
+                                              f_ref_pt = f_ref_pt) # get 1 year projection
       tac_r <- rowSums(projection$proj_Catch[,2,]) # get tac by region
 
       ### Apportionment -----------------------------------------------------------

@@ -46,6 +46,18 @@ R0_input[] <- om_values$rep$R0 * om_values$rep$Rec_trans_prop # mean recruitment
 R0_input[1:2,((n_years + 1):(n_years + 15))] <- om_values$rep$R0 * om_values$rep$Rec_trans_prop[1:2] * 0.25
 R0_input <- replicate(n = n_sims, R0_input)
 
+# To simulate more tags or resimulate tags with new sample sizes
+historical_tags <- rbind(data$tag_release_indicator,
+                         unname(as.matrix(data.frame(regions = c(2:5), tag_yr = 63))),
+                         unname(as.matrix(data.frame(regions = c(1,3:5), tag_yr = 64)))
+)
+
+# Get new simulated tags in
+new_goa_tags <- expand.grid(regions = 3:5, tag_yr = seq((n_years + 1), (n_years + closed_loop_yrs), 2))
+new_bsai_tags <- expand.grid(regions = 1:2, tag_yr = seq((n_years + 2), (n_years + closed_loop_yrs), 2))
+data$tag_release_indicator <- rbind(historical_tags, unname(as.matrix(new_goa_tags)), unname(as.matrix(new_bsai_tags)))
+
+
 # Condition closed-loop simulations, random recruitment
 sim_list <- condition_closed_loop_simulations(
   closed_loop_yrs = closed_loop_yrs,
@@ -63,7 +75,8 @@ sim_list <- condition_closed_loop_simulations(
   ISS_SrvAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ISS_SrvLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
-  ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets))
+  ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
+  n_tags_rel_input = rep(2e3, nrow(data$tag_release_indicator))
 )
 
 # Get constant B40 for comparison
