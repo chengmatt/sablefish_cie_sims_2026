@@ -607,7 +607,7 @@ with_progress({
                         srv_selex_prior = ems[[j]]$srv_selex_prior
     )
 
-    asmt_list$par$ln_fish_fixed_sel_pars[] <- log(10)
+    asmt_list$par$ln_fish_fixed_sel_pars[] <- log(3)
     asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
 
     retros <- tryCatch(

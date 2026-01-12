@@ -259,9 +259,8 @@ agg_data_to_single_rg <- function(sim_data, sim_env, y, sim, lls_design_type, sr
     sim_env$Agg_ObsCatch[1,1:y,,sim] <- aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0, mean(exp(sim_data$ln_sigmaC))))
   } else{
     aggregated_true_catch <- apply(sim_env$TrueCatch[,y,,sim, drop = FALSE], c(2,3), sum) # get true aggregated catch
-    sim_env$Agg_ObsCatch[1,1:y,,sim] <- rbind(sim_env$Agg_ObsCatch[1,1:(y-1),,sim], # bind previous catches with current catch
-                                              aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0,
-                                                                                mean(exp(sim_data$ln_sigmaC)))))
+    sim_env$Agg_ObsCatch[1,y,,sim] <- aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0,
+                                                                                mean(exp(sim_data$ln_sigmaC))))
   }
 
   # Fishery Compositions
@@ -378,8 +377,7 @@ agg_data_to_single_rg <- function(sim_data, sim_env, y, sim, lls_design_type, sr
 
     agg_imputed_srvidx <- colSums(agg_true_srvidx) # get aggregated imputed survey (no data in 2025)
     sim_env$Agg_TrueSrvIdx[1,y,,sim] <- agg_imputed_srvidx # save "true imputed index"
-    sim_env$Agg_ObsSrvIdx[1,1:y,,sim] <- rbind(sim_env$Agg_ObsSrvIdx[1,1:(y-1),,sim],
-                                               sim_env$Agg_TrueSrvIdx[1,y,,sim] * exp(rnorm(length(agg_imputed_srvidx), 0, srv_idx_se)))
+    sim_env$Agg_ObsSrvIdx[1,y,,sim] <- sim_env$Agg_TrueSrvIdx[1,y,,sim] * exp(rnorm(length(agg_imputed_srvidx), 0, srv_idx_se))
   }
 
   # Survey Compositions
@@ -666,7 +664,8 @@ run_three_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, 
 #'
 #' @return The updated `sim_env` object containing results across all simulation
 #'   replicates. The function modifies `sim_env` in place and also returns it.
-run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, lls_design_type, srv_idx_se,
+run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
+                                        lls_design_type, srv_idx_se,
                                         age_lag, srv_wgt,
                                         fish_wgt, faa_n_fish_fleets,
                                         faa_n_srv_fleets,
@@ -698,7 +697,7 @@ run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, lls_d
                              fish_sel_model,
                              srv_sel_model,
                              fish_selex_prior,
-                             srv_selex_prior)
+                             srv_selex_prior, )
         sim_env
       },
       .progress = TRUE
@@ -934,8 +933,8 @@ agg_data_to_faa <- function(sim_data,
   n_sexes <- sim_env$n_sexes
   n_ages <- sim_env$n_ages
   n_lens <- sim_env$n_lens
-  n_fish_fleets <- sim_env$n_fish_fleets
-  n_srv_fleets <- sim_env$n_srv_fleets
+  n_fish_fleets <- faa_n_fish_fleets
+  n_srv_fleets <- faa_n_srv_fleets
 
   # Catches (using true catches, and then applying error to aggregated true catches)
   if(faa_n_fish_fleets == 2) { # Two Fishery Fleets (i.e., fishery is not FAA)
@@ -944,8 +943,7 @@ agg_data_to_faa <- function(sim_data,
       sim_env$Agg_ObsCatch[1,1:y,,sim] <- aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0, mean(exp(sim_data$ln_sigmaC))))
     } else{
       aggregated_true_catch <- apply(sim_env$TrueCatch[,y,,sim, drop = FALSE], c(2,3), sum) # get true aggregated catch
-      sim_env$Agg_ObsCatch[1,1:y,,sim] <- rbind(sim_env$Agg_ObsCatch[1,1:(y-1),,sim], # bind previous catches with current catch
-                                                aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0, mean(exp(sim_data$ln_sigmaC)))))
+      sim_env$Agg_ObsCatch[1,y,,sim] <- aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0, mean(exp(sim_data$ln_sigmaC))))
     }
   }
 
@@ -957,16 +955,14 @@ agg_data_to_faa <- function(sim_data,
       aggregated_true_catch[1,,3] <- colSums(sim_env$TrueCatch[3:5,1:y,1,sim]) # GOA Fixed Gear
       aggregated_true_catch[1,,4] <- colSums(sim_env$TrueCatch[,1:y,2,sim]) # Trawl Gear
       sim_env$Agg_ObsCatch[1,1:y,,sim] <- aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0,   mean(exp(sim_data$ln_sigmaC)))) # add error
-
     } else{
       aggregated_true_catch <- array(0, dim = c(n_fish_fleets))
       aggregated_true_catch[1] <- sim_env$TrueCatch[1,y,1,sim] # BS Fixed Gear
       aggregated_true_catch[2] <- sim_env$TrueCatch[2,y,1,sim] # AI Fixed Gear
       aggregated_true_catch[3] <- sum(sim_env$TrueCatch[3:5,y,1,sim]) # GOA Fixed Gear
       aggregated_true_catch[4] <- sum(sim_env$TrueCatch[,y,2,sim]) # Trawl Gear
-      sim_env$Agg_ObsCatch[1,1:y,,sim] <- rbind(sim_env$Agg_ObsCatch[1,1:(y-1),,sim], # bind previous catches with current catch
-                                                aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0,
-                                                                                  mean(exp(sim_data$ln_sigmaC)))))
+      sim_env$Agg_ObsCatch[1,y,,sim] <- aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0,
+                                                                                  mean(exp(sim_data$ln_sigmaC))))
     }
   }
 
@@ -991,9 +987,8 @@ agg_data_to_faa <- function(sim_data,
       # Do GOA Fleets
       aggregated_true_catch[3] <- sum(sim_env$TrueCatch[3:5,y,1,sim]) # GOA Fixed Gear
       aggregated_true_catch[5] <- sum(sim_env$TrueCatch[2:5,y,2,sim]) # AI + GOA Trawl Gear
-      sim_env$Agg_ObsCatch[1,1:y,,sim] <- rbind(sim_env$Agg_ObsCatch[1,1:(y-1),,sim], # bind previous catches with current catch
-                                                aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0,
-                                                                                  mean(exp(sim_data$ln_sigmaC)))))
+      sim_env$Agg_ObsCatch[1,y,,sim] <- aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0,
+                                                                                  mean(exp(sim_data$ln_sigmaC))))
     }
   }
 
@@ -1020,9 +1015,8 @@ agg_data_to_faa <- function(sim_data,
       # Do GOA Fleets
       aggregated_true_catch[3] <- sum(sim_env$TrueCatch[3:5,y,1,sim]) # GOA Fixed Gear
       aggregated_true_catch[6] <- sum(sim_env$TrueCatch[3:5,y,2,sim]) # GOA Trawl Gear
-      sim_env$Agg_ObsCatch[1,1:y,,sim] <- rbind(sim_env$Agg_ObsCatch[1,1:(y-1),,sim], # bind previous catches with current catch
-                                                aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0,
-                                                                                  mean(exp(sim_data$ln_sigmaC)))))
+      sim_env$Agg_ObsCatch[1,y,,sim] <- aggregated_true_catch * exp(rnorm(length(aggregated_true_catch), 0,
+                                                                                  mean(exp(sim_data$ln_sigmaC))))
     }
   }
 
@@ -1604,10 +1598,9 @@ agg_data_to_faa <- function(sim_data,
 
     # save true aggregated index
     sim_env$Agg_TrueSrvIdx[1,y,,sim] <- agg_true_srvidx # save "true index"
-    sim_env$Agg_ObsSrvIdx[1,1:y,,sim] <- rbind(
-      sim_env$Agg_ObsSrvIdx[1,1:(y-1),,sim],
+    sim_env$Agg_ObsSrvIdx[1,y,,sim] <-
       agg_true_srvidx * exp(rnorm(length(agg_true_srvidx), 0, srv_idx_se))
-    )
+
   }
 
   if(faa_n_srv_fleets == 4) {
@@ -3090,14 +3083,16 @@ run_faa_closedloop_i <- function(sim_env,
                           srv_sel_blocks =  paste('none_Fleet_',1:faa_n_srv_fleets, sep = ''),
                           srv_sel_model = srv_sel_model,
                           srv_fixed_sel_pars_spec = rep("est_all", faa_n_srv_fleets),
-                          srv_selex_prior = srv_selex_prior
+                          srv_selex_prior = srv_selex_prior,
+                          cross_testing = FALSE
       )
 
+
       # some starting values
-      asmt_list$par$ln_fish_fixed_sel_pars[] <- log(8)
+      asmt_list$par$ln_fish_fixed_sel_pars[] <- log(3)
       asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
 
-      model <- fit_model(asmt_list$data, asmt_list$par, asmt_list$map, NULL, 2, silent = TRUE) # get model
+      model <- fit_model(asmt_list$data, asmt_list$par, asmt_list$map, NULL, 2, silent = F) # get model
 
       ### Reference Points --------------------------------------------------------
       ref_pts <- get_closed_loop_reference_points(
@@ -3228,7 +3223,8 @@ run_three_rg_closedloop_i <- function(sim_env,
         lls_design_type = lls_design_type,
         srv_wgt = srv_wgt,
         fish_wgt = fish_wgt,
-        UseTagging = 1
+        UseTagging = 1,
+        cross_testing = FALSE
       )
 
       model <- fit_model(asmt_list$data, asmt_list$par, asmt_list$map, NULL, 2, silent = TRUE) # get model
@@ -3371,6 +3367,8 @@ run_five_rg_closedloop_i <- function(sim_env,
         n_proj_yrs = 2
       )
 
+      sum(ref_pts$b_ref_pt[,2])
+
       ### HCR ---------------------------------------------------------------------
       f_ref_pt <- array(NA, c(sim_env$n_regions, 2))
 
@@ -3453,6 +3451,13 @@ run_five_rg_closedloop_i <- function(sim_env,
 
     } # end feedback
 
+    print(sum(sim_env$SSB[,y,sim]))
+    par(mfrow = c(1,2))
+    plot(colSums(sim_env$SSB[,,sim]))
+    abline(h = sum(ref_pts$b_ref_pt[,2]))
+    plot(rowSums(sim_env$Fmort[4,,,sim]))
+    abline(h = unique(ref_pts$f_ref_pt[,2]))
+    # median(colSums(sim_env$SSB[,65:y,sim]))
   } # end y loop
 
 }

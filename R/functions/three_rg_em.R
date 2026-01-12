@@ -38,6 +38,7 @@
 #'
 #' @param UseTagging Integer (0 or 1). Indicator for whether tagging data are
 #'   included in the model.
+#' @param cross_testing Boolean on whether this is cross testing
 #'
 #' @return A fully populated \code{input_list} object suitable for fitting a
 #'   three-region spatial assessment model.
@@ -50,11 +51,12 @@ three_rg_em <- function(sim_env,
                         lls_design_type,
                         srv_wgt = 'numbers',
                         fish_wgt = 'biomass',
-                        UseTagging = 1
+                        UseTagging = 1,
+                        cross_testing = TRUE
 ) {
 
   # Get simulated data
-  add_aggregated_obj_to_simenv(sim_env, 'three_rg', sim_env$n_fish_fleets, sim_env$n_srv_fleets)
+  if(cross_testing) add_aggregated_obj_to_simenv(sim_env, 'three_rg', sim_env$n_fish_fleets, sim_env$n_srv_fleets)
   sim_data <- simulation_data_to_SPoRC(sim_env, y, sim)
 
   # get years in simulation

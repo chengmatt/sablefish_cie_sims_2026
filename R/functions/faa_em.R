@@ -40,6 +40,7 @@
 #'   for survey selectivity.
 #' @param srv_selex_prior Data frame defining prior distributions for survey
 #'   selectivity parameters.
+#' @param cross_testing Boolean on whether cross testing to add aggregated objects to simulation environment
 #'
 faa_em <- function(sim_env,
                    y,
@@ -58,11 +59,12 @@ faa_em <- function(sim_env,
                    srv_sel_blocks,
                    srv_sel_model,
                    srv_fixed_sel_pars_spec,
-                   srv_selex_prior
+                   srv_selex_prior,
+                   cross_testing = TRUE
                    ) {
 
   # get simulated data
-  add_aggregated_obj_to_simenv(sim_env, 'faa', faa_n_fish_fleets, faa_n_srv_fleets)
+  if(cross_testing) add_aggregated_obj_to_simenv(sim_env, 'faa', faa_n_fish_fleets, faa_n_srv_fleets)
   sim_data <- simulation_data_to_SPoRC(sim_env, y, sim)
   sim_agg_data <- agg_data_to_faa(sim_data, sim_env, y, sim, faa_n_fish_fleets,
                                   faa_n_srv_fleets, srv_wgt, fish_wgt, srv_idx_se)
