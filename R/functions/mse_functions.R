@@ -3367,8 +3367,6 @@ run_five_rg_closedloop_i <- function(sim_env,
         n_proj_yrs = 2
       )
 
-      sum(ref_pts$b_ref_pt[,2])
-
       ### HCR ---------------------------------------------------------------------
       f_ref_pt <- array(NA, c(sim_env$n_regions, 2))
 
@@ -3451,13 +3449,13 @@ run_five_rg_closedloop_i <- function(sim_env,
 
     } # end feedback
 
-    print(sum(sim_env$SSB[,y,sim]))
-    par(mfrow = c(1,2))
-    plot(colSums(sim_env$SSB[,,sim]))
-    abline(h = sum(ref_pts$b_ref_pt[,2]))
-    plot(rowSums(sim_env$Fmort[4,,,sim]))
-    abline(h = unique(ref_pts$f_ref_pt[,2]))
-    # median(colSums(sim_env$SSB[,65:y,sim]))
+    # print(sum(sim_env$SSB[,y,sim]))
+    # par(mfrow = c(1,2))
+    # plot(colSums(sim_env$SSB[,,sim]))
+    # abline(h = sum(ref_pts$b_ref_pt[,2]))
+    # plot(rowSums(sim_env$Fmort[4,,,sim]))
+    # abline(h = unique(ref_pts$f_ref_pt[,2]))
+    # # median(colSums(sim_env$SSB[,65:y,sim]))
   } # end y loop
 
 }
