@@ -697,7 +697,7 @@ run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
                              fish_sel_model,
                              srv_sel_model,
                              fish_selex_prior,
-                             srv_selex_prior, )
+                             srv_selex_prior)
         sim_env
       },
       .progress = TRUE
@@ -3089,7 +3089,7 @@ run_faa_closedloop_i <- function(sim_env,
 
 
       # some starting values
-      asmt_list$par$ln_fish_fixed_sel_pars[] <- log(3)
+      asmt_list$par$ln_fish_fixed_sel_pars[] <- log(1)
       asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
 
       model <- fit_model(asmt_list$data, asmt_list$par, asmt_list$map, NULL, 2, silent = F) # get model

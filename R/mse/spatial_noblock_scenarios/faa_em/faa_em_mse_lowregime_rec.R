@@ -78,7 +78,8 @@ global_spr <- Get_Reference_Points(data = om_values$data,
 # Run MSEs ----------------------------------------------------------------
 sim_env_current <- Setup_sim_env(sim_list = sim_list)
 sim_env_current <- add_aggregated_obj_to_simenv(sim_env = sim_env_current, type = 'faa', faa_n_fish_fleets = 4, faa_n_srv_fleets = 4)
-sim_env_current <- run_faa_closedloop_parallel(sim_env = sim_env_current, n_sims = n_sims,
+sim_env_current <- run_faa_closedloop_parallel(sim_env = sim_env_current,
+                                               n_sims = n_sims,
                                                fleet_allocation = fleet_allocation,
                                                lls_design_type = 'current',
                                                srv_idx_se =  0.2, age_lag = 1,
@@ -88,8 +89,10 @@ sim_env_current <- run_faa_closedloop_parallel(sim_env = sim_env_current, n_sims
                                                                   "logist1_Fleet_3", "gamma_Fleet_4"),
                                                srv_sel_model = c('gamma_Fleet_1', "logist1_Fleet_2",
                                                                  "logist1_Fleet_3", "logist1_Fleet_4"),
-                                               fish_selex_prior = expand.grid(region = 1, fleet = 1:4, block = 1, sex = 1:2, par = 1:2, mu = 3.5, sd = 2),
-                                               srv_selex_prior = expand.grid(region = 1, fleet = 1:4, block = 1, sex = 1:2, par = 1:2, mu = 3.5, sd = 2),
+                                               fish_selex_prior = expand.grid(region = 1, fleet = 1:4, block = 1,
+                                                                              sex = 1:2, par = 1:2, mu = 3.5, sd = 2),
+                                               srv_selex_prior = expand.grid(region = 1, fleet = 1:4, block = 1,
+                                                                             sex = 1:2, par = 1:2, mu = 3.5, sd = 2),
                                                n_cores = 7)
 
 saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", "faa_lowregimerec.RDS"))

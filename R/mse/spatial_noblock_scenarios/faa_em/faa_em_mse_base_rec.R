@@ -86,8 +86,8 @@ sim_env_current <- run_faa_closedloop_parallel(sim_env = sim_env_current,
                                                                   "logist1_Fleet_3", "gamma_Fleet_4"),
                                                srv_sel_model = c('gamma_Fleet_1', "logist1_Fleet_2",
                                                                  "logist1_Fleet_3", "logist1_Fleet_4"),
-                                               fish_selex_prior = expand.grid(region = 1, fleet = 1:4, block = 1, sex = 1:2, par = 1:2, mu = 3.5, sd = 2),
-                                               srv_selex_prior = expand.grid(region = 1, fleet = 1:4, block = 1, sex = 1:2, par = 1:2, mu = 3.5, sd = 2),
+                                               fish_selex_prior = expand.grid(region = 1, fleet = 1:4, block = 1, sex = 1:2, par = 1:2, mu = 3.5, sd = 1.5),
+                                               srv_selex_prior = expand.grid(region = 1, fleet = 1:4, block = 1, sex = 1:2, par = 1:2, mu = 3.5, sd = 1.5),
                                                n_cores = 7)
 
 saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", "faa_base.RDS"))
