@@ -599,38 +599,49 @@ run_three_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, 
   options(future.globals.maxSize = 5e9)
   handlers(handler_progress(format = "[:bar] :percent"))
 
-  # run in parrallel and return simulation environment
+
+
+  # run in parallel and return simulation environment
   with_progress({
     env_list <- future_map(
       1:n_sims,
       ~{
-        run_three_rg_closedloop_i(sim_env, .x, fleet_allocation,
-                                  lls_design_type, srv_idx_se,
-                                  age_lag, srv_wgt, fish_wgt)
-        sim_env
+        tryCatch({
+          run_three_rg_closedloop_i(sim_env, .x, fleet_allocation,
+                                    lls_design_type, srv_idx_se,
+                                    age_lag, srv_wgt, fish_wgt)
+          sim_env  # return on success
+        }, error = function(e) {
+          warning(paste0("Simulation ", .x, " failed: ", e$message))
+          NULL  # return NULL on failure
+        })
       },
       .progress = TRUE
     )
   })
 
-  # Merge results back in
+  # Merge results back in (skip failed sims)
   for(i in 1:n_sims) {
-    for(var_name in ls(sim_env, all.names = TRUE)) { # loop through sim_env to get variable names
-      arr <- env_list[[i]][[var_name]] # get array
-      if(is.array(arr)) { # check if array
-        ndim <- length(dim(arr)) # check array dimensions
-        last_dim <- dim(arr)[ndim] # get last dimension
-        if(last_dim == n_sims) { # if last dimension matches number of sims
-          comma_str <- paste(rep(",", ndim - 1), collapse = "") # build comma structure, e.g., 3d array gives ,,,
-          expr <- paste0("sim_env[[\"", var_name, "\"]][", comma_str, "i] <- env_list[[i]][[\"", var_name, "\"]][", comma_str, "i]") # write expression for array
-          eval(parse(text = expr)) # parse expression
+    # Skip if this sim failed
+    if(is.null(env_list[[i]])) next
+
+    # Merge arrays
+    for(var_name in ls(sim_env, all.names = TRUE)) {
+      arr <- env_list[[i]][[var_name]]
+      if(is.array(arr)) {
+        ndim <- length(dim(arr))
+        last_dim <- dim(arr)[ndim]
+        if(last_dim == n_sims) {
+          comma_str <- paste(rep(",", ndim - 1), collapse = "")
+          expr <- paste0("sim_env[[\"", var_name, "\"]][", comma_str, "i] <- env_list[[i]][[\"", var_name, "\"]][", comma_str, "i]")
+          eval(parse(text = expr))
         }
       }
     }
-  }
 
-  # Merge model results back in
-  for(i in 1:n_sims) sim_env$models[[i]] <- env_list[[i]]$models[[i]]
+    # Merge model list
+    sim_env$models[[i]] <- env_list[[i]]$models[[i]]
+  }
 
   return(sim_env)
 }
@@ -680,48 +691,58 @@ run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
   options(future.globals.maxSize = 5e9)
   handlers(handler_progress(format = "[:bar] :percent"))
 
-  # run in parrallel and return simulation environment
+  # run in parallel and return simulation environment
   with_progress({
     env_list <- future_map(
       1:n_sims,
       ~{
-        run_faa_closedloop_i(sim_env, .x,
-                             fleet_allocation,
-                             lls_design_type,
-                             srv_idx_se,
-                             age_lag,
-                             srv_wgt,
-                             fish_wgt,
-                             faa_n_fish_fleets,
-                             faa_n_srv_fleets,
-                             fish_sel_model,
-                             srv_sel_model,
-                             fish_selex_prior,
-                             srv_selex_prior)
-        sim_env
+        tryCatch({
+          run_faa_closedloop_i(sim_env, .x,
+                               fleet_allocation,
+                               lls_design_type,
+                               srv_idx_se,
+                               age_lag,
+                               srv_wgt,
+                               fish_wgt,
+                               faa_n_fish_fleets,
+                               faa_n_srv_fleets,
+                               fish_sel_model,
+                               srv_sel_model,
+                               fish_selex_prior,
+                               srv_selex_prior)
+          sim_env  # return on success
+        }, error = function(e) {
+          warning(paste0("Simulation ", .x, " failed: ", e$message))
+          NULL  # return NULL on failure
+        })
       },
       .progress = TRUE
     )
   })
 
-  # Merge results back in
+  # Merge results back in (skip failed sims)
   for(i in 1:n_sims) {
-    for(var_name in ls(sim_env, all.names = TRUE)) { # loop through sim_env to get variable names
-      arr <- env_list[[i]][[var_name]] # get array
-      if(is.array(arr)) { # check if array
-        ndim <- length(dim(arr)) # check array dimensions
-        last_dim <- dim(arr)[ndim] # get last dimension
-        if(last_dim == n_sims) { # if last dimension matches number of sims
-          comma_str <- paste(rep(",", ndim - 1), collapse = "") # build comma structure, e.g., 3d array gives ,,,
-          expr <- paste0("sim_env[[\"", var_name, "\"]][", comma_str, "i] <- env_list[[i]][[\"", var_name, "\"]][", comma_str, "i]") # write expression for array
-          eval(parse(text = expr)) # parse expression
+    # Skip if this sim failed
+    if(is.null(env_list[[i]])) next
+
+    # Merge arrays
+    for(var_name in ls(sim_env, all.names = TRUE)) {
+      arr <- env_list[[i]][[var_name]]
+      if(is.array(arr)) {
+        ndim <- length(dim(arr))
+        last_dim <- dim(arr)[ndim]
+        if(last_dim == n_sims) {
+          comma_str <- paste(rep(",", ndim - 1), collapse = "")
+          expr <- paste0("sim_env[[\"", var_name, "\"]][", comma_str, "i] <- env_list[[i]][[\"", var_name, "\"]][", comma_str, "i]")
+          eval(parse(text = expr))
         }
       }
     }
+
+    # Merge model list
+    sim_env$models[[i]] <- env_list[[i]]$models[[i]]
   }
 
-  # Merge model results back in
-  for(i in 1:n_sims) sim_env$models[[i]] <- env_list[[i]]$models[[i]]
 
   return(sim_env)
 }
@@ -3089,8 +3110,9 @@ run_faa_closedloop_i <- function(sim_env,
 
 
       # some starting values
-      asmt_list$par$ln_fish_fixed_sel_pars[] <- log(1)
-      asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
+      asmt_list$par$ln_fish_fixed_sel_pars[,1,,,1] <- log(4)
+      asmt_list$par$ln_fish_fixed_sel_pars[,2,,,1] <- log(3)
+      # asmt_list$par$ln_srv_fixed_sel_pars[] <- log(5)
 
       model <- fit_model(asmt_list$data, asmt_list$par, asmt_list$map, NULL, 2, silent = F) # get model
 

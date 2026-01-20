@@ -62,7 +62,8 @@ sim_list <- condition_closed_loop_simulations(
   ISS_SrvAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ISS_SrvLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
-  ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets))
+  ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
+  R0_input = R0_input
 )
 
 # Get constant B40 for comparison
@@ -90,9 +91,9 @@ sim_env_current <- run_faa_closedloop_parallel(sim_env = sim_env_current,
                                                srv_sel_model = c('gamma_Fleet_1', "logist1_Fleet_2",
                                                                  "logist1_Fleet_3", "logist1_Fleet_4"),
                                                fish_selex_prior = expand.grid(region = 1, fleet = 1:4, block = 1,
-                                                                              sex = 1:2, par = 1:2, mu = 3.5, sd = 2),
+                                                                              sex = 1:2, par = 1:2, mu = 3.5, sd = 5),
                                                srv_selex_prior = expand.grid(region = 1, fleet = 1:4, block = 1,
-                                                                             sex = 1:2, par = 1:2, mu = 3.5, sd = 2),
+                                                                             sex = 1:2, par = 1:2, mu = 3.5, sd = 5),
                                                n_cores = 7)
 
 saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", "faa_lowregimerec.RDS"))

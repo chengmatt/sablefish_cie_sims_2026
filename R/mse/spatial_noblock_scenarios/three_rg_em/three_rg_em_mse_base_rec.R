@@ -14,7 +14,7 @@ library(progressr)
 om_values <- readRDS(here("data", "spatial_outputs", "Spatial_MltRel_NoBlock_model_results.RDS"))
 
 source(here("R", "functions", "mse_functions.R"))
-source(here("R", "functions", "single_region_em.R"))
+source(here("R", "functions", "three_rg_em.R"))
 
 # Condition OM ------------------------------------------------------------
 

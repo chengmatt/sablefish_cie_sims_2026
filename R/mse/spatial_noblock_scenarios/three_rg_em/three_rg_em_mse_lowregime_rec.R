@@ -14,7 +14,7 @@ library(progressr)
 om_values <- readRDS(here("data", "spatial_outputs", "Spatial_MltRel_model_results.RDS"))
 
 source(here("R", "functions", "mse_functions.R"))
-source(here("R", "functions", "single_region_em.R"))
+source(here("R", "functions", "three_rg_em.R"))
 
 
 # Condition OM ------------------------------------------------------------
@@ -76,7 +76,8 @@ sim_list <- condition_closed_loop_simulations(
   ISS_SrvLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
   ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
-  n_tags_rel_input = rep(2e3, nrow(data$tag_release_indicator))
+  n_tags_rel_input = rep(2e3, nrow(data$tag_release_indicator)),
+  R0_input = R0_input
 )
 
 # Get constant B40 for comparison

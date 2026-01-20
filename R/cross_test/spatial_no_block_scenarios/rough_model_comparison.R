@@ -115,8 +115,8 @@ for(i in 1:n_sims) {
   # Get FAA model selex
   if(length(faa_model[[i]]) > 1) faa_fish_sel[,,,1,i] <- faa_model[[i]]$rep$fish_sel[1,1,,,]
   if(length(faa_model[[i]]) > 1) faa_srv_sel[,,,1,i] <- faa_model[[i]]$rep$srv_sel[1,1,,,]
-  # if(length(faa_francis[[i]]) > 1) faa_fish_sel[,,,2,i] <- faa_francis[[i]]$rep$fish_sel[1,1,,,]
-  # if(length(faa_francis[[i]]) > 1) faa_srv_sel[,,,2,i] <- faa_francis[[i]]$rep$srv_sel[1,1,,,]
+  if(length(faa_francis[[i]]) > 1) faa_fish_sel[,,,2,i] <- faa_francis[[i]]$rep$fish_sel[1,1,,,]
+  if(length(faa_francis[[i]]) > 1) faa_srv_sel[,,,2,i] <- faa_francis[[i]]$rep$srv_sel[1,1,,,]
 
 } # end i loop
 
@@ -130,9 +130,6 @@ for(i in 1:n_sims) {
   if(length(three_rg_low[[i]]) > 1)  conv_store[5,i] <- conv_check(sd_rep = three_rg_low[[i]]$sd_rep)
   if(length(three_rg_high[[i]]) > 1) conv_store[6,i] <- conv_check(sd_rep = three_rg_high[[i]]$sd_rep)
 }
-
-sqrt(diag(three_rg_low[[40]]$sd_rep$cov.fixed))
-which(conv_store[5,] == F)
 
 # figure out convergence rates
 apply(conv_store, 1, sum, na.rm = T)
@@ -204,10 +201,9 @@ faa_fish_sel_df <- reshape2::melt(faa_fish_sel) %>%
       Fleet == 1 ~ 'BS_Fix',
       Fleet == 2 ~ 'AI_Fix',
       Fleet == 3 ~ 'GOA_Fix',
-      Fleet == 4 ~ 'BS_Trwl',
-      Fleet == 5 ~ 'AI+GOA_Trwl'
+      Fleet == 4 ~ 'BS+AI+GOA_Trwl'
     ),
-    Fleet = factor(Fleet, levels = c('BS_Fix', 'AI_Fix', 'GOA_Fix', 'BS_Trwl', 'AI+GOA_Trwl'))
+    Fleet = factor(Fleet, levels = c('BS_Fix', 'AI_Fix', 'GOA_Fix', 'BS_Trwl', 'BS+AI+GOA_Trwl'))
   )
 
 faa_srv_sel_df <- reshape2::melt(faa_srv_sel) %>%
@@ -227,36 +223,35 @@ faa_srv_sel_df <- reshape2::melt(faa_srv_sel) %>%
 # Plots -------------------------------------------------------------------
 ### FAA Selectivities -------------------------------------------------------
 faa_fish_sel_df %>%
-  filter(Sex == 'F', Fleet == 'BS_Trwl') %>%
-  drop_na() %>%
-  ggplot(aes(x = Age, y = value)) +
+  filter(Sex == 'F', Francis == 'No Francis') %>%
+  ggplot(aes(x = Age, y = value, group = Sim)) +
   geom_line() +
-  facet_wrap(~Sim)
+  facet_grid(~Fleet)
 
 faa_fish_sel_df %>%
-  filter(Sex == 'M') %>%
+  filter(Sex == 'M', Francis == 'No Francis') %>%
   ggplot(aes(x = Age, y = value, group = Sim)) +
   geom_line() +
-  facet_grid(Francis~Fleet)
+  facet_grid(~Fleet)
 
 faa_srv_sel_df %>%
-  filter(Sex == 'F') %>%
+  filter(Sex == 'F', Francis == 'No Francis') %>%
   ggplot(aes(x = Age, y = value, group = Sim)) +
   geom_line() +
-  facet_grid(Francis~Fleet)
+  facet_grid(~Fleet)
 
 faa_srv_sel_df %>%
-  filter(Sex == 'M') %>%
+  filter(Sex == 'M', Francis == 'No Francis') %>%
   ggplot(aes(x = Age, y = value, group = Sim)) +
   geom_line() +
-  facet_grid(Francis~Fleet)
+  facet_grid(~Fleet)
 
 ### SSB ---------------------------------------------------------------------
 
 # Absolute
 ggplot() +
-  geom_line(agg_ssb_df, mapping =  aes(x = Year, y = value, group = Sim)) +
-  geom_line(agg_ssb_df %>% filter(Sim == 1), mapping =  aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
+  geom_line(agg_ssb_df %>% filter(!str_detect(model_name, "_f")), mapping =  aes(x = Year, y = value, group = Sim)) +
+  geom_line(agg_ssb_df %>% filter(Sim == 1, !str_detect(model_name, "_f")), mapping =  aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
   facet_wrap(~model_name) +
   ylim(0, NA) +
   theme_bw(base_size = 15) +
@@ -268,7 +263,7 @@ ggplot() +
               group_by(Year, model_name) %>%
               summarize(lwr = quantile(RE, 0.025, na.rm = T),
                         upr = quantile(RE, 0.975, na.rm = T),
-                        median = median(RE, na.rm = T)),
+                        median = median(RE, na.rm = T)) %>% filter(!str_detect(model_name, "_f")),
             mapping =  aes(x = Year, y = median, color = model_name), lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3, col = 'black') +
   # coord_cartesian(ylim = c(-0.4, 0.4)) +
@@ -276,13 +271,13 @@ ggplot() +
 
 ggplot() +
   geom_ribbon(agg_ssb_df %>%
-              group_by(Year, model_name) %>%
+              group_by(Year, model_name) %>% filter(!str_detect(model_name, "_f")) %>%
               summarize(lwr = quantile(RE, 0.025, na.rm = T),
                         upr = quantile(RE, 0.975, na.rm = T),
                         median = median(RE, na.rm = T)),
             mapping =  aes(x = Year, y = median, ymin = lwr, ymax = upr, fill = model_name), lwd = 1.3, alpha = 0.25) +
   geom_line(agg_ssb_df %>%
-              group_by(Year, model_name) %>%
+              group_by(Year, model_name) %>% filter(!str_detect(model_name, "_f")) %>%
               summarize(lwr = quantile(RE, 0.025, na.rm = T),
                         upr = quantile(RE, 0.975, na.rm = T),
                         median = median(RE, na.rm = T)),
@@ -294,7 +289,7 @@ ggplot() +
 
 # Absolute Relative Error
 ggplot() +
-  geom_line(agg_ssb_df %>%
+  geom_line(agg_ssb_df %>% filter(!str_detect(model_name, "_f")) %>%
               group_by(Year, model_name) %>%
               summarize(lwr = quantile(Abs_RE, 0.025, na.rm = T),
                         upr = quantile(Abs_RE, 0.975, na.rm = T),
@@ -338,15 +333,15 @@ ggplot() +
 ### Recruitment -------------------------------------------------------------
 # Absolute
 ggplot() +
-  geom_line(agg_rec_df, mapping =  aes(x = Year, y = value, group = Sim)) +
-  geom_line(agg_rec_df %>% filter(Sim == 1), mapping =  aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
+  geom_line(agg_rec_df %>% filter(!str_detect(model_name, "_f")), mapping =  aes(x = Year, y = value, group = Sim)) +
+  geom_line(agg_rec_df %>% filter(Sim == 1, !str_detect(model_name, "_f")), mapping =  aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
   facet_wrap(~model_name) +
   ylim(0, NA) +
   theme_bw(base_size = 15)
 
 # Relative Error
 ggplot() +
-  geom_line(agg_rec_df %>%
+  geom_line(agg_rec_df %>% filter(!str_detect(model_name, "_f")) %>%
               group_by(Year, model_name) %>%
               summarize(lwr = quantile(RE, 0.025, na.rm = T),
                         upr = quantile(RE, 0.975, na.rm = T),
@@ -358,7 +353,7 @@ ggplot() +
 
 # Absolute Relative Error
 ggplot() +
-  geom_line(agg_rec_df %>%
+  geom_line(agg_rec_df %>% filter(!str_detect(model_name, "_f")) %>%
               group_by(Year, model_name) %>%
               summarize(lwr = quantile(Abs_RE, 0.025, na.rm = T),
                         upr = quantile(Abs_RE, 0.975, na.rm = T),
@@ -401,15 +396,15 @@ ggplot() +
 ### Depletion ---------------------------------------------------------------
 # Absolute
 ggplot() +
-  geom_line(agg_dep_df, mapping =  aes(x = Year, y = value, group = Sim)) +
-  geom_line(agg_dep_df %>% filter(Sim == 1), mapping =  aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
+  geom_line(agg_dep_df %>% filter(!str_detect(model_name, "_f")), mapping =  aes(x = Year, y = value, group = Sim)) +
+  geom_line(agg_dep_df %>% filter(!str_detect(model_name, "_f"), Sim == 1), mapping =  aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
   facet_wrap(~model_name) +
   ylim(0, NA) +
   theme_bw(base_size = 15)
 
 # Relative Error
 ggplot() +
-  geom_line(agg_dep_df %>%
+  geom_line(agg_dep_df %>% filter(!str_detect(model_name, "_f")) %>%
               group_by(Year, model_name) %>%
               summarize(lwr = quantile(RE, 0.025, na.rm = T),
                         upr = quantile(RE, 0.975, na.rm = T),
@@ -421,7 +416,7 @@ ggplot() +
 
 # Absolute Relative Error
 ggplot() +
-  geom_line(agg_dep_df %>%
+  geom_line(agg_dep_df %>% filter(!str_detect(model_name, "_f")) %>%
               group_by(Year, model_name) %>%
               summarize(lwr = quantile(Abs_RE, 0.025, na.rm = T),
                         upr = quantile(Abs_RE, 0.975, na.rm = T),
@@ -515,6 +510,30 @@ ggplot() +
   facet_grid(paste("to", to) ~paste("from", from))
 
 # Reference Points --------------------------------------------------------
+#' Threshold Harvest Control Rule
+#'
+#' Implements a threshold HCR where F is reduced linearly as biomass declines
+#' below the target biomass reference point.
+#'
+#' @param x Current biomass
+#' @param frp Fishing mortality reference point (target F)
+#' @param brp Biomass reference point (target biomass)
+#' @param alpha Minimum biomass threshold (as fraction of brp)
+#'
+#' @return Fishing mortality rate
+HCR_threshold <- function(x, frp, brp, alpha = 0.05) {
+  stock_status <- x / brp
+
+  if (stock_status >= 1) {
+    f <- frp
+  } else if (stock_status > alpha) {
+    f <- frp * (stock_status - alpha) / (1 - alpha)
+  } else {
+    f <- 0
+  }
+
+  return(f)
+}
 
 # Read in five region model to figure out global F40
 om_values <- readRDS(here("data", "spatial_outputs", "Spatial_MltRel_NoBlock_model_results.RDS"))
@@ -698,7 +717,7 @@ abc_df <- reshape2::melt(abc_values) %>%
                                                     "three_rg_low", "three_rg_high")))
 
 # Absolute
-ggplot(f40_df %>%
+ggplot(f40_df %>% filter(!str_detect(model_name, "_f")) %>%
          group_by(model_name) %>%
          summarize(median = median(value, na.rm = T),
                    lwr = quantile(value, 0.025, na.rm = T),
@@ -710,7 +729,7 @@ ggplot(f40_df %>%
   theme_bw()
 
 # Relative Error
-ggplot(f40_df %>%
+ggplot(f40_df %>% filter(!str_detect(model_name, "_f")) %>%
          mutate(RE = (value - unique(true_five_rg_f40$F_Ref_Pt)) / unique(true_five_rg_f40$F_Ref_Pt)) %>%
          group_by(model_name) %>%
          summarize(median = median(RE, na.rm = T),
@@ -723,7 +742,7 @@ ggplot(f40_df %>%
   theme_bw()
 
 # Absolute
-ggplot(b40_df %>%
+ggplot(b40_df %>% filter(!str_detect(model_name, "_f")) %>%
          group_by(model_name) %>%
          summarize(median = median(value, na.rm = T),
                    lwr = quantile(value, 0.025, na.rm = T),
@@ -735,7 +754,7 @@ ggplot(b40_df %>%
   theme_bw()
 
 # Relative Error
-ggplot(b40_df %>%
+ggplot(b40_df %>% filter(!str_detect(model_name, "_f")) %>%
          mutate(RE = (value - sum(true_five_rg_f40$B_Ref_Pt)) / sum(true_five_rg_f40$B_Ref_Pt)) %>%
          group_by(model_name) %>%
          summarize(median = median(RE, na.rm = T),
@@ -748,7 +767,7 @@ ggplot(b40_df %>%
   theme_bw()
 
 # Absolute
-ggplot(abc_df %>%
+ggplot(abc_df %>% filter(!str_detect(model_name, "_f")) %>%
          group_by(model_name) %>%
          summarize(median = median(value, na.rm = T),
                    lwr = quantile(value, 0.025, na.rm = T),
@@ -760,7 +779,7 @@ ggplot(abc_df %>%
   theme_bw()
 
 # Relative Error
-ggplot(abc_df %>%
+ggplot(abc_df %>% filter(!str_detect(model_name, "_f")) %>%
          mutate(RE = (value - sum(true_five_rg_f40$Catch_Advice)) / sum(true_five_rg_f40$Catch_Advice)) %>%
          group_by(model_name) %>%
          summarize(median = median(RE, na.rm = T),
@@ -772,53 +791,3 @@ ggplot(abc_df %>%
   labs(x = 'Model', y = 'abc Relative Error') +
   theme_bw()
 
-# Other Diagnostic Plots -------------------------------------------------------------
-# Survey Index Fits
-sim <- 5
-sgl_rg[[sim]]$data$ObsSrvIdx[which(sgl_rg[[sim]]$data$UseSrvIdx == 0)] <- NA
-get_idx_fits_plot(list(sgl_rg[[sim]]$data), list(sgl_rg[[sim]]$rep), 1)
-
-# Composition Fits
-comp_prop <- get_comp_prop(data = sgl_rg[[sim]]$data,
-                           rep = sgl_rg[[sim]]$rep,
-                           age_labels = 1:30,
-                           len_labels = seq(41, 99, 2),
-                           year_labels = 1960:2024)
-
-# get one step ahead fishery ages
-fishages <- get_osa(obs_mat = comp_prop$Obs_FishAge_mat, # observed fishery age compositions
-                    exp_mat = comp_prop$Pred_FishAge_mat, # predicted fishery age compositions
-                    N = array(sgl_rg[[sim]]$data$ISS_FishAgeComps[,,1,1], c(1,65)),
-                    years = list(
-                      which(sgl_rg[[sim]]$data$UseFishAgeComps[1,,1] == 1)
-                      # which(three_rg_high[[sim]]$data$UseFishAgeComps[2,,1] == 1),
-                      # which(three_rg_high[[sim]]$data$UseFishAgeComps[3,,1] == 1)
-                    ), # years with fishery ages
-                    fleet = 1, # fleet
-                    bins = 1:30, # age bins
-                    comp_type = 2, # composition type (age-specific)
-                    bin_label = "Ages" # bin labels
-)
-
-resid_plot <- SPoRC::plot_resids(osa_results = fishages)
-resid_plot[[1]]
-resid_plot[[2]]
-
-# get one step ahead survey ages
-srvages <- get_osa(obs_mat = comp_prop$Obs_SrvAge_mat, # observed fishery age compositions
-                    exp_mat = comp_prop$Pred_SrvAge_mat, # predicted fishery age compositions
-                    N = three_rg_high[[sim]]$data$ISS_SrvAgeComps[,,1,1],
-                    years = list(
-                      which(three_rg_high[[sim]]$data$UseSrvAgeComps[1,,1] == 1),
-                      which(three_rg_high[[sim]]$data$UseSrvAgeComps[2,,1] == 1),
-                      which(three_rg_high[[sim]]$data$UseSrvAgeComps[3,,1] == 1)
-                    ), # years with fishery ages
-                    fleet = 1, # fleet
-                    bins = 1:30, # age bins
-                    comp_type = 2, # composition type (age-specific)
-                    bin_label = "Ages" # bin labels
-)
-
-resid_plot <- SPoRC::plot_resids(osa_results = srvages)
-resid_plot[[1]]
-resid_plot[[2]]
