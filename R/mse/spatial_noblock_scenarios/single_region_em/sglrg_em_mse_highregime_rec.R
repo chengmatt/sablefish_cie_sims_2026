@@ -77,7 +77,6 @@ global_spr <- Get_Reference_Points(data = om_values$data,
 )
 
 # Run MSEs ----------------------------------------------------------------
-
 # Single-region, current design
 sim_env_current <- Setup_sim_env(sim_list = sim_list)
 sim_env_current <- add_aggregated_obj_to_simenv(sim_env = sim_env_current)
@@ -91,3 +90,4 @@ sim_env_current <- run_single_rg_closedloop_parallel(sim_env = sim_env_current, 
                                                      n_cores = 7)
 
 saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", "single_region_highregimerec.RDS"))
+

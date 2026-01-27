@@ -77,7 +77,6 @@ global_spr <- Get_Reference_Points(data = om_values$data,
 )
 
 # Run MSEs ----------------------------------------------------------------
-
 # Single-region, current design
 sim_env_current <- Setup_sim_env(sim_list = sim_list)
 sim_env_current <- add_aggregated_obj_to_simenv(sim_env = sim_env_current)

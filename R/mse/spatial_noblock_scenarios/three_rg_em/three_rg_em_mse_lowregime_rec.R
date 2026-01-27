@@ -11,7 +11,7 @@ library(furrr)
 library(progressr)
 
 # Read in model output
-om_values <- readRDS(here("data", "spatial_outputs", "Spatial_MltRel_model_results.RDS"))
+om_values <- readRDS(here("data", "spatial_outputs", "Spatial_MltRel_NoBlock_model_results.RDS"))
 
 source(here("R", "functions", "mse_functions.R"))
 source(here("R", "functions", "three_rg_em.R"))
@@ -102,4 +102,4 @@ sim_env_current <- run_three_rg_closedloop_parallel(sim_env = sim_env_current, n
                                                     fish_wgt = 'numbers',
                                                     n_cores = 7)
 
-saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_no_block_scenarios", "three_region_lowregimerec.RDS"))
+saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", "three_region_lowregimerec.RDS"))

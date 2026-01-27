@@ -533,6 +533,7 @@ run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
   handlers(handler_progress(format = "[:bar] :percent"))
 
   # run in parrallel and return simulation environment
+  set.seed(123)
   with_progress({
     env_list <- future_map(
       1:n_sims,
@@ -542,7 +543,8 @@ run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
                                    age_lag, srv_wgt, fish_wgt)
         sim_env
       },
-      .progress = TRUE
+      .progress = TRUE,
+      .options = furrr::furrr_options(seed = TRUE)
     )
   })
 
@@ -602,6 +604,7 @@ run_three_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, 
 
 
   # run in parallel and return simulation environment
+  set.seed(123)
   with_progress({
     env_list <- future_map(
       1:n_sims,
@@ -692,6 +695,7 @@ run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
   handlers(handler_progress(format = "[:bar] :percent"))
 
   # run in parallel and return simulation environment
+  set.seed(123)
   with_progress({
     env_list <- future_map(
       1:n_sims,
@@ -716,7 +720,8 @@ run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
           NULL  # return NULL on failure
         })
       },
-      .progress = TRUE
+      .progress = TRUE,
+      .options = furrr::furrr_options(seed = TRUE)
     )
   })
 
@@ -773,6 +778,7 @@ run_five_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, h
   handlers(handler_progress(format = "[:bar] :percent"))
 
   # run in parrallel and return simulation environment
+  set.seed(123)
   with_progress({
     env_list <- future_map(
       1:n_sims,
@@ -782,7 +788,8 @@ run_five_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, h
                                  hcr_type)
         sim_env
       },
-      .progress = TRUE
+      .progress = TRUE,
+      .options = furrr::furrr_options(seed = TRUE)
     )
   })
 
@@ -3352,8 +3359,7 @@ run_five_rg_closedloop_i <- function(sim_env,
                                     sim,
                                     fleet_allocation,
                                     hcr_type
-
-) {
+                                    ) {
 
   # Run Closed Loop ---------------------------------------------------------
   for(y in 1:sim_env$n_yrs) {

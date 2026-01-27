@@ -29,7 +29,7 @@ sd_rep <- om_values$sd_rep
 closed_loop_yrs <- 30      # Years to project forward
 n_years <- length(data$years)  # number of years
 burnin_years <- 1:n_years  # Historical conditioning period
-n_sims <- 100              # Number of replicate simulations
+n_sims <- 5              # Number of replicate simulations
 n_regions <- 5             # number of regions
 n_fish_fleets <- 2         # number of fishery fleets
 n_srv_fleets <- 3          # number of survey fleets

@@ -11,7 +11,7 @@ library(furrr)
 library(progressr)
 
 # Read in model output
-om_values <- readRDS(here("data", "spatial_outputs", "Spatial_MltRel_model_results.RDS"))
+om_values <- readRDS(here("data", "spatial_outputs", "Spatial_MltRel_NoBlock_model_results.RDS"))
 
 source(here("R", "functions", "mse_functions.R"))
 source(here("R", "functions", "faa_em.R"))
@@ -94,3 +94,4 @@ sim_env_current <- run_faa_closedloop_parallel(sim_env = sim_env_current, n_sims
                                                n_cores = 7)
 
 saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", "faa_highregimerec.RDS"))
+
