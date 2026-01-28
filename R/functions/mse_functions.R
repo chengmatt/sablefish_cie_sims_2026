@@ -533,7 +533,6 @@ run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
   handlers(handler_progress(format = "[:bar] :percent"))
 
   # run in parrallel and return simulation environment
-  set.seed(123)
   with_progress({
     env_list <- future_map(
       1:n_sims,
@@ -604,7 +603,6 @@ run_three_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, 
 
 
   # run in parallel and return simulation environment
-  set.seed(123)
   with_progress({
     env_list <- future_map(
       1:n_sims,
@@ -695,7 +693,6 @@ run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
   handlers(handler_progress(format = "[:bar] :percent"))
 
   # run in parallel and return simulation environment
-  set.seed(123)
   with_progress({
     env_list <- future_map(
       1:n_sims,
@@ -778,7 +775,6 @@ run_five_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, h
   handlers(handler_progress(format = "[:bar] :percent"))
 
   # run in parrallel and return simulation environment
-  set.seed(123)
   with_progress({
     env_list <- future_map(
       1:n_sims,
@@ -3081,7 +3077,7 @@ run_faa_closedloop_i <- function(sim_env,
                                  srv_sel_model,
                                  fish_selex_prior,
                                  srv_selex_prior
-) {
+                                 ) {
 
   # Run Closed Loop ---------------------------------------------------------
   for(y in 1:sim_env$n_yrs) {
@@ -3230,7 +3226,7 @@ run_three_rg_closedloop_i <- function(sim_env,
                                       age_lag,
                                       srv_wgt,
                                       fish_wgt
-) {
+                                      ) {
 
   # Run Closed Loop ---------------------------------------------------------
   for(y in 1:sim_env$n_yrs) {

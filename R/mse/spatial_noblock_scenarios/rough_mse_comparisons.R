@@ -13,12 +13,12 @@ source(here("R", "functions", "mse_functions.R"))
 
 # Read in MSEs (base recruitment)
 file_dir <- here("outputs", "mse_results", "spatial_noblock_scenarios")
-sgl_rg <- readRDS(here(file_dir, "single_region_highregimerec.RDS"))
-faa <- readRDS(here(file_dir, "faa_highregimerec.RDS"))
-five_rg <- readRDS(here(file_dir, 'five_region_highregimerec.RDS'))
+sgl_rg <- readRDS(here(file_dir, "single_region_base.RDS"))
+faa <- readRDS(here(file_dir, "faa_base.RDS"))
+five_rg <- readRDS(here(file_dir, 'five_region_base.RDS'))
 
 # Dimensions
-n_sims <- 100
+n_sims <- 5
 st_yr <- 65
 end_yr <- 95
 
@@ -285,9 +285,6 @@ for(y in st_yr:end_yr) {
   }
 }
 
-
-
-
 # Plot apportionment
 apportionment_df <- reshape2::melt(apportionment) %>%
   rename(model = Var1, region = Var2, year = Var3, sim = Var4) %>%
@@ -324,3 +321,5 @@ ggplot(approtionment_sum, aes(x = year + 65, y = median,
   ggthemes::scale_color_solarized() +
   ggthemes::scale_fill_solarized() +
   labs(x = 'Year', y = 'Apportionment', fill = 'Model', color = 'Model')
+
+
