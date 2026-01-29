@@ -13,12 +13,12 @@ source(here("R", "functions", "mse_functions.R"))
 
 # Read in MSEs (base recruitment)
 file_dir <- here("outputs", "mse_results", "spatial_noblock_scenarios")
-sgl_rg <- readRDS(here(file_dir, "single_region_base.RDS"))
-faa <- readRDS(here(file_dir, "faa_base.RDS"))
-five_rg <- readRDS(here(file_dir, 'five_region_base.RDS'))
+sgl_rg <- readRDS(here(file_dir, "single_region_highregimerec.RDS"))
+faa <- readRDS(here(file_dir, "faa_highregimerec.RDS"))
+five_rg <- readRDS(here(file_dir, 'five_region_highregimerec.RDS'))
 
 # Dimensions
-n_sims <- 5
+n_sims <- 150
 st_yr <- 65
 end_yr <- 95
 

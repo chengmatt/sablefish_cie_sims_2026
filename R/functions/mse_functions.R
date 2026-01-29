@@ -529,7 +529,7 @@ run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
 
 
   plan(multisession, workers = n_cores)
-  options(future.globals.maxSize = 5e9)
+  options(future.globals.maxSize = 8e9)
   handlers(handler_progress(format = "[:bar] :percent"))
 
   # run in parrallel and return simulation environment
@@ -597,7 +597,7 @@ run_three_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, 
 
 
   plan(multisession, workers = n_cores)
-  options(future.globals.maxSize = 5e9)
+  options(future.globals.maxSize = 8e9)
   handlers(handler_progress(format = "[:bar] :percent"))
 
 
@@ -689,7 +689,7 @@ run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
 
 
   plan(multisession, workers = n_cores)
-  options(future.globals.maxSize = 5e9)
+  options(future.globals.maxSize = 8e9)
   handlers(handler_progress(format = "[:bar] :percent"))
 
   # run in parallel and return simulation environment
@@ -771,7 +771,7 @@ run_five_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, h
 
 
   plan(multisession, workers = n_cores)
-  options(future.globals.maxSize = 5e9)
+  options(future.globals.maxSize = 8e9)
   handlers(handler_progress(format = "[:bar] :percent"))
 
   # run in parrallel and return simulation environment
