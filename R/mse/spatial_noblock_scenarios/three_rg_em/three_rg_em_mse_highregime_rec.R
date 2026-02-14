@@ -29,7 +29,7 @@ sd_rep <- om_values$sd_rep
 closed_loop_yrs <- 30      # Years to project forward
 n_years <- length(data$years)  # number of years
 burnin_years <- 1:n_years  # Historical conditioning period
-n_sims <- 150              # Number of replicate simulations
+n_sims <- 50              # Number of replicate simulations
 n_regions <- 5             # number of regions
 n_fish_fleets <- 2         # number of fishery fleets
 n_srv_fleets <- 3          # number of survey fleets
@@ -90,15 +90,18 @@ global_spr <- Get_Reference_Points(data = om_values$data,
 )
 
 # Run MSEs ----------------------------------------------------------------
-sim_env_current <- Setup_sim_env(sim_list = sim_list)
-sim_env_current <- add_aggregated_obj_to_simenv(sim_env = sim_env_current, type = "three_rg")
-sim_env_current <- run_three_rg_closedloop_parallel(sim_env = sim_env_current, n_sims = n_sims,
-                                                    fleet_allocation = fleet_allocation,
-                                                    lls_design_type = "current",
-                                                    srv_idx_se = 0.2,
-                                                    age_lag = 1,
-                                                    srv_wgt = 'numbers',
-                                                    fish_wgt = 'numbers',
-                                                    n_cores = 7)
+for(i in 1:3) {
+  sim_env_current <- Setup_sim_env(sim_list = sim_list)
+  sim_env_current <- add_aggregated_obj_to_simenv(sim_env = sim_env_current, type = "three_rg")
+  sim_env_current <- run_three_rg_closedloop_parallel(sim_env = sim_env_current, n_sims = n_sims,
+                                                      fleet_allocation = fleet_allocation,
+                                                      lls_design_type = "current",
+                                                      srv_idx_se = 0.2,
+                                                      age_lag = 1,
+                                                      srv_wgt = 'numbers',
+                                                      fish_wgt = 'numbers',
+                                                      n_cores = 7)
 
-saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", "three_region_highregimerec.RDS"))
+  saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", paste("three_region_highregimerec.RDS", "_", i, ".RDS", sep = "")))
+
+}

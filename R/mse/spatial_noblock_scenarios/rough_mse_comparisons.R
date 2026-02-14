@@ -13,9 +13,9 @@ source(here("R", "functions", "mse_functions.R"))
 
 # Read in MSEs (base recruitment)
 file_dir <- here("outputs", "mse_results", "spatial_noblock_scenarios")
-sgl_rg <- readRDS(here(file_dir, "single_region_highregimerec.RDS"))
-faa <- readRDS(here(file_dir, "faa_highregimerec.RDS"))
-five_rg <- readRDS(here(file_dir, 'five_region_highregimerec.RDS'))
+sgl_rg <- readRDS(here(file_dir, "single_region_base.RDS"))
+faa <- readRDS(here(file_dir, "faa_base.RDS"))
+five_rg <- readRDS(here(file_dir, 'five_region_base.RDS'))
 
 # Dimensions
 n_sims <- 150
@@ -190,17 +190,26 @@ catch_global_df <- reshape2::melt(catch_results) %>%
 #   }
 # }
 
-ggplot() +
-  geom_line(rec_rg_df %>% filter(year <= st_yr), mapping = aes(x = year, y = median), color = 'black', lwd = 1.3) +
-  geom_line(rec_rg_df %>% filter(year >= st_yr), mapping = aes(x = year, y = median, color = factor(model)), lwd = 1.3) +
-  geom_ribbon(rec_rg_df %>% filter(year >= st_yr), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.25, color = NA) +
-  facet_wrap(~region, nrow = 1, scales = 'free') +
-  coord_cartesian(ylim = c(0, NA)) +
-  geom_vline(xintercept = 65, lty = 2) +
-  ggthemes::scale_color_solarized() +
-  ggthemes::scale_fill_solarized() +
-  labs(x = 'Year', y = 'Recruitment', fill = 'Model', color = 'Model') +
-  theme_sablefish()
+# Terminal Year Bias
+ssb_bias_results <- array(NA, dim = c(2, 95, 150))
+
+# Loop through to get results
+for(i in 1:2) { # sgl, faa
+  for(j in 1:150) { # 150 sims
+    if((sum(mse_list[[i]]$models[[j]]$rep$SSB)) != 0) ssb_bias_results[i,,j] <- (mse_list[[i]]$models[[j]]$rep$SSB - colSums(mse_list[[i]]$SSB[,,j])) / colSums(mse_list[[i]]$SSB[,,j])
+  } # end j loop
+} # end i loop
+
+reshape2::melt(ssb_bias_results) %>%
+  group_by(Var2, Var1) %>%
+  mutate(median = median(value, na.rm = T)) %>%
+  ggplot() +
+  geom_line(aes(x = Var2 + 1959, y = value, group = Var3)) +
+  geom_line(aes(x = Var2 + 1959, y = median, group = Var1), col = 'green', lwd = 3) +
+  geom_hline(yintercept = 0, lty = 2, lwd = 2, col = 'red') +
+  facet_wrap(~Var1, labeller = labeller(Var1 = c("1" = "sgl", "2" = "faa"))) +
+  labs(x = 'Year', y = 'SSB Bias')
+
 
 # Compare Time Series -------------------------------------------------------------------
 
@@ -256,6 +265,18 @@ ggplot() +
   ggthemes::scale_fill_solarized() +
   labs(x = 'Year', y = 'Catch', fill = 'Model', color = 'Model')
 
+# Regional Recruitment
+ggplot() +
+  geom_line(rec_rg_df %>% filter(year <= st_yr), mapping = aes(x = year, y = median), color = 'black', lwd = 1.3) +
+  geom_line(rec_rg_df %>% filter(year >= st_yr), mapping = aes(x = year, y = median, color = factor(model)), lwd = 1.3) +
+  geom_ribbon(rec_rg_df %>% filter(year >= st_yr), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.25, color = NA) +
+  facet_wrap(~region, nrow = 1, scales = 'free') +
+  coord_cartesian(ylim = c(0, NA)) +
+  geom_vline(xintercept = 65, lty = 2) +
+  ggthemes::scale_color_solarized() +
+  ggthemes::scale_fill_solarized() +
+  labs(x = 'Year', y = 'Recruitment', fill = 'Model', color = 'Model') +
+  theme_sablefish()
 
 
 # Compare Apportionment ---------------------------------------------------
