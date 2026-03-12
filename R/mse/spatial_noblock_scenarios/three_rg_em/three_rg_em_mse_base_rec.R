@@ -29,7 +29,7 @@ sd_rep <- om_values$sd_rep
 closed_loop_yrs <- 30      # Years to project forward
 n_years <- length(data$years)  # number of years
 burnin_years <- 1:n_years  # Historical conditioning period
-n_sims <- 50              # Number of replicate simulations
+n_sims <- 10              # Number of replicate simulations
 n_regions <- 5             # number of regions
 n_fish_fleets <- 2         # number of fishery fleets
 n_srv_fleets <- 3          # number of survey fleets
@@ -51,7 +51,7 @@ new_bsai_tags <- expand.grid(regions = 1:2, tag_yr = seq((n_years + 2), (n_years
 data$tag_release_indicator <- rbind(historical_tags, unname(as.matrix(new_goa_tags)), unname(as.matrix(new_bsai_tags)))
 
 # Condition closed-loop simulations, random recruitment
-for(i in 1:3) {
+for(i in 1:25) {
   sim_list <- condition_closed_loop_simulations(
     closed_loop_yrs = closed_loop_yrs,
     n_sims = n_sims,
@@ -86,7 +86,8 @@ for(i in 1:3) {
   # Single-region, current design
   sim_env_current <- Setup_sim_env(sim_list = sim_list)
   sim_env_current <- add_aggregated_obj_to_simenv(sim_env = sim_env_current, type = "three_rg")
-  sim_env_current <- run_three_rg_closedloop_parallel(sim_env = sim_env_current, n_sims = n_sims,
+  sim_env_current <- run_three_rg_closedloop_parallel(sim_env = sim_env_current,
+                                                      n_sims = n_sims,
                                                       fleet_allocation = fleet_allocation,
                                                       lls_design_type = "current",
                                                       srv_idx_se = 0.2,
@@ -95,5 +96,5 @@ for(i in 1:3) {
                                                       fish_wgt = 'numbers',
                                                       n_cores = 7)
 
-  saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", paste("three_region_base.RDS", "_", i, ".RDS", sep = "")))
+  saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", paste("three_region_base", "_", i, ".RDS", sep = "")))
 }

@@ -64,7 +64,7 @@ faa_em <- function(sim_env,
                    ) {
 
   # get simulated data
-  if(cross_testing) add_aggregated_obj_to_simenv(sim_env, 'faa', faa_n_fish_fleets, faa_n_srv_fleets)
+  if(cross_testing && y == sim_env$feedback_start_yr) add_aggregated_obj_to_simenv(sim_env, 'faa', faa_n_fish_fleets, faa_n_srv_fleets)
   sim_data <- simulation_data_to_SPoRC(sim_env, y, sim)
   sim_agg_data <- agg_data_to_faa(sim_data, sim_env, y, sim, faa_n_fish_fleets,
                                   faa_n_srv_fleets, srv_wgt, fish_wgt, srv_idx_se)

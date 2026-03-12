@@ -532,6 +532,11 @@ run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
   options(future.globals.maxSize = 8e9)
   handlers(handler_progress(format = "[:bar] :percent"))
 
+  # storage containers for models
+  n_feedback_yrs <- sim_env$n_yrs - sim_env$feedback_start_yr + 1
+  sim_env$models <- vector("list", n_feedback_yrs)
+  for(i in seq_len(n_feedback_yrs)) sim_env$models[[i]] <- vector("list", n_sims)
+
   # run in parrallel and return simulation environment
   with_progress({
     env_list <- future_map(
@@ -561,10 +566,14 @@ run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
         }
       }
     }
+
+    # merge model results back in
+    for(yr_idx in 1:n_feedback_yrs) {
+      sim_env$models[[yr_idx]][[i]] <- env_list[[i]]$models[[yr_idx]][[i]]
+    }
+
   }
 
-  # Merge model results back in
-  for(i in 1:n_sims) sim_env$models[[i]] <- env_list[[i]]$models[[i]]
 
   return(sim_env)
 }
@@ -600,7 +609,10 @@ run_three_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, 
   options(future.globals.maxSize = 8e9)
   handlers(handler_progress(format = "[:bar] :percent"))
 
-
+  # storage containers for models
+  n_feedback_yrs <- sim_env$n_yrs - sim_env$feedback_start_yr + 1
+  sim_env$models <- vector("list", n_feedback_yrs)
+  for(i in seq_len(n_feedback_yrs)) sim_env$models[[i]] <- vector("list", n_sims)
 
   # run in parallel and return simulation environment
   with_progress({
@@ -640,8 +652,11 @@ run_three_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, 
       }
     }
 
-    # Merge model list
-    sim_env$models[[i]] <- env_list[[i]]$models[[i]]
+    # Merge model results back in
+    for(yr_idx in 1:n_feedback_yrs) {
+      sim_env$models[[yr_idx]][[i]] <- env_list[[i]]$models[[yr_idx]][[i]]
+    }
+
   }
 
   return(sim_env)
@@ -692,6 +707,11 @@ run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
   options(future.globals.maxSize = 8e9)
   handlers(handler_progress(format = "[:bar] :percent"))
 
+  # storage containers for models
+  n_feedback_yrs <- sim_env$n_yrs - sim_env$feedback_start_yr + 1
+  sim_env$models <- vector("list", n_feedback_yrs)
+  for(i in seq_len(n_feedback_yrs)) sim_env$models[[i]] <- vector("list", n_sims)
+
   # run in parallel and return simulation environment
   with_progress({
     env_list <- future_map(
@@ -741,8 +761,12 @@ run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
       }
     }
 
-    # Merge model list
-    sim_env$models[[i]] <- env_list[[i]]$models[[i]]
+
+    # Merge model results back in
+    for(yr_idx in 1:n_feedback_yrs) {
+      sim_env$models[[yr_idx]][[i]] <- env_list[[i]]$models[[yr_idx]][[i]]
+    }
+
   }
 
 
@@ -3022,13 +3046,11 @@ run_single_rg_closedloop_i <- function(sim_env,
         } # end r loop
       } # end if
 
-    } # end feedback
+      # save models
+      sim_env$models[[y - sim_env$feedback_start_yr + 1]][[sim]] <- model
+      if(y == sim_env$n_yrs) sim_env$models[[y - sim_env$feedback_start_yr + 1]][[sim]]$sd_rep <- RTMB::sdreport(model)
 
-    # save models
-    if(y == sim_env$n_yrs) {
-      model$sd_rep <- RTMB::sdreport(model)
-      sim_env$models[[sim]] <- model
-    }
+    } # end feedback
 
   } # end y loop
 
@@ -3184,13 +3206,11 @@ run_faa_closedloop_i <- function(sim_env,
         } # end r loop
       } # end if
 
-    } # end feedback
+      # save models
+      sim_env$models[[y - sim_env$feedback_start_yr + 1]][[sim]] <- model
+      if(y == sim_env$n_yrs) sim_env$models[[y - sim_env$feedback_start_yr + 1]][[sim]]$sd_rep <- RTMB::sdreport(model)
 
-    # save models
-    if(y == sim_env$n_yrs) {
-      model$sd_rep <- RTMB::sdreport(model)
-      sim_env$models[[sim]] <- model
-    }
+    } # end feedback
 
   } # end y loop
 
@@ -3252,7 +3272,7 @@ run_three_rg_closedloop_i <- function(sim_env,
         cross_testing = FALSE
       )
 
-      model <- fit_model(asmt_list$data, asmt_list$par, asmt_list$map, NULL, 2, silent = TRUE) # get model
+      model <- fit_model(asmt_list$data, asmt_list$par, asmt_list$map, NULL, 2, silent = F) # get model
 
       ### Reference Points --------------------------------------------------------
       ref_pts <- get_closed_loop_reference_points(
@@ -3321,13 +3341,11 @@ run_three_rg_closedloop_i <- function(sim_env,
         } # end r loop
       } # end if
 
-    } # end feedback
+      # save models
+      sim_env$models[[y - sim_env$feedback_start_yr + 1]][[sim]] <- model
+      if(y == sim_env$n_yrs) sim_env$models[[y - sim_env$feedback_start_yr + 1]][[sim]]$sd_rep <- RTMB::sdreport(model)
 
-    # save models
-    if(y == sim_env$n_yrs) {
-      model$sd_rep <- RTMB::sdreport(model)
-      sim_env$models[[sim]] <- model
-    }
+      } # end feedback
 
   } # end y loop
 

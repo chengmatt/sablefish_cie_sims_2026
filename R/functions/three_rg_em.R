@@ -56,7 +56,7 @@ three_rg_em <- function(sim_env,
 ) {
 
   # Get simulated data
-  if(cross_testing) add_aggregated_obj_to_simenv(sim_env, 'three_rg', sim_env$n_fish_fleets, sim_env$n_srv_fleets)
+  if(cross_testing && y == sim_env$feedback_start_yr) add_aggregated_obj_to_simenv(sim_env, 'three_rg', sim_env$n_fish_fleets, sim_env$n_srv_fleets)
   sim_data <- simulation_data_to_SPoRC(sim_env, y, sim)
 
   # get years in simulation
