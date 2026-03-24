@@ -89,6 +89,7 @@ n_yrs <- 95
 n_sims <- 100
 n_ages <- 30
 n_sexes <- 2
+n_rg <- 3
 
 srv_model_names  <- data.frame(model = 1:3, model_name = c("sgl", "faa", "three_rg"))
 n_models_srv     <- nrow(srv_model_names)
@@ -386,72 +387,72 @@ conv_srv_df <- reshape2::melt(conv_srv) %>%
     .groups     = "drop"
   )
 
+fig_dir_ct <- here(base_path, "figs")
+dir.create(fig_dir_ct, showWarnings = FALSE, recursive = TRUE)
+
 #### Aggregate Bias ----------------------------------------------------------
-# SSB
 ggplot(agg_ssb_srv_sum, aes(x = Year, y = med, ymin = lo, ymax = hi,
                             color = Survey, fill = Survey)) +
   geom_ribbon(alpha = 0.2, color = NA) +
   geom_line(lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, color = "black", lwd = 1) +
-  facet_wrap( ~ model_name) +
+  facet_wrap(~model_name) +
   theme_bw(base_size = 15) +
   labs(y = "SSB Relative Error")
+ggsave(file.path(fig_dir_ct, 'agg_ssb_bias_srvchng.png'), width = 10, height = 4, dpi = 300)
 
-# Recruitment
 ggplot(agg_rec_srv_sum, aes(x = Year, y = med, ymin = lo, ymax = hi,
                             color = Survey, fill = Survey)) +
   geom_ribbon(alpha = 0.2, color = NA) +
   geom_line(lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, color = "black", lwd = 1) +
-  facet_wrap( ~ model_name) +
+  facet_wrap(~model_name) +
   theme_bw(base_size = 15) +
   labs(y = "Recruitment Relative Error")
+ggsave(file.path(fig_dir_ct, 'agg_rec_bias_srvchng.png'), width = 10, height = 4, dpi = 300)
 
-# Depletion
 ggplot(agg_dep_srv_sum, aes(x = Year, y = med, ymin = lo, ymax = hi,
                             color = Survey, fill = Survey)) +
   geom_ribbon(alpha = 0.2, color = NA) +
   geom_line(lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, color = "black", lwd = 1) +
-  facet_wrap( ~ model_name) +
+  facet_wrap(~model_name) +
   theme_bw(base_size = 15) +
   labs(y = "Depletion Relative Error")
-
+ggsave(file.path(fig_dir_ct, 'agg_dep_bias_srvchng.png'), width = 10, height = 4, dpi = 300)
 
 #### Spatial Model Bias ------------------------------------------------------
-
-# SSB
 ggplot(spt_ssb_srv_sum, aes(x = Year, y = med, ymin = lo, ymax = hi,
                             color = Survey, fill = Survey)) +
   geom_ribbon(alpha = 0.2, color = NA) +
   geom_line(lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, color = "black", lwd = 1) +
-  facet_wrap( ~Region) +
+  facet_wrap(~Region) +
   theme_bw(base_size = 15) +
   labs(y = "SSB Relative Error")
+ggsave(file.path(fig_dir_ct, 'spt_ssb_bias_srvchng.png'), width = 10, height = 4, dpi = 300)
 
-# Recruitment
 ggplot(spt_rec_srv_sum, aes(x = Year, y = med, ymin = lo, ymax = hi,
                             color = Survey, fill = Survey)) +
   geom_ribbon(alpha = 0.2, color = NA) +
   geom_line(lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, color = "black", lwd = 1) +
-  facet_wrap( ~ Region) +
+  facet_wrap(~Region) +
   theme_bw(base_size = 15) +
   labs(y = "Recruitment Relative Error")
+ggsave(file.path(fig_dir_ct, 'spt_rec_bias_srvchng.png'), width = 10, height = 4, dpi = 300)
 
-# Depletion
 ggplot(spt_dep_srv_sum, aes(x = Year, y = med, ymin = lo, ymax = hi,
                             color = Survey, fill = Survey)) +
   geom_ribbon(alpha = 0.2, color = NA) +
   geom_line(lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, color = "black", lwd = 1) +
-  facet_wrap( ~ Region) +
+  facet_wrap(~Region) +
   theme_bw(base_size = 15) +
   labs(y = "Depletion Relative Error")
+ggsave(file.path(fig_dir_ct, 'spt_dep_bias_srvchng.png'), width = 10, height = 4, dpi = 300)
 
-### Reference Points and Catch Advice --------------------------------------------------------
-# Relative Error F40 (not comparable)
+### Reference Points and Catch Advice ----------------------------------------
 ggplot(f40_srv_df %>%
          group_by(model_name) %>%
          summarise(median = median(RE, na.rm = TRUE),
@@ -462,8 +463,8 @@ ggplot(f40_srv_df %>%
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3) +
   labs(x = "Model", y = "F40 RE") +
   theme_bw()
+ggsave(file.path(fig_dir_ct, 'f40_bias_srvchng.png'), width = 6, height = 4, dpi = 300)
 
-# Relative Error B40
 ggplot(b40_srv_df %>%
          group_by(model_name) %>%
          summarise(median = median(RE, na.rm = TRUE),
@@ -474,8 +475,8 @@ ggplot(b40_srv_df %>%
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3) +
   labs(x = "Model", y = "B40 RE") +
   theme_bw()
+ggsave(file.path(fig_dir_ct, 'b40_bias_srvchng.png'), width = 6, height = 4, dpi = 300)
 
-# Relative Error ABC
 ggplot(abc_srv_df %>%
          group_by(model_name) %>%
          summarise(median = median(RE, na.rm = TRUE),
@@ -486,12 +487,14 @@ ggplot(abc_srv_df %>%
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3) +
   labs(x = "Model", y = "ABC RE") +
   theme_bw()
+ggsave(file.path(fig_dir_ct, 'abc_bias_srvchng.png'), width = 6, height = 4, dpi = 300)
 
-
-### Spatial Model Movement Bias ----------------------------------------------------------------
+### Spatial Model Movement Bias ----------------------------------------------
 ggplot(move_ribbon, aes(x = ages, fill = Survey, color = Survey)) +
   geom_ribbon(aes(ymin = lo, ymax = hi), alpha = 0.3, color = NA) +
   geom_line(aes(y = med)) +
   geom_line(aes(y = true), lty = 2, color = "black", lwd = 1.3) +
   ggh4x::facet_grid2(to ~ from, scales = "free", independent = "all") +
   theme_bw(base_size = 15)
+ggsave(file.path(fig_dir_ct, 'movement_bias_srvchng.png'), width = 10, height = 8, dpi = 300)
+

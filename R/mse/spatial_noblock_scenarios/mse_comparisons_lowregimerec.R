@@ -62,21 +62,21 @@ dir.create(fig_dir, showWarnings = FALSE, recursive = TRUE)
 
 # Read in results ---------------------------------------------------------
 files <- list.files(file_dir, full.names = TRUE)
-sgl_rg_files <- files[stringr::str_detect(files, "single_region_base")]
+sgl_rg_files <- files[stringr::str_detect(files, "single_region_lowregimerec")]
 all_sgl_rg_results <- lapply(sgl_rg_files, readRDS)
 sgl_rg <- combine_results(all_sgl_rg_results)
 
 files <- list.files(file_dir, full.names = TRUE)
-faa_files <- files[stringr::str_detect(files, "faa_base")]
+faa_files <- files[stringr::str_detect(files, "faa_lowregimerec")]
 all_faa_results <- lapply(faa_files, readRDS)
 faa <- combine_results(all_faa_results)
 
 files <- list.files(file_dir, full.names = TRUE)
-three_rg_files <- files[stringr::str_detect(files, "three_region_base")]
+three_rg_files <- files[stringr::str_detect(files, "three_region_lowregimerec")]
 all_three_rg_results <- lapply(three_rg_files, readRDS)
 three_rg <- combine_results(all_three_rg_results)
 
-five_rg <- readRDS(here(file_dir, 'five_region_base.RDS'))
+five_rg <- readRDS(here(file_dir, 'five_region_lowregimerec.RDS'))
 
 ## Process MSE results ---------------------------------------------------------
 n_sims <- 100
@@ -277,7 +277,7 @@ ggplot() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'SSB', fill = 'Model', color = 'Model') +
   theme_bw(base_size = 13)
-ggsave(file.path(fig_dir, 'ssb_regional_base.png'), width = 14, height = 4, dpi = 300)
+ggsave(file.path(fig_dir, 'ssb_regional_lowregimerec.png'), width = 14, height = 4, dpi = 300)
 
 ggplot() +
   geom_ribbon(ssb_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.15, color = NA) +
@@ -289,7 +289,7 @@ ggplot() +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'SSB', fill = 'Model', color = 'Model')
-ggsave(file.path(fig_dir, 'ssb_global_base.png'), width = 8, height = 5, dpi = 300)
+ggsave(file.path(fig_dir, 'ssb_global_lowregimerec.png'), width = 8, height = 5, dpi = 300)
 
 ##### Catch -------------------------------------------------------------------
 ggplot() +
@@ -303,7 +303,7 @@ ggplot() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'Catch', fill = 'Model', color = 'Model') +
   theme_bw(base_size = 13)
-ggsave(file.path(fig_dir, 'catch_regional_base.png'), width = 14, height = 4, dpi = 300)
+ggsave(file.path(fig_dir, 'catch_regional_lowregimerec.png'), width = 14, height = 4, dpi = 300)
 
 ggplot() +
   geom_ribbon(catch_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.15, color = NA) +
@@ -315,7 +315,7 @@ ggplot() +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'Catch', fill = 'Model', color = 'Model')
-ggsave(file.path(fig_dir, 'catch_global_base.png'), width = 8, height = 5, dpi = 300)
+ggsave(file.path(fig_dir, 'catch_global_lowregimerec.png'), width = 8, height = 5, dpi = 300)
 
 ##### Recruitment -------------------------------------------------------------
 ggplot() +
@@ -329,7 +329,7 @@ ggplot() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'Recruitment', fill = 'Model', color = 'Model') +
   theme_bw(base_size = 13)
-ggsave(file.path(fig_dir, 'rec_regional_base.png'), width = 14, height = 4, dpi = 300)
+ggsave(file.path(fig_dir, 'rec_regional_lowregimerec.png'), width = 14, height = 4, dpi = 300)
 
 ggplot() +
   geom_ribbon(rec_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.15, color = NA) +
@@ -341,7 +341,7 @@ ggplot() +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'Recruitment', fill = 'Model', color = 'Model')
-ggsave(file.path(fig_dir, 'rec_global_base.png'), width = 8, height = 5, dpi = 300)
+ggsave(file.path(fig_dir, 'rec_global_lowregimerec.png'), width = 8, height = 5, dpi = 300)
 
 ##### Apportionment -----------------------------------------------------------
 ggplot() +
@@ -354,7 +354,7 @@ ggplot() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'Apportionment', fill = 'Model', color = 'Model') +
   theme_bw(base_size = 13)
-ggsave(file.path(fig_dir, 'apportionment_base.png'), width = 14, height = 4, dpi = 300)
+ggsave(file.path(fig_dir, 'apportionment_lowregimerec.png'), width = 14, height = 4, dpi = 300)
 
 ## Process Estimation Bias Results ------------------------------------------------
 n_cl_yrs <- end_yr - st_yr + 1
@@ -437,16 +437,16 @@ scalar_bias_df <- rbind(
 
 ### EM Time Series Bias -----------------------------------------------------
 bias_ts_plot(ssb_bias_df, 'SSB Bias')
-ggsave(file.path(fig_dir, 'ssb_bias_base.png'), width = 10, height = 4, dpi = 300)
+ggsave(file.path(fig_dir, 'ssb_bias_lowregimerec.png'), width = 10, height = 4, dpi = 300)
 
 bias_ts_plot(dep_bias_df, 'Depletion Bias')
-ggsave(file.path(fig_dir, 'dep_bias_base.png'), width = 10, height = 4, dpi = 300)
+ggsave(file.path(fig_dir, 'dep_bias_lowregimerec.png'), width = 10, height = 4, dpi = 300)
 
 bias_ts_plot(totbiom_bias_df, 'Total Biomass Bias')
-ggsave(file.path(fig_dir, 'totbiom_bias_base.png'), width = 10, height = 4, dpi = 300)
+ggsave(file.path(fig_dir, 'totbiom_bias_lowregimerec.png'), width = 10, height = 4, dpi = 300)
 
 bias_ts_plot(rec_bias_df, 'Recruitment Bias')
-ggsave(file.path(fig_dir, 'rec_bias_base.png'), width = 10, height = 4, dpi = 300)
+ggsave(file.path(fig_dir, 'rec_bias_lowregimerec.png'), width = 10, height = 4, dpi = 300)
 
 ### EM Scalar Bias ----------------------------------------------------------
 ggplot(scalar_bias_df, aes(x = cl_yr, y = median)) +
@@ -456,7 +456,7 @@ ggplot(scalar_bias_df, aes(x = cl_yr, y = median)) +
   geom_hline(yintercept = 0, linetype = 'dashed') +
   labs(x = 'Year', y = 'Relative Error', title = 'R0 and Survey q Bias') +
   theme_bw(base_size = 13)
-ggsave(file.path(fig_dir, 'scalar_bias_base.png'), width = 10, height = 6, dpi = 300)
+ggsave(file.path(fig_dir, 'scalar_bias_lowregimerec.png'), width = 10, height = 6, dpi = 300)
 
 ### Animate EM Time Series Bias ---------------------------------------------
 build_tracking_df <- function(est_arr, true_arr, bias_arr, metric_label) {
@@ -524,5 +524,5 @@ p <- ggplot(combined_anim_df, aes(x = year, y = median, color = type, fill = typ
   ease_aes('linear')
 
 animate(p, nframes = n_cl_yrs, fps = 4, width = 1000, height = 1000)
-anim_save(file.path(fig_dir, 'all_tracking_base.gif'))
+anim_save(file.path(fig_dir, 'all_tracking_lowregimerec.gif'))
 

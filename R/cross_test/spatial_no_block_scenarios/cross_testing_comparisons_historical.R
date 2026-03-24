@@ -88,6 +88,7 @@ n_yrs <- 65
 n_sims <- 100
 n_ages <- 30
 n_sexes <- 2
+n_rg <- 5
 
 ### Process Results ---------------------------------------------------------
 
@@ -316,18 +317,21 @@ for (i in 1:n_sims) {
 # figure out convergence rates
 apply(conv_store, 1, sum, na.rm = T)
 
-### SSB ---------------------------------------------------------------------
+fig_dir_ct <- here("outputs", "cross_test", "spatial_no_block_scenarios", "figs")
+dir.create(fig_dir_ct, showWarnings = FALSE, recursive = TRUE)
 
+### SSB ---------------------------------------------------------------------
 #### Aggregate ---------------------------------------------------------------
 
 # Absolute
 ggplot() +
-  geom_line(agg_ssb_df, mapping =  aes(x = Year, y = value, group = Sim)) +
-  geom_line(agg_ssb_df, mapping =  aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
+  geom_line(agg_ssb_df, mapping = aes(x = Year, y = value, group = Sim)) +
+  geom_line(agg_ssb_df, mapping = aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
   facet_wrap(~model_name) +
   ylim(0, NA) +
   theme_bw(base_size = 15) +
   labs(y = 'SSB')
+ggsave(file.path(fig_dir_ct, 'agg_ssb_abs_historical.png'), width = 10, height = 4, dpi = 300)
 
 # Relative Error
 ggplot() +
@@ -336,21 +340,23 @@ ggplot() +
               summarize(lwr = quantile(RE, 0.025, na.rm = T),
                         upr = quantile(RE, 0.975, na.rm = T),
                         median = median(RE, na.rm = T)),
-            mapping =  aes(x = Year, y = median, color = model_name), lwd = 1.3) +
+            mapping = aes(x = Year, y = median, color = model_name), lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3, col = 'black') +
   coord_cartesian(ylim = c(-0.4, 0.4)) +
   theme_bw(base_size = 15)
+ggsave(file.path(fig_dir_ct, 'agg_ssb_re_historical.png'), width = 10, height = 4, dpi = 300)
 
 #### Spatial Estimates -------------------------------------------------------
 
 # Absolute
 ggplot() +
-  geom_line(spt_ssb_df, mapping =  aes(x = Year, y = value, group = Sim)) +
-  geom_line(spt_ssb_df %>% filter(Sim == 1), mapping =  aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
+  geom_line(spt_ssb_df, mapping = aes(x = Year, y = value, group = Sim)) +
+  geom_line(spt_ssb_df %>% filter(Sim == 1), mapping = aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
   facet_grid(Region~Data, scales = 'free') +
   ylim(0, NA) +
   theme_bw(base_size = 15) +
   labs(y = 'SSB')
+ggsave(file.path(fig_dir_ct, 'spt_ssb_abs_historical.png'), width = 8, height = 6, dpi = 300)
 
 # Relative Error
 ggplot() +
@@ -359,21 +365,24 @@ ggplot() +
               summarize(lwr = quantile(RE, 0.025, na.rm = T),
                         upr = quantile(RE, 0.975, na.rm = T),
                         median = median(RE, na.rm = T)),
-            mapping =  aes(x = Year, y = median, color = factor(Region)), lwd = 1.3) +
+            mapping = aes(x = Year, y = median, color = factor(Region)), lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3, col = 'black') +
   coord_cartesian(ylim = c(-0.4, 0.4)) +
   theme_bw(base_size = 15) +
   facet_grid(Region~Data, scales = 'free')
+ggsave(file.path(fig_dir_ct, 'spt_ssb_re_historical.png'), width = 8, height = 6, dpi = 300)
 
 ### Recruitment -------------------------------------------------------------
 #### Aggregate ---------------------------------------------------------------
+
 # Absolute
 ggplot() +
-  geom_line(agg_rec_df, mapping =  aes(x = Year, y = value, group = Sim)) +
-  geom_line(agg_rec_df %>% filter(Sim == 1), mapping =  aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
+  geom_line(agg_rec_df, mapping = aes(x = Year, y = value, group = Sim)) +
+  geom_line(agg_rec_df %>% filter(Sim == 1), mapping = aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
   facet_wrap(~model_name) +
   ylim(0, NA) +
   theme_bw(base_size = 15)
+ggsave(file.path(fig_dir_ct, 'agg_rec_abs_historical.png'), width = 10, height = 4, dpi = 300)
 
 # Relative Error
 ggplot() +
@@ -382,20 +391,22 @@ ggplot() +
               summarize(lwr = quantile(RE, 0.025, na.rm = T),
                         upr = quantile(RE, 0.975, na.rm = T),
                         median = median(RE, na.rm = T)),
-            mapping =  aes(x = Year, y = median, color = model_name), lwd = 1.3) +
+            mapping = aes(x = Year, y = median, color = model_name), lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3, col = 'black') +
   coord_cartesian(ylim = c(-1, 1)) +
   theme_bw(base_size = 15)
+ggsave(file.path(fig_dir_ct, 'agg_rec_re_historical.png'), width = 10, height = 4, dpi = 300)
 
+#### Spatial Estimates -------------------------------------------------------
 
-##### Spatial Estimates -------------------------------------------------------
 # Absolute
 ggplot() +
-  geom_line(spt_rec_df, mapping =  aes(x = Year, y = value, group = Sim)) +
-  geom_line(spt_rec_df %>% filter(Sim == 1), mapping =  aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
+  geom_line(spt_rec_df, mapping = aes(x = Year, y = value, group = Sim)) +
+  geom_line(spt_rec_df %>% filter(Sim == 1), mapping = aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
   facet_grid(Region~Data, scales = 'free') +
   ylim(0, NA) +
   theme_bw(base_size = 15)
+ggsave(file.path(fig_dir_ct, 'spt_rec_abs_historical.png'), width = 8, height = 6, dpi = 300)
 
 # Relative Error
 ggplot() +
@@ -404,21 +415,23 @@ ggplot() +
               summarize(lwr = quantile(RE, 0.025, na.rm = T),
                         upr = quantile(RE, 0.975, na.rm = T),
                         median = median(RE, na.rm = T)),
-            mapping =  aes(x = Year, y = median, color = factor(Region)), lwd = 1.3) +
+            mapping = aes(x = Year, y = median, color = factor(Region)), lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3, col = 'black') +
   theme_bw(base_size = 15) +
   facet_grid(Region~Data, scales = 'free')
+ggsave(file.path(fig_dir_ct, 'spt_rec_re_historical.png'), width = 8, height = 6, dpi = 300)
 
 ### Depletion ---------------------------------------------------------------
 #### Aggregate ---------------------------------------------------------------
 
 # Absolute
 ggplot() +
-  geom_line(agg_dep_df, mapping =  aes(x = Year, y = value, group = Sim)) +
-  geom_line(agg_dep_df %>% filter(!str_detect(model_name, "_f"), Sim == 1), mapping =  aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
+  geom_line(agg_dep_df, mapping = aes(x = Year, y = value, group = Sim)) +
+  geom_line(agg_dep_df %>% filter(!str_detect(model_name, "_f"), Sim == 1), mapping = aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
   facet_wrap(~model_name) +
   ylim(0, NA) +
   theme_bw(base_size = 15)
+ggsave(file.path(fig_dir_ct, 'agg_dep_abs_historical.png'), width = 10, height = 4, dpi = 300)
 
 # Relative Error
 ggplot() +
@@ -427,21 +440,22 @@ ggplot() +
               summarize(lwr = quantile(RE, 0.025, na.rm = T),
                         upr = quantile(RE, 0.975, na.rm = T),
                         median = median(RE, na.rm = T)),
-            mapping =  aes(x = Year, y = median, color = model_name), lwd = 1.3) +
+            mapping = aes(x = Year, y = median, color = model_name), lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3, col = 'black') +
   coord_cartesian(ylim = c(-0.4, 0.4)) +
   theme_bw(base_size = 15)
-
+ggsave(file.path(fig_dir_ct, 'agg_dep_re_historical.png'), width = 10, height = 4, dpi = 300)
 
 #### Spatial Estimates -------------------------------------------------------
 
 # Absolute
 ggplot() +
-  geom_line(spt_dep_df, mapping =  aes(x = Year, y = value, group = Sim)) +
-  geom_line(spt_dep_df %>% filter(Sim == 1), mapping =  aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
+  geom_line(spt_dep_df, mapping = aes(x = Year, y = value, group = Sim)) +
+  geom_line(spt_dep_df %>% filter(Sim == 1), mapping = aes(x = Year, y = OM), lty = 2, color = 'red', lwd = 1.3) +
   facet_grid(Region~Data, scales = 'free') +
   ylim(0, NA) +
   theme_bw(base_size = 15)
+ggsave(file.path(fig_dir_ct, 'spt_dep_abs_historical.png'), width = 8, height = 6, dpi = 300)
 
 # Relative Error
 ggplot() +
@@ -450,13 +464,14 @@ ggplot() +
               summarize(lwr = quantile(RE, 0.025, na.rm = T),
                         upr = quantile(RE, 0.975, na.rm = T),
                         median = median(RE, na.rm = T)),
-            mapping =  aes(x = Year, y = median, color = factor(Region)), lwd = 1.3) +
+            mapping = aes(x = Year, y = median, color = factor(Region)), lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3, col = 'black') +
-  # coord_cartesian(ylim = c(-0.5, 0.5)) +
   facet_grid(Region~Data, scales = 'free')
+ggsave(file.path(fig_dir_ct, 'spt_dep_re_historical.png'), width = 8, height = 6, dpi = 300)
 
-### Reference Points and Catch Advice --------------------------------------------------------
-# Absolute F40 (not necessarily comparable)
+### Reference Points and Catch Advice ---------------------------------------
+
+# Absolute F40
 ggplot(f40_df %>%
          group_by(model_name) %>%
          summarize(median = median(value, na.rm = T),
@@ -467,8 +482,9 @@ ggplot(f40_df %>%
   geom_hline(yintercept = unique(true_five_rg_f40$F_Ref_Pt), lty = 2, lwd = 1.3) +
   labs(x = 'Model', y = 'F40') +
   theme_bw()
+ggsave(file.path(fig_dir_ct, 'f40_abs_historical.png'), width = 6, height = 4, dpi = 300)
 
-# Relative Error F40 (not necessarily comparable)
+# Relative Error F40
 ggplot(f40_df %>%
          mutate(RE = (value - unique(true_five_rg_f40$F_Ref_Pt)) / unique(true_five_rg_f40$F_Ref_Pt)) %>%
          group_by(model_name) %>%
@@ -480,6 +496,7 @@ ggplot(f40_df %>%
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3) +
   labs(x = 'Model', y = 'F40 Relative Error') +
   theme_bw()
+ggsave(file.path(fig_dir_ct, 'f40_re_historical.png'), width = 6, height = 4, dpi = 300)
 
 # Absolute B40
 ggplot(b40_df %>%
@@ -492,6 +509,7 @@ ggplot(b40_df %>%
   geom_hline(yintercept = sum(true_five_rg_f40$B_Ref_Pt), lty = 2, lwd = 1.3) +
   labs(x = 'Model', y = 'B40') +
   theme_bw()
+ggsave(file.path(fig_dir_ct, 'b40_abs_historical.png'), width = 6, height = 4, dpi = 300)
 
 # Relative Error B40
 ggplot(b40_df %>%
@@ -503,10 +521,11 @@ ggplot(b40_df %>%
        aes(x = model_name, y = median, ymin = lwr, ymax = upr)) +
   geom_pointrange() +
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3) +
-  labs(x = 'Model', y = 'b40 Relative Error') +
+  labs(x = 'Model', y = 'B40 Relative Error') +
   theme_bw()
+ggsave(file.path(fig_dir_ct, 'b40_re_historical.png'), width = 6, height = 4, dpi = 300)
 
-# Absolute
+# Absolute ABC
 ggplot(abc_df %>%
          group_by(model_name) %>%
          summarize(median = median(value, na.rm = T),
@@ -517,6 +536,7 @@ ggplot(abc_df %>%
   geom_hline(yintercept = sum(true_five_rg_f40$Catch_Advice), lty = 2, lwd = 1.3) +
   labs(x = 'Model', y = 'ABC') +
   theme_bw()
+ggsave(file.path(fig_dir_ct, 'abc_abs_historical.png'), width = 6, height = 4, dpi = 300)
 
 # Relative Error ABC
 ggplot(abc_df %>%
@@ -530,9 +550,9 @@ ggplot(abc_df %>%
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3) +
   labs(x = 'Model', y = 'ABC Relative Error') +
   theme_bw()
+ggsave(file.path(fig_dir_ct, 'abc_re_historical.png'), width = 6, height = 4, dpi = 300)
 
-
-### Spatial Model Movement Bias ----------------------------------------------------------------
+### Spatial Model Movement Bias ---------------------------------------------
 ggplot(move_ribbon, aes(x = ages, fill = Type, color = Type)) +
   geom_ribbon(aes(ymin = lo, ymax = hi), alpha = 0.3, color = NA) +
   geom_line(aes(y = med)) +
@@ -540,3 +560,4 @@ ggplot(move_ribbon, aes(x = ages, fill = Type, color = Type)) +
   ggh4x::facet_grid2(paste("to", to) ~ paste("from", from),
                      scales = "free", independent = "all") +
   theme_bw(base_size = 15)
+ggsave(file.path(fig_dir_ct, 'movement_bias_historical.png'), width = 10, height = 8, dpi = 300)
