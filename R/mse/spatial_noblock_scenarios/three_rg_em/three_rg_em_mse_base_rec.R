@@ -94,7 +94,7 @@ for(i in 1:25) {
                                                       age_lag = 1,
                                                       srv_wgt = 'numbers',
                                                       fish_wgt = 'numbers',
-                                                      n_cores = 7)
+                                                      n_cores = 14)
 
   saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", paste("three_region_base", "_", i, ".RDS", sep = "")))
 }
