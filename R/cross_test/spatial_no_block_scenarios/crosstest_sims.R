@@ -67,6 +67,7 @@ sim_list_lowsamp <- condition_closed_loop_simulations(
 # Modify report file to incorporate time-varying movement
 tv_moverep <- rep
 tv_moverep$Movement[,,20:39,,] <- tv_moverep$Movement[5:1,5:1,1:20,,,drop = FALSE] # reverse movement (turn 1 to 5 rates into 5 to 1 rates)
+tv_moverep$Rec[,]
 
 sim_list_lowsamp_tvmove <- condition_closed_loop_simulations(
   closed_loop_yrs = closed_loop_yrs,
@@ -87,6 +88,32 @@ sim_list_lowsamp_tvmove <- condition_closed_loop_simulations(
   ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
   n_tags_rel_input = rep(2e3, nrow(data$tag_release_indicator))
 )
+
+# Condition closed-loop simulations, GOA recruitment crash, with no movement
+dt_rep <- rep
+dt_rep$Movement[,,,,] <- diag(1, data$n_regions) # no movement
+dt_rep$Rec[3:5,33:65] <- dt_rep$Rec[3:5,33:65] * 0.1
+
+sim_list_dt <- condition_closed_loop_simulations(
+  closed_loop_yrs = closed_loop_yrs,
+  n_sims = n_sims,
+  data = data,
+  parameters = parameters,
+  mapping = mapping,
+  sd_rep = sd_rep,
+  rep = dt_rep,
+  random = NULL,
+  recruitment_opt = 'resample_from_input',
+  # setup variances
+  ISS_FishAgeComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_FishLenComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_SrvAgeComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ISS_SrvLenComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
+  ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
+  n_tags_rel_input = rep(2e3, nrow(data$tag_release_indicator))
+)
+
 
 # Condition closed-loop simulations, mean recruitment (high sample sizes)
 # To simulate more tags or resimulate tags with new sample sizes
@@ -131,6 +158,16 @@ sim_env_lowsamp_tvmove <- run_single_rg_closedloop_parallel(sim_env = sim_env_lo
                                                      fleet_allocation = fleet_allocation,
                                                      lls_design_type = "historical", n_cores = 8)
 saveRDS(sim_env_lowsamp_tvmove, here("outputs", "cross_test", "spatial_no_block_scenarios", "spt_rand_OM_lowsamp_tvmove_sens.RDS"))
+
+
+# Divergent trends (use single-region model to initialize)
+sim_env_dt <- Setup_sim_env(sim_list = sim_list_dt)
+sim_env_dt <- add_aggregated_obj_to_simenv(sim_env = sim_env_dt)
+sim_env_dt <- run_single_rg_closedloop_parallel(sim_env = sim_env_dt, n_sims = n_sims,
+                                                fleet_allocation = fleet_allocation,
+                                                lls_design_type = "historical", n_cores = 15)
+saveRDS(sim_env_dt, here("outputs", "cross_test", "spatial_no_block_scenarios", "spt_rand_OM_lowsamp_dt.RDS"))
+
 
 # Single-region high sample size
 sim_env_highsamp <- Setup_sim_env(sim_list = sim_list_highsamp)

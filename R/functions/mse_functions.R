@@ -524,8 +524,8 @@ single_region_use_indicators <- function(y, n_fish_fleets, n_srv_fleets, age_lag
 #'
 #' @return The updated `sim_env` object containing results across all simulation
 #'   replicates. The function modifies `sim_env` in place and also returns it.
-run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, lls_design_type, srv_idx_se,
-                                              age_lag, srv_wgt, fish_wgt, n_cores) {
+run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, srv_idx_se = 0.2,
+                                              age_lag = 1, srv_wgt = 'numbers', fish_wgt = 'numbers', n_cores) {
 
 
   plan(multisession, workers = n_cores)

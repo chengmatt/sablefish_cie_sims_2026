@@ -169,9 +169,30 @@ spt_dep_om_df <- melt_om(spt_dep_om, is_spatial = TRUE)
 agg_ssb_df <- melt_em(agg_ssb_store, agg_ssb_om_df)
 agg_rec_df <- melt_em(agg_rec_store, agg_rec_om_df)
 agg_dep_df <- melt_em(agg_dep_store, agg_dep_om_df)
-spt_ssb_df <- melt_em(spt_ssb_store, spt_ssb_om_df, is_spt_store = TRUE)
-spt_rec_df <- melt_em(spt_rec_store, spt_rec_om_df, is_spt_store = TRUE)
-spt_dep_df <- melt_em(spt_dep_store, spt_dep_om_df, is_spt_store = TRUE)
+spt_ssb_df <- melt_em(spt_ssb_store, spt_ssb_om_df, is_spt_store = TRUE) %>%
+    mutate(
+  Region = case_when(
+    Region == 1 ~ "BS",
+    Region == 2 ~ "AI",
+    Region == 3 ~ "GOA"
+  )
+    )
+spt_rec_df <- melt_em(spt_rec_store, spt_rec_om_df, is_spt_store = TRUE) %>%
+  mutate(
+    Region = case_when(
+      Region == 1 ~ "BS",
+      Region == 2 ~ "AI",
+      Region == 3 ~ "GOA"
+    )
+  )
+spt_dep_df <- melt_em(spt_dep_store, spt_dep_om_df, is_spt_store = TRUE) %>%
+  mutate(
+    Region = case_when(
+      Region == 1 ~ "BS",
+      Region == 2 ~ "AI",
+      Region == 3 ~ "GOA"
+    )
+  )
 
 #### Reference Points and Catch Advice --------------------------------------------------------
 om_values <- readRDS(here("data", "spatial_outputs", "Spatial_MltRel_NoBlock_model_results.RDS"))
@@ -293,13 +314,13 @@ move_ribbon <- move_joined_df %>%
     .groups = "drop"
   ) %>%
   mutate(from =
-           case_when(from == 1 ~ "BS+AI+WGOA",
-                     from == 2 ~ 'CGOA',
-                     from == 3 ~ 'EGOA'),
+           case_when(from == 1 ~ "BS",
+                     from == 2 ~ 'AI',
+                     from == 3 ~ 'GOA'),
          to =
-           case_when(to == 1 ~ "BS+AI+WGOA",
-                     to == 2 ~ 'CGOA',
-                     to == 3 ~ 'EGOA'))
+           case_when(to == 1 ~ "BS",
+                     to == 2 ~ 'AI',
+                     to == 3 ~ 'GOA'))
 
 
 ### Model Convergence -------------------------------------------------------
@@ -317,7 +338,7 @@ for (i in 1:n_sims) {
 # figure out convergence rates
 apply(conv_store, 1, sum, na.rm = T)
 
-fig_dir_ct <- here("outputs", "cross_test", "spatial_no_block_scenarios", "figs")
+fig_dir_ct <- here("outputs", "cross_test", "figs")
 dir.create(fig_dir_ct, showWarnings = FALSE, recursive = TRUE)
 
 ### SSB ---------------------------------------------------------------------
@@ -355,7 +376,7 @@ ggplot() +
   facet_grid(Region~Data, scales = 'free') +
   ylim(0, NA) +
   theme_bw(base_size = 15) +
-  labs(y = 'SSB')
+  labs(y = 'SSB', color = 'Region')
 ggsave(file.path(fig_dir_ct, 'spt_ssb_abs_historical.png'), width = 8, height = 6, dpi = 300)
 
 # Relative Error
@@ -369,6 +390,7 @@ ggplot() +
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3, col = 'black') +
   coord_cartesian(ylim = c(-0.4, 0.4)) +
   theme_bw(base_size = 15) +
+  labs(color = 'Region') +
   facet_grid(Region~Data, scales = 'free')
 ggsave(file.path(fig_dir_ct, 'spt_ssb_re_historical.png'), width = 8, height = 6, dpi = 300)
 
@@ -418,7 +440,8 @@ ggplot() +
             mapping = aes(x = Year, y = median, color = factor(Region)), lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3, col = 'black') +
   theme_bw(base_size = 15) +
-  facet_grid(Region~Data, scales = 'free')
+  facet_grid(Region~Data, scales = 'free') +
+  labs(color = 'Region')
 ggsave(file.path(fig_dir_ct, 'spt_rec_re_historical.png'), width = 8, height = 6, dpi = 300)
 
 ### Depletion ---------------------------------------------------------------
@@ -466,7 +489,9 @@ ggplot() +
                         median = median(RE, na.rm = T)),
             mapping = aes(x = Year, y = median, color = factor(Region)), lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3, col = 'black') +
-  facet_grid(Region~Data, scales = 'free')
+  facet_grid(Region~Data, scales = 'free') +
+  labs(color = 'Region') +
+  theme_bw(base_size = 15)
 ggsave(file.path(fig_dir_ct, 'spt_dep_re_historical.png'), width = 8, height = 6, dpi = 300)
 
 ### Reference Points and Catch Advice ---------------------------------------

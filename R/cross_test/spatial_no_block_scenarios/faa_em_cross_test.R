@@ -172,7 +172,7 @@ for (i in 1:nrow(ems_grid)) {
 # Run Models (First Half) --------------------------------------------------------------
 
 handlers(global = TRUE)  # progress bar
-plan(multisession, workers = 5)
+plan(multisession, workers = 15)
 options(future.globals.maxSize = 15e9)
 
 # loop through
@@ -207,8 +207,14 @@ with_progress({
                           srv_selex_prior = ems[[j]]$srv_selex_prior
       )
 
-      asmt_list$par$ln_fish_fixed_sel_pars[] <- log(8)
-      asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
+      if(ems[[j]]$faa_n_fish_fleets != 2) {
+        asmt_list$par$ln_fish_fixed_sel_pars[] <- log(8)
+        asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
+      } else{
+        asmt_list$par$ln_fish_fixed_sel_pars[] <- log(3)
+        asmt_list$par$ln_srv_fixed_sel_pars[] <- log(1)
+      }
+
 
       # fit model
       model <- tryCatch({
@@ -221,8 +227,6 @@ with_progress({
           3,
           silent = F
         )
-
-        plot(model$rep$fish_sel[1,1,,1,4], ylim = c(0,1))
 
         model$data <- asmt_list$data # save data
         model$sd_rep <- sdreport(model)
@@ -245,7 +249,7 @@ saveRDS(model_list_lowsamp, here("outputs", "cross_test", "spatial_no_block_scen
 # Run Models (Second Half) --------------------------------------------------------------
 
 handlers(global = TRUE)  # progress bar
-plan(multisession, workers = 5)
+plan(multisession, workers = 13)
 options(future.globals.maxSize = 15e9)
 
 # loop through
@@ -280,8 +284,13 @@ with_progress({
                           srv_selex_prior = ems[[j]]$srv_selex_prior
       )
 
-      asmt_list$par$ln_fish_fixed_sel_pars[] <- log(10)
-      asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
+      if(ems[[j]]$faa_n_fish_fleets != 2) {
+        asmt_list$par$ln_fish_fixed_sel_pars[] <- log(10)
+        asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
+      } else{
+        asmt_list$par$ln_fish_fixed_sel_pars[] <- log(3)
+        asmt_list$par$ln_srv_fixed_sel_pars[] <- log(1)
+      }
 
       # fit model
       model <- tryCatch({
@@ -652,7 +661,7 @@ finalized_model_francis <- readRDS(here("outputs", "cross_test", "spatial_no_blo
 # Combine models
 for(i in 1:100) {
   for(j in 1:nrow(ems_grid)) {
-    if(j <= (nrow(ems_grid) / 2)) model_list_all[[i]][[j]] <- model_list_first[[i]][[j]]
+    if(j <= nrow(ems_grid) / 2) model_list_all[[i]][[j]] <- model_list_first[[i]][[j]]
     else model_list_all[[i]][[j]] <- model_list_second[[i]][[j]]
   }
 }
