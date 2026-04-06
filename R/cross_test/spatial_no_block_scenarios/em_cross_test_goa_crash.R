@@ -73,13 +73,13 @@ ssb_sgl_rg_re <- array(NA, dim = c(y, n_sims))
 rec_sgl_rg_re <- array(NA, dim = c(y, n_sims))
 
 for(i in 1:100) {
-  if(length(model_list[[i]]) > 1) {
+  if(length(sgl_mod_list[[i]]) > 1) {
     ssb_sgl_rg_re[,i] <- (t(sgl_mod_list[[i]]$rep$SSB) - colSums(om$SSB[,1:65,i]) )/ colSums(om$SSB[,1:65,i])
     rec_sgl_rg_re[,i] <- (t(sgl_mod_list[[i]]$rep$Rec) - colSums(om$Rec[,1:65,i]) )/ colSums(om$Rec[,1:65,i])
   }
 }
 
-plot(apply(ssb_sgl_rg_re, 1, median, na.rm = T), type = 'l', ylim = c(-1, 1))
+plot(apply(ssb_sgl_rg_re, 1, median, na.rm = T), type = 'l', ylim = c(-1, 1), main = 'Single Region SSB Error')
 abline(h = 0, lty = 2, lwd = 2)
 
 plot(apply(rec_sgl_rg_re, 1, median, na.rm = T), type = 'l', ylim = c(-1, 1))
@@ -313,7 +313,7 @@ for(i in 1:100) {
   }
 }
 
-plot(apply(ssb_faa_re, 1, median, na.rm = T), type = 'l', ylim = c(-1, 1))
+plot(apply(ssb_faa_re, 1, median, na.rm = T), type = 'l', ylim = c(-1, 1), main = 'FAA SSB Error')
 abline(h = 0, lty = 2, lwd = 2)
 
 plot(apply(rec_faa_re, 1, median, na.rm = T), type = 'l', ylim = c(-1, 1))

@@ -896,7 +896,7 @@ ggplot(re_df %>% filter(Fleet == 1), aes(x = Year, y = value, color = Survey)) +
   geom_hline(yintercept = 0, linetype = "dashed") +
   geom_vline(xintercept = c(2018, 2025), lty = 2, color = 'black', lwd = 1 ) +
   labs(y = "Mean Relative Error in Survey Index") +
-  theme_bw()
+  theme_bw(base_size = 15)
 
 # Single region model starts off engativeyl biased because of carry over values
 # from previous years prior to "observing" large recruitment events in
