@@ -300,8 +300,10 @@ agg_data_to_single_rg <- function(sim_data, sim_env, y, sim, lls_design_type, sr
       if(length(regions) == 0) regions <- 1:sim_env$n_regions
 
       # age comps
-      sim_env$Agg_ObsFishAgeComps[,yr,,,f,sim] <- apply(sim_data$ObsFishAgeComps[,yr,,,f] * catch_prop[,yr,f], c(2,3), sum)
-      sim_env$Agg_ObsFishAgeComps[,yr,,,f,sim] <- sim_env$Agg_ObsFishAgeComps[,yr,,,f,sim] / sum(sim_env$Agg_ObsFishAgeComps[,yr,,,f,sim])
+      regional_props_age <- sweep(sim_data$ObsFishAgeComps[,yr,,,f], 1,
+                                  apply(sim_data$ObsFishAgeComps[,yr,,,f], 1, sum), "/")
+      agg_age <- apply(regional_props_age * catch_prop[,yr,f], c(2,3), sum)
+      sim_env$Agg_ObsFishAgeComps[,yr,,,f,sim] <- agg_age / sum(agg_age)
 
       # Calculate n_eff for age comps
       regional_n_age <- apply(sim_data$ObsFishAgeComps[regions,yr,,,f], 1, sum)
@@ -312,8 +314,10 @@ agg_data_to_single_rg <- function(sim_data, sim_env, y, sim, lls_design_type, sr
       sim_env$Agg_ISS_FishAgeComps[,yr,1,f,sim] <- numerator_age / denominator_age
 
       # length comps
-      sim_env$Agg_ObsFishLenComps[,yr,,,f,sim] <- apply(sim_data$ObsFishLenComps[,yr,,,f] * catch_prop[,yr,f], c(2,3), sum)
-      sim_env$Agg_ObsFishLenComps[,yr,,,f,sim] <- sim_env$Agg_ObsFishLenComps[,yr,,,f,sim] / sum(sim_env$Agg_ObsFishLenComps[,yr,,,f,sim])
+      regional_props_len <- sweep(sim_data$ObsFishLenComps[,yr,,,f], 1,
+                                  apply(sim_data$ObsFishLenComps[,yr,,,f], 1, sum), "/")
+      agg_len <- apply(regional_props_len * catch_prop[,yr,f], c(2,3), sum)
+      sim_env$Agg_ObsFishLenComps[,yr,,,f,sim] <- agg_len / sum(agg_len)
 
       # Calculate n_eff for length comps
       regional_n_len <- apply(sim_data$ObsFishLenComps[regions,yr,,,f], 1, sum)
@@ -424,8 +428,10 @@ agg_data_to_single_rg <- function(sim_data, sim_env, y, sim, lls_design_type, sr
     srv_prop[,yr,1] <- srv_prop[,yr,1] / sum(srv_prop[,yr,1]) # renormalize survey weighting
 
     for(f in 1:n_srv_fleets) {
-      sim_env$Agg_ObsSrvAgeComps[,yr,,,f,sim] <- apply(sim_data$ObsSrvAgeComps[,yr,,,f] * srv_prop[,yr,f], c(2,3), sum)
-      sim_env$Agg_ObsSrvAgeComps[,yr,,,f,sim] <- sim_env$Agg_ObsSrvAgeComps[,yr,,,f,sim] / sum(sim_env$Agg_ObsSrvAgeComps[,yr,,,f,sim]) # normalize
+      regional_props_srv <- sweep(sim_data$ObsSrvAgeComps[,yr,,,f], 1,
+                                  apply(sim_data$ObsSrvAgeComps[,yr,,,f], 1, sum), "/")
+      agg_srv <- apply(regional_props_srv * srv_prop[,yr,f], c(2,3), sum)
+      sim_env$Agg_ObsSrvAgeComps[,yr,,,f,sim] <- agg_srv / sum(agg_srv)
 
       regions <- (1:sim_env$n_regions)[-which(srv_prop[,yr,f] == 0)]
       if(length(regions) == 0) regions <- 1:sim_env$n_regions
@@ -524,7 +530,7 @@ single_region_use_indicators <- function(y, n_fish_fleets, n_srv_fleets, age_lag
 #'
 #' @return The updated `sim_env` object containing results across all simulation
 #'   replicates. The function modifies `sim_env` in place and also returns it.
-run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, srv_idx_se = 0.2,
+run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, srv_idx_se = 0.2, lls_design_type,
                                               age_lag = 1, srv_wgt = 'numbers', fish_wgt = 'numbers', n_cores) {
 
 
@@ -673,7 +679,6 @@ run_three_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, 
 #'
 #' @param sim_env A list or environment containing the simulation environment, including population dynamics,
 #'   survey data, movement matrices, natural mortality, and other model parameters.
-#' @param sim Integer. Index of the simulation replicate.
 #' @param fleet_allocation Numeric vector. Proportions used to allocate regional TAC to fleets.
 #' @param lls_design_type Character. Type of longline survey design used for apportionment.
 #' @param srv_idx_se Numeric. Standard error of survey indices.
@@ -688,6 +693,9 @@ run_three_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation, 
 #'   fleet blocks, sex, and region.
 #' @param srv_selex_prior  Priors for survey fleet selectivity parameters.
 #' @param n_cores Number of cores
+#' @param n_sims Number of simulations
+#' @param fish_sel_blocks Fishery blocks
+#' @param srv_sel_blocks Survey blocks
 #'
 #' @return The updated `sim_env` object containing results across all simulation
 #'   replicates. The function modifies `sim_env` in place and also returns it.
@@ -700,6 +708,8 @@ run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
                                         srv_sel_model,
                                         fish_selex_prior,
                                         srv_selex_prior,
+                                        fish_sel_blocks,
+                                        srv_sel_blocks,
                                         n_cores) {
 
 
@@ -730,7 +740,11 @@ run_faa_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
                                fish_sel_model,
                                srv_sel_model,
                                fish_selex_prior,
-                               srv_selex_prior)
+                               srv_selex_prior,
+                               fish_sel_blocks,
+                               srv_sel_blocks
+                               )
+
           sim_env  # return on success
         }, error = function(e) {
           warning(paste0("Simulation ", .x, " failed: ", e$message))
@@ -2076,7 +2090,7 @@ faa_use_indicators <- function(sim_env,
     usefishage[,40:(y-age_lag),1:3] <- 1 # use data starting year 40, with age lag for all fixed gear
     usefishage[,55,1] <- 0 # no samples in BS fleet in year 55
     usefishlen[,31:39,1:3] <- 1 # use data only from 31 - 39 for all fixed gear
-    usefishlen[,c(31,32,35:37,39:y),2] <- 1 # trawl gera length comps (aggregated)
+    usefishlen[,c(31,32,35:37,39:y),4] <- 1 # trawl gera length comps (aggregated)
   }
 
   if(faa_n_fish_fleets == 5) {
@@ -3080,6 +3094,8 @@ run_single_rg_closedloop_i <- function(sim_env,
 #' @param fish_selex_prior LPriors for fishing fleet selectivity parameters. Constructed based on
 #'   fleet blocks, sex, and region.
 #' @param srv_selex_prior  Priors for survey fleet selectivity parameters.
+#' @param fish_sel_blocks Fishery blocks
+#' @param srv_sel_blocks Survey blocks
 #'
 #' @returns None. The function updates `sim_env` in-place with population dynamics,
 #'   fishing mortality, and assessment model outputs. The last year's model object
@@ -3098,7 +3114,9 @@ run_faa_closedloop_i <- function(sim_env,
                                  fish_sel_model,
                                  srv_sel_model,
                                  fish_selex_prior,
-                                 srv_selex_prior
+                                 srv_selex_prior,
+                                 fish_sel_blocks,
+                                 srv_sel_blocks
                                  ) {
 
   # Run Closed Loop ---------------------------------------------------------
@@ -3122,11 +3140,11 @@ run_faa_closedloop_i <- function(sim_env,
                           faa_n_srv_fleets = faa_n_srv_fleets,
                           srv_wgt = srv_wgt,
                           fish_wgt = fish_wgt,
-                          fish_sel_blocks = paste('none_Fleet_',1:faa_n_fish_fleets, sep = ''),
+                          fish_sel_blocks = fish_sel_blocks,
                           fish_sel_model = fish_sel_model,
                           fish_fixed_sel_pars_spec = rep("est_all", faa_n_fish_fleets),
                           fish_selex_prior = fish_selex_prior,
-                          srv_sel_blocks =  paste('none_Fleet_',1:faa_n_srv_fleets, sep = ''),
+                          srv_sel_blocks =  srv_sel_blocks,
                           srv_sel_model = srv_sel_model,
                           srv_fixed_sel_pars_spec = rep("est_all", faa_n_srv_fleets),
                           srv_selex_prior = srv_selex_prior,

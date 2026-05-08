@@ -141,6 +141,32 @@ sim_list_highsamp <- condition_closed_loop_simulations(
   n_tags_rel_input = rep(2e3, nrow(data$tag_release_indicator))
 )
 
+# Condition closed-loop simulations, mean recruitment (high sample sizes for aggregation test)
+# To simulate more tags or resimulate tags with new sample sizes
+data$tag_release_indicator <- expand.grid(
+  regions = 1:5, tag_yrs = 1:(n_years + closed_loop_yrs)
+)
+
+sim_list_highsamp_aggtest <- condition_closed_loop_simulations(
+  closed_loop_yrs = closed_loop_yrs,
+  n_sims = n_sims,
+  data = data,
+  parameters = parameters,
+  mapping = mapping,
+  sd_rep = sd_rep,
+  rep = rep,
+  random = NULL,
+  recruitment_opt = 'resample_from_input',
+  # setup variances
+  ISS_FishAgeComps = array(1e5, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_FishLenComps = array(1e5, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_SrvAgeComps = array(1e5, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ISS_SrvLenComps = array(1e5, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
+  ObsSrvIdx_SE = array(0.1, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
+  n_tags_rel_input = rep(1e5, nrow(data$tag_release_indicator))
+)
+
 
 # Run MSEs to get "data" ----------------------------------------------------------------
 # Single-region low sample size
@@ -176,3 +202,12 @@ sim_env_highsamp <- run_single_rg_closedloop_parallel(sim_env = sim_env_highsamp
                                                       fleet_allocation = fleet_allocation,
                                                       lls_design_type = "historical", n_cores = 8)
 saveRDS(sim_env_highsamp, here("outputs", "cross_test", "spatial_no_block_scenarios", "spt_rand_OM_highsamp.RDS"))
+
+# Single-region high sample size - agg test
+sim_env_highsamp_aggtest <- Setup_sim_env(sim_list = sim_list_highsamp_aggtest)
+sim_env_highsamp_aggtest <- add_aggregated_obj_to_simenv(sim_env = sim_env_highsamp_aggtest)
+sim_env_highsamp_aggtest <- run_single_rg_closedloop_parallel(sim_env = sim_env_highsamp_aggtest, n_sims = n_sims,
+                                                      fleet_allocation = fleet_allocation,
+                                                      lls_design_type = "historical",
+                                                      n_cores = 15)
+saveRDS(sim_env_highsamp_aggtest, here("outputs", "cross_test", "spatial_no_block_scenarios", "spt_rand_OM_highsamp_aggtest.RDS"))

@@ -348,27 +348,28 @@ ggsave(file.path(fig_dir, 'catch_global_base.png'), width = 8, height = 5, dpi =
 
 ##### Recruitment -------------------------------------------------------------
 ggplot() +
-  geom_ribbon(rec_rg_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.15, color = NA) +
-  geom_line(rec_rg_df %>% filter(year <= st_yr + 1960), mapping = aes(x = year, y = median), color = 'black', lwd = 1) +
-  geom_line(rec_rg_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, color = factor(model)), lwd = 1) +
-  facet_wrap(~region, nrow = 1, scales = 'free') +
+  geom_ribbon(rec_rg_df %>% filter(year >= st_yr + 1960, model == 'sgl'), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr), alpha = 0.15, color = NA) +
+  geom_line(rec_rg_df %>% filter(year <= st_yr + 1960, model == 'sgl'), mapping = aes(x = year, y = median), color = 'black', lwd = 1) +
+  geom_line(rec_rg_df %>% filter(year >= st_yr + 1960, model == 'sgl'), mapping = aes(x = year, y = median), lwd = 1) +
+  facet_wrap(~region, nrow = 1) +
   coord_cartesian(ylim = c(0, NA)) +
   geom_vline(xintercept = 2025, lty = 2) +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'Recruitment', fill = 'Model', color = 'Model') +
   theme_bw(base_size = 13)
-ggsave(file.path(fig_dir, 'rec_regional_base.png'), width = 14, height = 7, dpi = 300)
+ggsave(file.path(fig_dir, 'rec_regional_base.png'), width = 18, height = 7, dpi = 300)
 
 ggplot() +
-  geom_ribbon(rec_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.15, color = NA) +
-  geom_line(rec_global_df %>% filter(year <= st_yr + 1960), mapping = aes(x = year, y = median), color = 'black', lwd = 1) +
-  geom_line(rec_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, color = factor(model)), lwd = 1) +
+  geom_ribbon(rec_global_df %>% filter(year >= st_yr + 1960, model == 'sgl'), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.15, color = NA) +
+  geom_line(rec_global_df %>% filter(year <= st_yr + 1960, model == 'sgl'), mapping = aes(x = year, y = median), color = 'black', lwd = 1) +
+  geom_line(rec_global_df %>% filter(year >= st_yr + 1960, model == 'sgl'), mapping = aes(x = year, y = median, color = factor(model)), lwd = 1) +
   coord_cartesian(ylim = c(0, NA)) +
   geom_vline(xintercept = 2025, lty = 2) +
   theme_bw(base_size = 18) +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
+  theme(legend.position = 'none') +
   labs(x = 'Year', y = 'Recruitment', fill = 'Model', color = 'Model')
 ggsave(file.path(fig_dir, 'rec_global_base.png'), width = 8, height = 5, dpi = 300)
 
@@ -683,4 +684,75 @@ p_spt <- ggplot(spt_combined_anim_df,
 
 animate(p_spt, nframes = n_cl_yrs, fps = 4, width = 900, height = 700)
 anim_save(file.path(fig_dir, 'spt_regional_tracking_base.gif'))
+
+
+# Publication Plots -------------------------------------------------------
+ssb_global_df <- ssb_global_df %>% mutate(model = factor(model, levels = c("five_rg", 'sgl', 'faa', 'three_rg')))
+catch_global_df <- catch_global_df %>% mutate(model = factor(model, levels = c("five_rg", 'sgl', 'faa', 'three_rg')))
+
+# SSB
+ssb_base_plot <- ggplot() +
+  geom_ribbon(ssb_global_df %>% filter(year >= st_yr + 1960),
+              mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model),
+                            fill = factor(model)), alpha = 0.1, color = NA) +
+  geom_line(ssb_global_df %>% filter(year >= 60 + 1960, year <= st_yr + 1960), mapping = aes(x = year, y = median,
+                                                                                             lty = factor(model)), color = 'black', lwd = 1.3) +
+  geom_line(ssb_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median,
+                                                                          color = factor(model), lty = factor(model)), lwd = 1.3) +
+  coord_cartesian(ylim = c(0, NA)) +
+  theme_bw(base_size = 18) +
+  theme(legend.position = c(0.075, 0.85), legend.background = element_blank()) +
+  ggthemes::scale_color_colorblind() +
+  ggthemes::scale_fill_colorblind() +
+  labs(x = 'Year', y = 'SSB (kt)', fill = 'Model', color = 'Model', lty = 'Model')
+
+
+# Catch
+catch_base_plot <- ggplot() +
+  geom_ribbon(catch_global_df %>% filter(year >= st_yr + 1960),
+              mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model),
+                            fill = factor(model)), alpha = 0.1, color = NA) +
+  geom_line(catch_global_df %>% filter(year >= 60 + 1960, year <= st_yr + 1960), mapping = aes(x = year, y = median,
+                                                                                               lty = factor(model)), color = 'black', lwd = 1.3) +
+  geom_line(catch_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median,
+                                                                            color = factor(model), lty = factor(model)), lwd = 1.3) +
+  coord_cartesian(ylim = c(0, NA)) +
+  theme_bw(base_size = 18) +
+  theme(legend.position = c(0.075, 0.85), legend.background = element_blank()) +
+  ggthemes::scale_color_colorblind() +
+  ggthemes::scale_fill_colorblind() +
+  labs(x = 'Year', y = 'Catch (kt)', fill = 'Model', color = 'Model', lty = 'Model')
+
+# SSB Bias
+cl_bias_plot <- bias_ts_plot(df = ssb_bias_df, title = 'SSB Bias') +
+  geom_line(lwd = 1, alpha = 0.85) +
+  geom_point(ssb_bias_df %>% filter(cl_yr == year),
+             mapping = aes(x = year, y = median, fill = cl_yr),
+             pch = 21, size = 4, color = 'black', alpha = 0.85) +
+  labs(x = 'Year', y = 'Relative Error in SSB', title = '', color = '', fill = '') +
+  scale_color_viridis_c(option = 'magma', direction = -1) +
+  scale_fill_viridis_c(option = 'magma', direction = -1) +
+  facet_grid(model~.) +
+  theme_bw(base_size = 18) +
+  coord_cartesian(ylim = c(-0.5, 0.5)) +
+  theme(legend.position = c(0.875, 0.08),
+        legend.background = element_blank())
+
+# Align all 3 individual plots first
+aligned <- cowplot::align_plots(
+  ssb_base_plot,
+  catch_base_plot,
+  cl_bias_plot,
+  align = 'hv',
+  axis = 'tblr'
+)
+
+# Plot
+left_col <- cowplot::plot_grid(aligned[[1]], aligned[[2]], ncol = 1,
+                               labels = c('A', 'B'), label_size = 30, hjust = -0.55, vjust =  2.5)
+cowplot::plot_grid(left_col, aligned[[3]],
+                   rel_widths = c(0.7, 0.3), labels = c('', 'C'),
+                   label_size = 30, hjust = -0.55, vjust =  2.5)
+
+ggsave(file.path(fig_dir, 'mse_base.png'), width = 18, height = 15, dpi = 300)
 

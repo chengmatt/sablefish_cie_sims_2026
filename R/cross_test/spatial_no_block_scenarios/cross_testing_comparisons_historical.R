@@ -71,8 +71,8 @@ library(tidyverse)
 # Historical Survey Design (1960 - 2024) ----------------------------------
 
 # Read in estimation models
-sgl_rg <- readRDS(here("outputs", "cross_test", "spatial_no_block_scenarios", "single_region_crosstest_lowsamp.RDS"))
-faa <- readRDS(here("outputs", "cross_test", "spatial_no_block_scenarios", "faa_crosstest_lowsamp_firsthalf.RDS")) # Model 19
+sgl_rg_models <- readRDS(here("outputs", "cross_test", "spatial_no_block_scenarios", "single_region_crosstest_lowsamp.RDS"))
+faa <- readRDS(here("outputs", "cross_test", "spatial_no_block_scenarios", "faa_crosstest_lowsamp_fifthpart.RDS")) # Model 19
 three_rg_low <- readRDS(here("outputs", "cross_test", "spatial_no_block_scenarios", "three_region_crosstest_lowsamp.RDS"))
 three_rg_high <- readRDS(here("outputs", "cross_test", "spatial_no_block_scenarios", "three_region_crosstest_highsamp.RDS"))
 
@@ -81,7 +81,12 @@ oms <- readRDS(here("outputs", 'cross_test', "spatial_no_block_scenarios", "spt_
 
 # Reverse order of FAA models
 faa_model <- vector("list", 100)
-for(i in 1:100) faa_model[[i]] <- faa[[i]][[19]]
+for(i in 1:100) faa_model[[i]] <- faa[[i]][[187]]
+
+# Reverse order of singl region models
+sgl_rg <- vector("list", 100)
+for(i in 1:100) sgl_rg[[i]] <- sgl_rg_models[[i]][[4]]
+
 
 # Dimensions
 n_yrs <- 65
@@ -586,3 +591,4 @@ ggplot(move_ribbon, aes(x = ages, fill = Type, color = Type)) +
                      scales = "free", independent = "all") +
   theme_bw(base_size = 15)
 ggsave(file.path(fig_dir_ct, 'movement_bias_historical.png'), width = 10, height = 8, dpi = 300)
+

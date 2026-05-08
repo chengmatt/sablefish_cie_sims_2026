@@ -18,10 +18,15 @@
 #'   length-limited surveys.
 #' @param srv_wgt numbers', 'biomass', or 'eqwt' weighting for survey comps (default, numbers)
 #' @param fish_wgt numbers', 'biomass', or 'eqwt' weighting for fishery comps (default, biomass)
+#' @param srv_block Whether or not to use survey blocks
+#' @param fish_block Whether or not to use fishery blocks
 #'
 #' @return A fully configured SPoRC estimation-model `input_list` for a
 #'   single-region model.
-single_region_em <- function(sim_env, y, sim, srv_idx_se = 0.2, age_lag = 1, lls_design_type, srv_wgt = 'numbers', fish_wgt = 'biomass') {
+single_region_em <- function(sim_env, y, sim, srv_idx_se = 0.2, age_lag = 1,
+                             lls_design_type, srv_wgt = 'numbers', fish_wgt = 'biomass',
+                             srv_block = FALSE,
+                             fish_block = FALSE) {
 
   # Get simulated data
   sim_data <- simulation_data_to_SPoRC(sim_env, y, sim)
@@ -169,10 +174,17 @@ single_region_em <- function(sim_env, y, sim, srv_idx_se = 0.2, age_lag = 1, lls
   # Fishery Selex
   # defining priors
   sex_par <- expand.grid(sex = 1:2, par = 1:2)
-  fleet_blocks <- data.frame(
-    fleet = c(1, 2),
-    block = c(1, 1)
-  )
+  if(fish_block == FALSE) {
+    fleet_blocks <- data.frame(
+      fleet = c(1, 2),
+      block = c(1, 1)
+    )
+  } else {
+    fleet_blocks <- data.frame(
+      fleet = c(1, 2, 1),
+      block = c(1, 1, 2)
+    )
+  }
 
   # merge together (note that unlike the operational assessment, selectivity
   # blocks are reduced from 3 to 2)
@@ -199,8 +211,14 @@ single_region_em <- function(sim_env, y, sim, srv_idx_se = 0.2, age_lag = 1, lls
   input_list <- Setup_Mod_Fishsel_and_Q(input_list = input_list,
                                         cont_tv_fish_sel = c("none_Fleet_1", "none_Fleet_2"),
                                         fish_sel_blocks =
-                                          c("none_Fleet_1",
-                                            "none_Fleet_2"),
+                                          if(fish_block == FALSE) {
+                                            c("none_Fleet_1",
+                                              "none_Fleet_2")
+                                          } else {
+                                            c("Block_1_Year_1-55_Fleet_1",
+                                              "Block_2_Year_56-terminal_Fleet_1",
+                                              "none_Fleet_2")
+                                          },
                                         fish_sel_model =
                                           c("logist1_Fleet_1", "gamma_Fleet_2"),
                                         fish_q_blocks =
@@ -217,10 +235,17 @@ single_region_em <- function(sim_env, y, sim, srv_idx_se = 0.2, age_lag = 1, lls
   sex_par <- expand.grid(sex = 1:2, par = 1:2)
 
   # Define valid fleet-block combinations (only estimating domestic and jp LLS)
-  fleet_blocks <- data.frame(
-    fleet = c(1, 3),
-    block = c(1, 1)
-  )
+  if(srv_block == FALSE) {
+    fleet_blocks <- data.frame(
+      fleet = c(1, 3),
+      block = c(1, 1)
+    )
+  } else{
+    fleet_blocks <- data.frame(
+      fleet = c(1, 3, 1),
+      block = c(1, 1, 2)
+    )
+  }
 
   # Merge to get all valid combinations
   srv_selex_structure <- merge(fleet_blocks, sex_par)
@@ -243,10 +268,18 @@ single_region_em <- function(sim_env, y, sim, srv_idx_se = 0.2, age_lag = 1, lls
                                            "none_Fleet_2",
                                            "none_Fleet_3"),
                                        srv_sel_blocks =
-                                         c("none_Fleet_1",
-                                           "none_Fleet_2",
-                                           "none_Fleet_3"
-                                         ),
+                                         if(srv_block == FALSE) {
+                                           c("none_Fleet_1",
+                                             "none_Fleet_2",
+                                             "none_Fleet_3"
+                                           )
+                                         } else {
+                                           c("Block_1_Year_1-55_Fleet_1",
+                                             "Block_2_Year_56-terminal_Fleet_1",
+                                             "none_Fleet_2",
+                                             "none_Fleet_3"
+                                           )
+                                         },
                                        srv_sel_model =
                                          c("logist1_Fleet_1",
                                            "exponential_Fleet_2",
