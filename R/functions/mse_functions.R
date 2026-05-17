@@ -535,7 +535,7 @@ run_single_rg_closedloop_parallel <- function(sim_env, n_sims, fleet_allocation,
 
 
   plan(multisession, workers = n_cores)
-  options(future.globals.maxSize = 8e9)
+  options(future.globals.maxSize = 15e9)
   handlers(handler_progress(format = "[:bar] :percent"))
 
   # storage containers for models

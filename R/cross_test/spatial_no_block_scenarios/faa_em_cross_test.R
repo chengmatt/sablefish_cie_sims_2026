@@ -578,13 +578,20 @@ retros_w_francis_df <- data.table::rbindlist(retros_w_francis)
 write.csv(retros_w_francis_df, here("outputs", "cross_test", "spatial_no_block_scenarios", "faa_finalized_cross_test_retro_francis.csv"))
 
 # Process Results ---------------------------------------------------------
+n <- nrow(ems_grid)
+split_names <- c("firstpart", "secondpart", "thirdpart", "fourthpart", "fifthpart", "sixthpart")
+n_parts <- length(split_names)
+splits <- lapply(1:n_parts, function(i) seq(ceiling((i-1)*n/n_parts) + 1, ceiling(i*n/n_parts)))
+
 ssb_store <- array(NA, dim = c(65, 100, n + 1))
 rec_store <- array(NA, dim = c(65, 100, n + 1))
 dep_store <- array(NA, dim = c(65, 100, n + 1))
+conv_df <- data.frame()
 
 depletion_om <- colSums(lowsamp$SSB[,-66,1]) / sum(lowsamp$SSB[,1,1])
 ssb_om <- colSums(lowsamp$SSB[,-66,1])
 rec_om <- colSums(lowsamp$Rec[,-66,1])
+
 
 for(part in 1:n_parts) {
   part_data <- readRDS(here("outputs", "cross_test", "spatial_no_block_scenarios",
@@ -595,6 +602,7 @@ for(part in 1:n_parts) {
     for(i in 1:100) {
       tryCatch({
         if(length(part_data[[i]][[mod]]) > 1) {
+
           ssb_em <- as.vector(t(part_data[[i]][[mod]]$rep$SSB))
           rec_em <- as.vector(t(part_data[[i]][[mod]]$rep$Rec))
 
@@ -603,6 +611,11 @@ for(part in 1:n_parts) {
 
           depletion_em <- ssb_em / ssb_em[1]
           dep_store[, i, mod] <- (depletion_em - depletion_om) / depletion_om
+
+          # get convergence
+          tmp_conv <- data.frame(model = mod, sim = i, pd = part_data[[i]][[mod]]$sd_rep$pdHess,
+                                 grad = max(abs(part_data[[i]][[mod]]$sd_rep$gradient.fixed)))
+          conv_df <- rbind(tmp_conv, conv_df)
         }
       }, error = function(e) NULL)
     }
@@ -612,6 +625,14 @@ for(part in 1:n_parts) {
   gc()
 }
 
+conv_df %>%
+  mutate(conv = ifelse(pd == TRUE & grad <= 1e-5, T, F)) %>%
+  group_by(model) %>%
+  summarize(sum = sum(conv)) %>%
+  filter(model %in% 1:56
+         # model %in% c(22, 1, 8, 5, 19)
+         ) %>%
+  left_join(ems_grid, by = c("model" = "model_id")) %>% view()
 
 # which model has the minimum mean absolute bias?
 reshape2::melt(ssb_store) %>%
@@ -646,14 +667,19 @@ dep_sum_results <- reshape2::melt(dep_store) %>%
   left_join(ems_grid, by = c("Var3" = "model_id"))
 
 ssb_sum_results %>%
+  drop_na() %>%
   ggplot(aes(x = fishery_structure, y = median)) +
   geom_boxplot() +
   geom_hline(yintercept = 0, lty = 2, col = 'black') +
   coord_cartesian(ylim = c(-0.25, 0.25)) +
-  facet_grid(survey_selex~fishery_selex, scales = 'free') +
+  facet_grid(survey_selex ~ fishery_selex, scales = 'free',
+             labeller = labeller(
+               survey_selex = \(x) paste("Survey:", x),
+               fishery_selex = \(x) paste("Fishery:", x)
+             )) +
   theme_bw(base_size = 12) +
   theme(legend.position = 'top') +
-  labs(x = 'Yr', y = 'SSB RE')
+  labs(x = 'Fishery Fleet Structure', y = 'Spawning Stock Biomass Relative Error')
 
 ssb_sum_results %>%
   filter(fishery_selex != 'All_Gamma' & survey_selex != 'All_Gamma') %>%
@@ -664,7 +690,7 @@ ssb_sum_results %>%
   facet_grid(survey_selex~fishery_selex, scales = 'free') +
   theme_bw(base_size = 12) +
   theme(legend.position = 'top') +
-  labs(x = 'Yr', y = 'SSB RE')
+  labs(x = 'Fishery Fleet Structure', y = 'Spawning Stock Biomass Relative Error')
 
 ssb_sum_results %>%
   filter((fishery_selex != 'All_Gamma' &
@@ -677,7 +703,7 @@ ssb_sum_results %>%
   facet_grid(survey_selex~fishery_selex, scales = 'free') +
   theme_bw(base_size = 12) +
   theme(legend.position = 'top') +
-  labs(x = 'Yr', y = 'SSB RE')
+  labs(x = 'Fishery Fleet Structure', y = 'Spawning Stock Biomass Relative Error')
 
 ssb_sum_results %>%
   filter((fishery_selex != 'All_Gamma' &
@@ -692,38 +718,30 @@ ssb_sum_results %>%
   facet_grid(survey_selex~fishery_selex, scales = 'free') +
   theme_bw(base_size = 12) +
   theme(legend.position = 'top') +
-  labs(x = 'Yr', y = 'SSB RE')
+  labs(x = 'Fishery Fleet Structure', y = 'Spawning Stock Biomass Relative Error')
 
 # 3F1T models seem to do better in estimaitng inittal pop scale
 ssb_sum_results %>%
-  filter(
-         Var3 %in% c(5, 1, 19)) %>%
-  ggplot(aes(x = Var1, y = median, ymin = lwr, ymax = upr, fill = factor(Var3), color = factor(Var3))) +
+  filter(Var3 %in% c(22, 1, 8, 5, 19)) %>%
+  left_join(ems_grid %>%
+              filter(model_id %in% c(22, 1, 8, 5, 19)) %>%
+              select(model_id, fishery_structure, fishery_selex, survey_selex),
+            by = c("Var3" = 'model_id')) %>%
+  mutate(model_name = paste(
+    fishery_structure.x, paste("FS:", fishery_selex.x), paste("SS:", survey_selex.x),
+    sep = '_'
+  )) %>%
+  ggplot(aes(x = Var1 + 1959, y = median, ymin = lwr, ymax = upr,
+             fill = factor(model_name), color = factor(model_name))) +
+  geom_ribbon(alpha = 0.1, color = NA) +
   geom_line(lwd = 1.3) +
-  geom_ribbon(alpha = 0.35, color = NA) +
   geom_hline(yintercept = 0, lty = 2, col = 'black') +
   coord_cartesian(ylim = c(-0.25, 0.25)) +
-  # facet_wrap(~Var3, scales = 'free') +
-  theme_bw(base_size = 12) +
-  theme(legend.position = 'top') +
-  labs(x = 'Yr', y = 'SSB RE')
+  theme_bw(base_size = 15) +
+  labs(x = 'Year',
+       y = 'Spawning Stock Biomass Relative Error',
+       color = 'Model', fill = 'Model')
 
-ssb_sum_results %>%
-  filter((fishery_selex != 'All_Gamma' &
-            survey_selex != 'All_Gamma'),
-         fishery_structure != '1F_1T',
-         (fishery_selex != 'All_Logist' &
-            survey_selex != 'All_Logist'),
-         fishery_structure == '3F_1T') %>%
-  ggplot(aes(x = Var3, y = median, group = Var3)) +
-  geom_boxplot() +
-  geom_hline(yintercept = 0, lty = 2, col = 'black') +
-  coord_cartesian(ylim = c(-0.25, 0.25)) +
-  # facet_wrap(~Var3, scales = 'free') +
-  theme_bw(base_size = 12) +
-  theme(legend.position = 'top') +
-  labs(x = 'Yr', y = 'SSB RE')
-#
 # # Sensitivity Run Results ---------------------------------------------------------
 # model_list_lowsamp <- readRDS(here("outputs", "cross_test", "spatial_no_block_scenarios", "faa_crosstest_movesense_finalFAA.RDS"))
 # model_list_lowsamp_francis <- readRDS(here("outputs", "cross_test", "spatial_no_block_scenarios", "faa_crosstest_movesense_finalFAA_francis.RDS"))

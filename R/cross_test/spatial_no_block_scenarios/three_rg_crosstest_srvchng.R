@@ -24,7 +24,7 @@ n_sims <- 100 # number of sims
 
 # Run EMs, low sample OM -----------------------------------------------------------------
 handlers(global = TRUE)  # progress bar
-plan(multisession, workers = 6)
+plan(multisession, workers = 15)
 options(future.globals.maxSize = 15e9)
 
 # loop through
@@ -126,7 +126,7 @@ saveRDS(model_list_srvchng, here("outputs", "cross_test", "spatial_no_block_scen
 
 # All design -----------------------------------------------------------------
 handlers(global = TRUE)  # progress bar
-plan(multisession, workers = 7)
+plan(multisession, workers = 15)
 options(future.globals.maxSize = 15e9)
 
 # loop through

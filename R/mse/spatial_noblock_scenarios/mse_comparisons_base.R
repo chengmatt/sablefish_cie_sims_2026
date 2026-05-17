@@ -687,9 +687,6 @@ anim_save(file.path(fig_dir, 'spt_regional_tracking_base.gif'))
 
 
 # Publication Plots -------------------------------------------------------
-ssb_global_df <- ssb_global_df %>% mutate(model = factor(model, levels = c("five_rg", 'sgl', 'faa', 'three_rg')))
-catch_global_df <- catch_global_df %>% mutate(model = factor(model, levels = c("five_rg", 'sgl', 'faa', 'three_rg')))
-
 # SSB
 ssb_base_plot <- ggplot() +
   geom_ribbon(ssb_global_df %>% filter(year >= st_yr + 1960),

@@ -23,7 +23,7 @@ n_sims <- 100 # number of sims
 
 # Current design  -----------------------------------------------------------------
 handlers(global = TRUE)  # progress bar
-plan(multisession, workers = 6)
+plan(multisession, workers = 10)
 options(future.globals.maxSize = 15e9)
 
 # loop through
@@ -109,7 +109,7 @@ plot(apply(abs((rec_em_results - rec_om_results) / rec_om_results), 1, median), 
 
 # All design -----------------------------------------------------------------
 handlers(global = TRUE)  # progress bar
-plan(multisession, workers = 7)
+plan(multisession, workers = 10)
 options(future.globals.maxSize = 15e9)
 
 # loop through
@@ -195,7 +195,7 @@ plot(apply(abs((rec_em_results - rec_om_results) / rec_om_results), 1, median), 
 
 # Historical design -----------------------------------------------------------------
 handlers(global = TRUE)  # progress bar
-plan(multisession, workers = 7)
+plan(multisession, workers = 10)
 options(future.globals.maxSize = 15e9)
 # loop through
 with_progress({

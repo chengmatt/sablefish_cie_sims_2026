@@ -357,8 +357,8 @@ with_progress({
     asmt_list$par$ln_srv_fixed_sel_pars[] <- log(2)
 
     # reset weights at 20 and then weight by catch
-    asmt_list$data$ISS_FishAgeComps[,,,1:3] <- 150 * asmt_list$data$ObsCatch[,,1:3] / rowSums(asmt_list$data$ObsCatch[,,1:3])
-    asmt_list$data$ISS_SrvAgeComps[,,,1:3] <- 150 * asmt_list$data$ObsSrvIdx[,,1:3] / rowSums(asmt_list$data$ObsSrvIdx[,,1:3])
+    asmt_list$data$ISS_FishAgeComps[,,,1:3] <- 100 * asmt_list$data$ObsCatch[,,1:3] / rowSums(asmt_list$data$ObsCatch[,,1:3])
+    asmt_list$data$ISS_SrvAgeComps[,,,1:3] <- 100 * asmt_list$data$ObsSrvIdx[,,1:3] / rowSums(asmt_list$data$ObsSrvIdx[,,1:3])
 
     # fit model
     model <- tryCatch({

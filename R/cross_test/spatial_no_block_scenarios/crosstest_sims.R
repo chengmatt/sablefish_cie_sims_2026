@@ -54,10 +54,10 @@ sim_list_lowsamp <- condition_closed_loop_simulations(
   random = NULL,
   recruitment_opt = 'resample_from_input',
   # setup variances
-  ISS_FishAgeComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
-  ISS_FishLenComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
-  ISS_SrvAgeComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
-  ISS_SrvLenComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ISS_FishAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_FishLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_SrvAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ISS_SrvLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
   ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
   n_tags_rel_input = rep(2e3, nrow(data$tag_release_indicator))
@@ -80,10 +80,10 @@ sim_list_lowsamp_tvmove <- condition_closed_loop_simulations(
   random = NULL,
   recruitment_opt = 'resample_from_input',
   # setup variances
-  ISS_FishAgeComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
-  ISS_FishLenComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
-  ISS_SrvAgeComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
-  ISS_SrvLenComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ISS_FishAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_FishLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_SrvAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ISS_SrvLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
   ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
   n_tags_rel_input = rep(2e3, nrow(data$tag_release_indicator))
@@ -105,10 +105,10 @@ sim_list_dt <- condition_closed_loop_simulations(
   random = NULL,
   recruitment_opt = 'resample_from_input',
   # setup variances
-  ISS_FishAgeComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
-  ISS_FishLenComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
-  ISS_SrvAgeComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
-  ISS_SrvLenComps = array(30, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ISS_FishAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_FishLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
+  ISS_SrvAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
+  ISS_SrvLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
   ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
   n_tags_rel_input = rep(2e3, nrow(data$tag_release_indicator))
@@ -200,7 +200,7 @@ sim_env_highsamp <- Setup_sim_env(sim_list = sim_list_highsamp)
 sim_env_highsamp <- add_aggregated_obj_to_simenv(sim_env = sim_env_highsamp)
 sim_env_highsamp <- run_single_rg_closedloop_parallel(sim_env = sim_env_highsamp, n_sims = n_sims,
                                                       fleet_allocation = fleet_allocation,
-                                                      lls_design_type = "historical", n_cores = 8)
+                                                      lls_design_type = "historical", n_cores = 15)
 saveRDS(sim_env_highsamp, here("outputs", "cross_test", "spatial_no_block_scenarios", "spt_rand_OM_highsamp.RDS"))
 
 # Single-region high sample size - agg test
