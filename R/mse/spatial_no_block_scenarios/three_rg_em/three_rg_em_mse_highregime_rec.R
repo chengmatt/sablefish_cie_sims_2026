@@ -1,4 +1,4 @@
-# Purpose: To run a five region OM, with a single region EM (low regime recruitment)
+# Purpose: To run a five region OM, with a three region EM (high regime recruitment)
 # Creator: Matthew LH. Cheng (UAF - CFOS)
 # Date: 11/26/25
 
@@ -15,7 +15,6 @@ om_values <- readRDS(here("data", "spatial_outputs", "Spatial_MltRel_NoBlock_mod
 
 source(here("R", "functions", "mse_functions.R"))
 source(here("R", "functions", "three_rg_em.R"))
-
 
 # Condition OM ------------------------------------------------------------
 
@@ -43,7 +42,7 @@ fleet_allocation[,2] <- 1 - fleet_allocation[,1] # trawl gear allocation
 # mean recruitment
 R0_input <- array(0, dim = c(n_regions, n_years + closed_loop_yrs))
 R0_input[] <- om_values$rep$R0 * om_values$rep$Rec_trans_prop # mean recruitment from EM in all years
-R0_input[1:2,((n_years + 1):(n_years + 15))] <- om_values$rep$R0 * om_values$rep$Rec_trans_prop[1:2] * 0.25
+R0_input[1:2,((n_years + 1):(n_years + 15))] <- om_values$rep$R0 * om_values$rep$Rec_trans_prop[1:2] * 3
 R0_input <- replicate(n = n_sims, R0_input)
 
 # To simulate more tags or resimulate tags with new sample sizes
@@ -101,8 +100,8 @@ for(i in 1:25) {
                                                       age_lag = 1,
                                                       srv_wgt = 'numbers',
                                                       fish_wgt = 'numbers',
-                                                      n_cores = 13)
+                                                      n_cores = 6)
 
-  saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", paste("three_region_lowregimerec", "_", i, ".RDS", sep = "")))
+  saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_no_block_scenarios", paste("three_region_highregimerec", "_", i, ".RDS", sep = "")))
 
 }

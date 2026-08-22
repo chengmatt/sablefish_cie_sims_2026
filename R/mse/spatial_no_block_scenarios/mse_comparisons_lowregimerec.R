@@ -76,6 +76,41 @@ bias_spt_ts_plot <- function(df, title) {
     theme_bw(base_size = 13)
 }
 
+# Rotated densities of the terminal year distribution, returned as a narrow companion
+# panel to sit immediately right of a time series plot. df is simulation level
+# (model, year, sim, value) and y limits are lifted off main_plot so the strip shares
+# its scale exactly. Densities are trimmed to trim_q (matching the ribbon interval, so
+# tail sims do not stretch the axis) and share a common scaling, so relative peak
+# heights are comparable across models.
+terminal_density_panel <- function(df, term_yr, main_plot, alpha = 0.35,
+                                   trim_q = c(0.025, 0.975), base_size = 18) {
+
+  dens_df <- df %>%
+    filter(year == term_yr) %>%
+    group_by(model) %>%
+    reframe({
+      d <- density(value, na.rm = TRUE,
+                   from = quantile(value, trim_q[1], na.rm = TRUE),
+                   to   = quantile(value, trim_q[2], na.rm = TRUE))
+      tibble(value = d$x, dens = d$y)
+    }) %>%
+    mutate(dens = dens / max(dens))
+
+  ggplot(dens_df) +
+    geom_ribbon(mapping = aes(y = value, xmin = 0, xmax = dens, fill = factor(model)),
+                orientation = 'y', alpha = alpha, color = NA) +
+    geom_path(mapping = aes(y = value, x = dens, color = factor(model)), lwd = 1) +
+    coord_cartesian(ylim = ggplot_build(main_plot)$layout$panel_params[[1]]$y.range,
+                    xlim = c(0, 1.05), expand = FALSE) +
+    ggthemes::scale_color_colorblind() +
+    ggthemes::scale_fill_colorblind() +
+    theme_bw(base_size = base_size) +
+    theme(legend.position = 'none',
+          axis.title = element_blank(), axis.text = element_blank(),
+          axis.ticks = element_blank(), panel.grid = element_blank(),
+          plot.margin = margin(0, 0, 0, 0)) # sit tight against the time series
+}
+
 # Setup -------------------------------------------------------------------
 
 library(here)
@@ -85,27 +120,27 @@ library(gganimate)
 library(patchwork)
 
 source(here("R", "functions", "mse_functions.R"))
-file_dir <- here("outputs", "mse_results", "spatial_noblock_scenarios")
+file_dir <- here("outputs", "mse_results", "spatial_no_block_scenarios")
 fig_dir  <- here("outputs", "mse_results", "figs")
 dir.create(fig_dir, showWarnings = FALSE, recursive = TRUE)
 
 # Read in results ---------------------------------------------------------
 files <- list.files(file_dir, full.names = TRUE)
-sgl_rg_files <- files[stringr::str_detect(files, "single_region_highregimerec")]
+sgl_rg_files <- files[stringr::str_detect(files, "single_region_lowregimerec")]
 all_sgl_rg_results <- lapply(sgl_rg_files, readRDS)
 sgl_rg <- combine_results(all_sgl_rg_results)
 
 files <- list.files(file_dir, full.names = TRUE)
-faa_files <- files[stringr::str_detect(files, "faa_highregimerec")]
+faa_files <- files[stringr::str_detect(files, "faa_lowregimerec")]
 all_faa_results <- lapply(faa_files, readRDS)
 faa <- combine_results(all_faa_results)
 
 files <- list.files(file_dir, full.names = TRUE)
-three_rg_files <- files[stringr::str_detect(files, "three_region_highregimerec")]
+three_rg_files <- files[stringr::str_detect(files, "three_region_lowregimerec")]
 all_three_rg_results <- lapply(three_rg_files, readRDS)
 three_rg <- combine_results(all_three_rg_results)
 
-five_rg <- readRDS(here(file_dir, 'five_region_highregimerec.RDS'))
+five_rg <- readRDS(here(file_dir, 'five_region_lowregimerec.RDS'))
 
 ## Process MSE results ---------------------------------------------------------
 n_sims <- 100
@@ -160,14 +195,10 @@ ssb_rg_df <- reshape2::melt(ssb_results) %>%
   model = factor(model, levels = c('sgl', 'faa', 'three_rg', 'five_rg')),
   year = year + 1960)
 
-ssb_global_df <- reshape2::melt(ssb_results) %>%
+ssb_global_sim_df <- reshape2::melt(ssb_results) %>%
   rename(model = Var1, region = Var2, year = Var3, sim = Var4) %>%
   group_by(model, year, sim) %>%
-  summarize(value = sum(value)) %>%
-  group_by(model, year) %>%
-  summarize(median = median(value, na.rm = T),
-            lwr = quantile(value, 0.025, na.rm = T),
-            upr = quantile(value, 0.975, na.rm = T)) %>%
+  summarize(value = sum(value), .groups = 'drop') %>%
   mutate(model = case_when(
     model == 1 ~ 'sgl',
     model == 2 ~ 'faa',
@@ -177,6 +208,12 @@ ssb_global_df <- reshape2::melt(ssb_results) %>%
   period = ifelse(year <= st_yr, "Historical", 'Projection'),
   model = factor(model, levels = c('sgl', 'faa', 'three_rg', 'five_rg')),
   year = year + 1960)
+
+ssb_global_df <- ssb_global_sim_df %>%
+  group_by(model, period, year) %>%
+  summarize(median = median(value, na.rm = T),
+            lwr = quantile(value, 0.025, na.rm = T),
+            upr = quantile(value, 0.975, na.rm = T), .groups = 'drop')
 
 rec_rg_df <- reshape2::melt(rec_results) %>%
   rename(model = Var1, region = Var2, year = Var3, sim = Var4) %>%
@@ -246,14 +283,10 @@ catch_rg_df <- reshape2::melt(catch_results) %>%
   model = factor(model, levels = c('sgl', 'faa', 'three_rg', 'five_rg')),
   year = year + 1960)
 
-catch_global_df <- reshape2::melt(catch_results) %>%
+catch_global_sim_df <- reshape2::melt(catch_results) %>%
   rename(model = Var1, region = Var2, year = Var3, fleet = Var4, sim = Var5) %>%
   group_by(model, year, sim) %>%
-  summarize(value = sum(value)) %>%
-  group_by(model, year) %>%
-  summarize(median = median(value, na.rm = T),
-            lwr = quantile(value, 0.025, na.rm = T),
-            upr = quantile(value, 0.975, na.rm = T)) %>%
+  summarize(value = sum(value), .groups = 'drop') %>%
   mutate(model = case_when(
     model == 1 ~ 'sgl',
     model == 2 ~ 'faa',
@@ -263,6 +296,12 @@ catch_global_df <- reshape2::melt(catch_results) %>%
   period = ifelse(year <= st_yr, "Historical", 'Projection'),
   model = factor(model, levels = c('sgl', 'faa', 'three_rg', 'five_rg')),
   year = year + 1960)
+
+catch_global_df <- catch_global_sim_df %>%
+  group_by(model, period, year) %>%
+  summarize(median = median(value, na.rm = T),
+            lwr = quantile(value, 0.025, na.rm = T),
+            upr = quantile(value, 0.975, na.rm = T), .groups = 'drop')
 
 apport_df <- reshape2::melt(catch_results) %>%
   rename(model = Var1, region = Var2, year = Var3, fleet = Var4, sim = Var5) %>%
@@ -306,7 +345,7 @@ ggplot() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'SSB', fill = 'Model', color = 'Model') +
   theme_bw(base_size = 13)
-ggsave(file.path(fig_dir, 'ssb_regional_highregimerec.png'), width = 14, height = 7, dpi = 300)
+ggsave(file.path(fig_dir, 'ssb_regional_lowregimerec.png'), width = 14, height = 7, dpi = 300)
 
 ggplot() +
   geom_ribbon(ssb_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.15, color = NA) +
@@ -318,7 +357,7 @@ ggplot() +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'SSB', fill = 'Model', color = 'Model')
-ggsave(file.path(fig_dir, 'ssb_global_highregimerec.png'), width = 8, height = 5, dpi = 300)
+ggsave(file.path(fig_dir, 'ssb_global_lowregimerec.png'), width = 8, height = 5, dpi = 300)
 
 ##### Catch -------------------------------------------------------------------
 ggplot() +
@@ -332,7 +371,7 @@ ggplot() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'Catch', fill = 'Model', color = 'Model') +
   theme_bw(base_size = 13)
-ggsave(file.path(fig_dir, 'catch_regional_highregimerec.png'), width = 14, height = 7, dpi = 300)
+ggsave(file.path(fig_dir, 'catch_regional_lowregimerec.png'), width = 14, height = 7, dpi = 300)
 
 ggplot() +
   geom_ribbon(catch_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.15, color = NA) +
@@ -344,7 +383,7 @@ ggplot() +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'Catch', fill = 'Model', color = 'Model')
-ggsave(file.path(fig_dir, 'catch_global_highregimerec.png'), width = 8, height = 5, dpi = 300)
+ggsave(file.path(fig_dir, 'catch_global_lowregimerec.png'), width = 8, height = 5, dpi = 300)
 
 ##### Recruitment -------------------------------------------------------------
 ggplot() +
@@ -358,7 +397,7 @@ ggplot() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'Recruitment', fill = 'Model', color = 'Model') +
   theme_bw(base_size = 13)
-ggsave(file.path(fig_dir, 'rec_regional_highregimerec.png'), width = 18, height = 7, dpi = 300)
+ggsave(file.path(fig_dir, 'rec_regional_lowregimerec.png'), width = 14, height = 7, dpi = 300)
 
 ggplot() +
   geom_ribbon(rec_global_df %>% filter(year >= st_yr + 1960, model == 'sgl'), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.15, color = NA) +
@@ -371,7 +410,7 @@ ggplot() +
   ggthemes::scale_fill_colorblind() +
   theme(legend.position = 'none') +
   labs(x = 'Year', y = 'Recruitment', fill = 'Model', color = 'Model')
-ggsave(file.path(fig_dir, 'rec_global_highregimerec.png'), width = 8, height = 5, dpi = 300)
+ggsave(file.path(fig_dir, 'rec_global_lowregimerec.png'), width = 8, height = 5, dpi = 300)
 
 ##### Apportionment -----------------------------------------------------------
 ggplot() +
@@ -384,7 +423,7 @@ ggplot() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'Apportionment', fill = 'Model', color = 'Model') +
   theme_bw(base_size = 13)
-ggsave(file.path(fig_dir, 'apportionment_highregimerec.png'), width = 14, height = 7, dpi = 300)
+ggsave(file.path(fig_dir, 'apportionment_lowregimerec.png'), width = 14, height = 7, dpi = 300)
 
 ## Process Estimation Bias Results ------------------------------------------------
 n_cl_yrs <- end_yr - st_yr + 1
@@ -506,22 +545,22 @@ scalar_bias_df <- rbind(
 
 ### EM Time Series Bias -----------------------------------------------------
 bias_ts_plot(ssb_bias_df, 'SSB Bias')
-ggsave(file.path(fig_dir, 'ssb_bias_highregimerec.png'), width = 10, height = 4, dpi = 300)
+ggsave(file.path(fig_dir, 'ssb_bias_lowregimerec.png'), width = 10, height = 4, dpi = 300)
 
 bias_ts_plot(dep_bias_df, 'Depletion Bias')
-ggsave(file.path(fig_dir, 'dep_bias_highregimerec.png'), width = 10, height = 4, dpi = 300)
+ggsave(file.path(fig_dir, 'dep_bias_lowregimerec.png'), width = 10, height = 4, dpi = 300)
 
 bias_ts_plot(totbiom_bias_df, 'Total Biomass Bias')
-ggsave(file.path(fig_dir, 'totbiom_bias_highregimerec.png'), width = 10, height = 4, dpi = 300)
+ggsave(file.path(fig_dir, 'totbiom_bias_lowregimerec.png'), width = 10, height = 4, dpi = 300)
 
 bias_ts_plot(rec_bias_df, 'Recruitment Bias')
-ggsave(file.path(fig_dir, 'rec_bias_highregimerec.png'), width = 10, height = 4, dpi = 300)
+ggsave(file.path(fig_dir, 'rec_bias_lowregimerec.png'), width = 10, height = 4, dpi = 300)
 
 bias_spt_ts_plot(spt_ssb_bias_df, "Spatial SSB Bias")
-ggsave(file.path(fig_dir, 'spt_ssb_bias_highregimerec.png'), width = 10, height = 4, dpi = 300)
+ggsave(file.path(fig_dir, 'spt_ssb_bias_lowregimerec.png'), width = 10, height = 4, dpi = 300)
 
 bias_spt_ts_plot(spt_rec_bias_df, "Spatial Recruitment Bias")
-ggsave(file.path(fig_dir, 'spt_rec_bias_highregimerec.png'), width = 10, height = 4, dpi = 300)
+ggsave(file.path(fig_dir, 'spt_rec_bias_lowregimerec.png'), width = 10, height = 4, dpi = 300)
 
 
 ### EM Scalar Bias ----------------------------------------------------------
@@ -532,7 +571,7 @@ ggplot(scalar_bias_df, aes(x = cl_yr, y = median)) +
   geom_hline(yintercept = 0, linetype = 'dashed') +
   labs(x = 'Year', y = 'Relative Error', title = 'R0 and Survey q Bias') +
   theme_bw(base_size = 13)
-ggsave(file.path(fig_dir, 'scalar_bias_highregimerec.png'), width = 10, height = 6, dpi = 300)
+ggsave(file.path(fig_dir, 'scalar_bias_lowregimerec.png'), width = 10, height = 6, dpi = 300)
 
 ### Animate EM Time Series Bias ---------------------------------------------
 build_tracking_df <- function(est_arr, true_arr, bias_arr, metric_label) {
@@ -600,7 +639,7 @@ p <- ggplot(combined_anim_df, aes(x = year, y = median, color = type, fill = typ
   ease_aes('linear')
 
 animate(p, nframes = n_cl_yrs, fps = 4, width = 1000, height = 1000)
-anim_save(file.path(fig_dir, 'all_tracking_highregimerec.gif'))
+anim_save(file.path(fig_dir, 'all_tracking_lowregimerec.gif'))
 
 ### Animate Spatial Model Regional SSB/Rec Bias --------------------------------
 
@@ -680,11 +719,15 @@ p_spt <- ggplot(spt_combined_anim_df,
   ease_aes('linear')
 
 animate(p_spt, nframes = n_cl_yrs, fps = 4, width = 900, height = 700)
-anim_save(file.path(fig_dir, 'spt_regional_tracking_highregimerec.gif'))
+anim_save(file.path(fig_dir, 'spt_regional_tracking_lowregimerec.gif'))
+
 
 # Publication Plots -------------------------------------------------------
 ssb_global_df <- ssb_global_df %>% mutate(model = factor(model, levels = c("five_rg", 'sgl', 'faa', 'three_rg')))
 catch_global_df <- catch_global_df %>% mutate(model = factor(model, levels = c("five_rg", 'sgl', 'faa', 'three_rg')))
+# re-level the sim level frames too, so the density strips take the same colours
+ssb_global_sim_df <- ssb_global_sim_df %>% mutate(model = factor(model, levels = c("five_rg", 'sgl', 'faa', 'three_rg')))
+catch_global_sim_df <- catch_global_sim_df %>% mutate(model = factor(model, levels = c("five_rg", 'sgl', 'faa', 'three_rg')))
 
 # SSB
 ssb_base_plot <- ggplot() +
@@ -697,7 +740,8 @@ ssb_base_plot <- ggplot() +
                                                                           color = factor(model), lty = factor(model)), lwd = 1.3) +
   coord_cartesian(ylim = c(0, NA)) +
   theme_bw(base_size = 18) +
-  theme(legend.position = c(0.075, 0.85), legend.background = element_blank()) +
+  theme(legend.position = c(0.075, 0.85), legend.background = element_blank(),
+        plot.margin = margin(9, 4, 9, 9)) + # trimmed right, to pull the density strip in
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'SSB (kt)', fill = 'Model', color = 'Model', lty = 'Model')
@@ -709,12 +753,13 @@ catch_base_plot <- ggplot() +
               mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model),
                             fill = factor(model)), alpha = 0.1, color = NA) +
   geom_line(catch_global_df %>% filter(year >= 60 + 1960, year <= st_yr + 1960), mapping = aes(x = year, y = median,
-                                                                                               lty = factor(model)), color = 'black', lwd = 1.3) +
+                                                                            lty = factor(model)), color = 'black', lwd = 1.3) +
   geom_line(catch_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median,
                                                                             color = factor(model), lty = factor(model)), lwd = 1.3) +
   coord_cartesian(ylim = c(0, NA)) +
   theme_bw(base_size = 18) +
-  theme(legend.position = c(0.075, 0.85), legend.background = element_blank()) +
+  theme(legend.position = c(0.075, 0.85), legend.background = element_blank(),
+        plot.margin = margin(9, 4, 9, 9)) + # trimmed right, to pull the density strip in
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'Catch (kt)', fill = 'Model', color = 'Model', lty = 'Model')
@@ -734,20 +779,34 @@ cl_bias_plot <- bias_ts_plot(df = ssb_bias_df, title = 'SSB Bias') +
   theme(legend.position = c(0.875, 0.08),
         legend.background = element_blank())
 
-# Align all 3 individual plots first
+# Align all 3 individual plots first. Align left but not right: cl_bias_plot carries
+# facet strips on its right edge, so aligning 'r' would pad ~28pt of dead space onto
+# the right of the time series, exactly where the density strips need to sit.
 aligned <- cowplot::align_plots(
   ssb_base_plot,
   catch_base_plot,
   cl_bias_plot,
   align = 'hv',
-  axis = 'tblr'
+  axis = 'tbl'
 )
 
+# Terminal year densities, glued to the right of each time series
+ssb_dens_plot   <- terminal_density_panel(ssb_global_sim_df, term_yr = end_yr + 1960,
+                                          main_plot = ssb_base_plot)
+catch_dens_plot <- terminal_density_panel(catch_global_sim_df, term_yr = end_yr + 1960,
+                                          main_plot = catch_base_plot)
+
+ssb_row   <- cowplot::plot_grid(aligned[[1]], ssb_dens_plot, nrow = 1,
+                                rel_widths = c(1, 0.1), align = 'h', axis = 'tb')
+catch_row <- cowplot::plot_grid(aligned[[2]], catch_dens_plot, nrow = 1,
+                                rel_widths = c(1, 0.1), align = 'h', axis = 'tb')
+
 # Plot
-left_col <- cowplot::plot_grid(aligned[[1]], aligned[[2]], ncol = 1,
+left_col <- cowplot::plot_grid(ssb_row, catch_row, ncol = 1,
                                labels = c('A', 'B'), label_size = 30, hjust = -0.55, vjust =  2.5)
-cowplot::plot_grid(left_col, aligned[[3]],
-                   rel_widths = c(0.7, 0.3), labels = c('', 'C'),
+cowplot::plot_grid(left_col, aligned[[3]], NULL, nrow = 1,
+                   rel_widths = c(0.70, 0.24, 0.06), labels = c('', 'C', ''),
                    label_size = 30, hjust = -0.55, vjust =  2.5)
-ggsave(file.path(fig_dir, 'mse_highegimerec.png'), width = 18, height = 15, dpi = 300)
+
+ggsave(file.path(fig_dir, 'mse_lowregimerec.png'), width = 20, height = 15, dpi = 300, bg = 'white')
 

@@ -1,4 +1,4 @@
-# Purpose: To self test the single region EM prior to the MSE year "R/cross_test/spatial_no_block_scenarios/sglrg_em_crosstest.R"
+# Purpose: To self test the single region EM prior to the MSE year
 # across a combination of weighting schemes for the survey and fishery
 # Creator: Matthew LH. Cheng
 # Date: 12/9/25

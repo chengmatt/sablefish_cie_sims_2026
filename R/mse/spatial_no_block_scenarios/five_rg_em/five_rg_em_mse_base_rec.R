@@ -1,4 +1,4 @@
-# Purpose: To run a five region OM, with a single region EM (low regime recruitment)
+# Purpose: To run a five region OM, with a five region EM "true values" (base recruitment)
 # Creator: Matthew LH. Cheng (UAF - CFOS)
 # Date: 11/26/25
 
@@ -14,7 +14,6 @@ om_values <- readRDS(here("data", "spatial_outputs", "Spatial_MltRel_NoBlock_mod
 
 source(here("R", "functions", "mse_functions.R"))
 source(here("R", "functions", "single_region_em.R"))
-
 
 # Condition OM ------------------------------------------------------------
 
@@ -39,12 +38,6 @@ fleet_allocation <- array(NA, dim = c(n_regions, n_fish_fleets))
 fleet_allocation[,1] <- c(0.5,0.75,0.8,0.8,0.95) # from fmp
 fleet_allocation[,2] <- 1 - fleet_allocation[,1] # trawl gear allocation
 
-# mean recruitment
-R0_input <- array(0, dim = c(n_regions, n_years + closed_loop_yrs))
-R0_input[] <- om_values$rep$R0 * om_values$rep$Rec_trans_prop # mean recruitment from EM in all years
-R0_input[1:2,((n_years + 1):(n_years + 15))] <- om_values$rep$R0 * om_values$rep$Rec_trans_prop[1:2] * 0.25
-R0_input <- replicate(n = n_sims, R0_input)
-
 # Condition closed-loop simulations, random recruitment
 sim_list <- condition_closed_loop_simulations(
   closed_loop_yrs = closed_loop_yrs,
@@ -55,15 +48,14 @@ sim_list <- condition_closed_loop_simulations(
   sd_rep = sd_rep,
   rep = rep,
   random = NULL,
-  recruitment_opt = 'mean_rec',
+  recruitment_opt = 'resample_from_input',
   # setup variances
   ISS_FishAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
   ISS_FishLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_fish_fleets, n_sims)),
   ISS_SrvAgeComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ISS_SrvLenComps = array(20, dim = c(n_regions, n_years + closed_loop_yrs, om_values$data$n_sexes, n_srv_fleets, n_sims)),
   ObsFishIdx_SE = array(NA, dim = c(n_regions, n_years + closed_loop_yrs, n_fish_fleets)),
-  ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets)),
-  R0_input = R0_input
+  ObsSrvIdx_SE = array(0.2, dim = c(n_regions, n_years + closed_loop_yrs, n_srv_fleets))
 )
 
 # Get constant B40 for comparison
@@ -76,14 +68,13 @@ global_spr <- Get_Reference_Points(data = om_values$data,
                                    rec_age = 2
 )
 
-
 # Run MSEs ----------------------------------------------------------------
 sim_env_current <- Setup_sim_env(sim_list = sim_list)
 sim_env_current <- add_aggregated_obj_to_simenv(sim_env = sim_env_current)
 sim_env_current <- run_five_rg_closedloop_parallel(sim_env = sim_env_current, n_sims = n_sims,
-                                                   fleet_allocation = fleet_allocation,
-                                                   hcr_type = 'global_ssb_global_b40',
-                                                   n_cores = 7)
+                                                    fleet_allocation = fleet_allocation,
+                                                    hcr_type = 'global_ssb_global_b40',
+                                                    n_cores = 7)
 
-saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", "five_region_lowregimerec.RDS"))
+saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_no_block_scenarios", "five_region_base.RDS"))
 

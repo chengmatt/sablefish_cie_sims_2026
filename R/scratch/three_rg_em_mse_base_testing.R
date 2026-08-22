@@ -98,5 +98,5 @@ sim_env_current <- run_three_rg_closedloop_parallel(sim_env = sim_env_current,
                                                     fish_wgt = 'numbers',
                                                     n_cores = 1)
 
-saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", "three_region_test.RDS"))
+saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_no_block_scenarios", "three_region_test.RDS"))
 

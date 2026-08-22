@@ -81,7 +81,7 @@ for(i in 1:3) {
                                                        srv_wgt = 'numbers',
                                                        fish_wgt = 'numbers', n_cores = 6)
 
-  saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_noblock_scenarios", paste("single_region_base", "_", i, ".RDS", sep = "")))
+  saveRDS(sim_env_current, here("outputs", "mse_results", "spatial_no_block_scenarios", paste("single_region_base", "_", i, ".RDS", sep = "")))
 
 
 }

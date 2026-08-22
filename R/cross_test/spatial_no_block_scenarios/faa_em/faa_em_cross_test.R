@@ -629,58 +629,106 @@ conv_df %>%
   mutate(conv = ifelse(pd == TRUE & grad <= 1e-5, T, F)) %>%
   group_by(model) %>%
   summarize(sum = sum(conv)) %>%
-  filter(model %in% 1:56
-         # model %in% c(22, 1, 8, 5, 19)
-         ) %>%
+  filter(model %in% 1:56) %>%
   left_join(ems_grid, by = c("model" = "model_id")) %>% view()
 
 # which model has the minimum mean absolute bias?
-reshape2::melt(ssb_store) %>%
+bias_order <- reshape2::melt(ssb_store) %>%
+  filter(Var3 %in% 1:56) %>%
   drop_na() %>%
   left_join(ems_grid, by = c("Var3" = "model_id")) %>%
   filter(fish_blocks_type == 'none', srv_blocks_type == 'none') %>%
   group_by(Var3) %>%
-  summarize(median_abs = (median(abs(value)))) %>% view()
+  summarize(median_abs = (median(abs(value))))
+
+# the least 5 biased models
+least_5 <- which(bias_order$median_abs %in% sort(bias_order$median_abs)[1:5])
 
 # Summarized results (SSB)
 ssb_sum_results <- reshape2::melt(ssb_store) %>%
+  filter(Var3 %in% 1:56) %>%
   group_by(Var1, Var3) %>%
   summarize(median = median(value, na.rm = T),
             lwr = quantile(value, 0.025, na.rm = T),
             upr = quantile(value, 0.975, na.rm = T)) %>%
-  left_join(ems_grid, by = c("Var3" = "model_id"))
+  left_join(ems_grid, by = c("Var3" = "model_id")) %>%
+  mutate(fishery_structure = str_replace(fishery_structure, 'F', 'L'),
+         least_biased = ifelse(Var3 %in% least_5, 'least', 'other')) # Replace F w/ L
 
 # Summarized results (Rec)
 rec_sum_results <- reshape2::melt(rec_store) %>%
+  filter(Var3 %in% 1:56) %>%
   group_by(Var1, Var3) %>%
   summarize(median = median(value, na.rm = T),
             lwr = quantile(value, 0.025, na.rm = T),
             upr = quantile(value, 0.975, na.rm = T)) %>%
-  left_join(ems_grid, by = c("Var3" = "model_id"))
+  left_join(ems_grid, by = c("Var3" = "model_id")) %>%
+  mutate(fishery_structure = str_replace(fishery_structure, 'F', 'L')) # Replace F w/ L
 
 # Summarized results (Depletion)
 dep_sum_results <- reshape2::melt(dep_store) %>%
+  filter(Var3 %in% 1:56) %>%
   group_by(Var1, Var3) %>%
   summarize(median = median(value, na.rm = T),
             lwr = quantile(value, 0.025, na.rm = T),
             upr = quantile(value, 0.975, na.rm = T)) %>%
-  left_join(ems_grid, by = c("Var3" = "model_id"))
+  left_join(ems_grid, by = c("Var3" = "model_id")) %>%
+  mutate(fishery_structure = str_replace(fishery_structure, 'F', 'L')) # Replace F w/ L
 
-ssb_sum_results %>%
+# grid plot
+ssb_grid_least <- ssb_sum_results %>%
   drop_na() %>%
-  ggplot(aes(x = fishery_structure, y = median)) +
+  ggplot(aes(x = fishery_structure, y = median, fill = least_biased)) +
   geom_boxplot() +
   geom_hline(yintercept = 0, lty = 2, col = 'black') +
   coord_cartesian(ylim = c(-0.25, 0.25)) +
   facet_grid(survey_selex ~ fishery_selex, scales = 'free',
              labeller = labeller(
-               survey_selex = \(x) paste("Survey:", x),
-               fishery_selex = \(x) paste("Fishery:", x)
+               survey_selex = \(x) paste("Srv:", x),
+               fishery_selex = \(x) paste("Fsh:", x)
              )) +
-  theme_bw(base_size = 12) +
-  theme(legend.position = 'top') +
+  scale_fill_manual(values = c("other" = "grey90", "least" = "#E69F00")) +
+  theme_bw(base_size = 14) +
+  theme(legend.position = 'none') +
   labs(x = 'Fishery Fleet Structure', y = 'Spawning Stock Biomass Relative Error')
 
+# Time series of least biased models
+ssb_ts_least <- ssb_sum_results %>%
+  filter(Var3 %in% least_5) %>%
+  left_join(ems_grid %>%
+              filter(model_id %in% least_5) %>%
+              select(model_id, fishery_structure, fishery_selex, survey_selex),
+            by = c("Var3" = 'model_id')) %>%
+  mutate(model_name = paste(
+    fishery_structure.x, paste("Fsh:", fishery_selex.x), paste("Srv:", survey_selex.x),
+    sep = '_'
+  )) %>%
+  ggplot(aes(x = Var1 + 1959, y = median, ymin = lwr, ymax = upr,
+             fill = factor(model_name), color = factor(model_name))) +
+  geom_ribbon(alpha = 0.1, color = NA) +
+  geom_line(lwd = 1.3) +
+  ggthemes::scale_color_colorblind() +
+  ggthemes::scale_fill_colorblind() +
+  geom_hline(yintercept = 0, lty = 2, col = 'black') +
+  coord_cartesian(ylim = c(-0.25, 0.25)) +
+  theme_bw(base_size = 14) +
+  guides(
+    color = guide_legend(ncol = 1),
+    fill = guide_legend(ncol = 1)
+  ) +
+  theme(legend.position = c(0.425,0.885), legend.background = element_blank()) +
+  labs(x = 'Year',
+       y = 'Spawning Stock Biomass Relative Error',
+       color = 'Model', fill = 'Model')
+
+# save plot
+ggsave(here('outputs', 'cross_test', 'figs', 'ssb_re_grid.png'),
+       cowplot::plot_grid(
+         ssb_grid_least, ssb_ts_least, rel_widths = c(0.7, 0.3), labels = c("A", "B"), label_size = 25
+       ),
+       width = 19, height = 13)
+
+# other plots
 ssb_sum_results %>%
   filter(fishery_selex != 'All_Gamma' & survey_selex != 'All_Gamma') %>%
   ggplot(aes(x = fishery_structure, y = median)) +
@@ -722,9 +770,9 @@ ssb_sum_results %>%
 
 # 3F1T models seem to do better in estimaitng inittal pop scale
 ssb_sum_results %>%
-  filter(Var3 %in% c(22, 1, 8, 5, 19)) %>%
+  filter(Var3 %in% c(22, 1, 8, 5, 19, 56)) %>%
   left_join(ems_grid %>%
-              filter(model_id %in% c(22, 1, 8, 5, 19)) %>%
+              filter(model_id %in% c(22, 1, 8, 5, 19, 56)) %>%
               select(model_id, fishery_structure, fishery_selex, survey_selex),
             by = c("Var3" = 'model_id')) %>%
   mutate(model_name = paste(
@@ -736,8 +784,8 @@ ssb_sum_results %>%
   geom_ribbon(alpha = 0.1, color = NA) +
   geom_line(lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, col = 'black') +
-  coord_cartesian(ylim = c(-0.25, 0.25)) +
-  theme_bw(base_size = 15) +
+  # coord_cartesian(ylim = c(-0.25, 0.25)) +
+  theme_bw(base_size = 20) +
   labs(x = 'Year',
        y = 'Spawning Stock Biomass Relative Error',
        color = 'Model', fill = 'Model')

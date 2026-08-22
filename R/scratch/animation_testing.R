@@ -1,4 +1,4 @@
-a = readRDS("/Users/matthewcheng/Desktop/PostDoc/Spatial Assessments and Sablefish/sablefish_cie_sims_2026/outputs/mse_results/spatial_noblock_scenarios/three_region_test.RDS")
+a = readRDS("/Users/matthewcheng/Desktop/PostDoc/Spatial Assessments and Sablefish/sablefish_cie_sims_2026/outputs/mse_results/spatial_no_block_scenarios/three_region_test.RDS")
 library(ggplot2)
 library(gganimate)
 anim_df <- do.call(rbind, lapply(65:95, function(yr) {

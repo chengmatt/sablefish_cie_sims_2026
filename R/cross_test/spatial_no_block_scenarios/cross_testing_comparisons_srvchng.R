@@ -214,7 +214,7 @@ mods_srv <- lapply(file_patterns, function(pat) {
   ) |> setNames(survey_designs)
 }) |> setNames(names(file_patterns))
 
-srvchng_om <- readRDS(here("outputs", "mse_results", "spatial_noblock_scenarios", "five_region_base.RDS"))
+srvchng_om <- readRDS(here("outputs", "mse_results", "spatial_no_block_scenarios", "five_region_base.RDS"))
 
 # OM storage (invariant across survey designs)
 agg_ssb_om_srv <- array(NA, dim = c(n_yrs, n_sims))
