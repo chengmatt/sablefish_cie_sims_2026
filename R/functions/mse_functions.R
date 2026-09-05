@@ -3414,7 +3414,7 @@ run_five_rg_closedloop_i <- function(sim_env,
         y = y,
         sim = sim,
 
-        # single region reference points
+        # multi region reference points
         reference_points_opt = list(
           n_avg_yrs = 1,
           SPR_x = 0.4,
@@ -3518,4 +3518,208 @@ run_five_rg_closedloop_i <- function(sim_env,
     # # median(colSums(sim_env$SSB[,65:y,sim]))
   } # end y loop
 
+}
+
+#' Run a single Closed-Loop Simulation Iteration to look at apportionment
+#'
+#'
+#' @param sim_env An environment or list containing all operating-model state
+#'   variables, true quantities, storage arrays, and simulation settings.
+#' @param sim Integer. Simulation replicate index to run.
+#' @param fleet_allocation Numeric vector giving the proportion of regional TAC
+#'   assigned to each fishery fleet.
+#' @param lls_design_type Character string specifying the longline survey design:
+#'   `"current"`, `"historical"`, or `"all"`. Passed to the assessment model
+#'   builder for appropriate survey imputation logic.
+#' @param apportionment_type Character - 'carryover', 'equal', or '2024_values' apportionment
+#'
+#' @return The function updates `sim_env` in place (population states, catches,
+#'   F rates, and assessment outputs). No value is returned.
+run_apportionment_closedloop_i <- function(sim_env,
+                                           sim,
+                                           fleet_allocation,
+                                           lls_design_type,
+                                           apportionment_type
+) {
+
+  # Run Closed Loop ---------------------------------------------------------
+  for(y in 1:sim_env$n_yrs) {
+
+    # Execute annual population dynamics
+    run_annual_cycle(y, sim, sim_env)
+
+    # Run feedback
+    if(y >= sim_env$feedback_start_yr) {
+
+      ### Reference Points --------------------------------------------------------
+      ref_pts <- get_closed_loop_reference_points(
+        use_true_values = TRUE,
+        sim_env = sim_env,
+        asmt_data = NULL,
+        asmt_rep = NULL,
+        y = y,
+        sim = sim,
+
+        # multi region reference points (going to collaspe to single region)
+        reference_points_opt = list(
+          n_avg_yrs = 1,
+          SPR_x = 0.4,
+          calc_rec_st_yr = 20,
+          rec_age = 2,
+          type = 'multi_region',
+          what = "global_SPR",
+          B_x = 0.4
+        ),
+        n_proj_yrs = 2
+      )
+
+      ### HCR ---------------------------------------------------------------------
+      # use global to mimic single-region mgmt then to apportionemtnet
+      f_ref_pt <- array(NA, c(sim_env$n_regions, 2))
+      agg_ssb <- sum(sim_env$SSB[,y,sim]) # get ssb
+      exp_frate <- HCR_threshold(x = agg_ssb, frp = unique(ref_pts$f_ref_pt[,2]), brp = sum(ref_pts$b_ref_pt[,2]), alpha = 0.05) # get prescribed f
+      f_ref_pt[] <- exp_frate
+
+      ### Projection --------------------------------------------------------------
+      # create asmt_list and model to store true values in
+      asmt_list <- list()
+      model <- list()
+      asmt_list$data <- list()
+      model$rep <- list()
+
+      # make inputs for projection
+      model$rep$NAA <- sim_env$NAA[,,,,sim]
+      model$rep$NAA0 <- sim_env$NAA0[,,,,sim]
+      asmt_list$data$WAA <- sim_env$WAA[,,,,sim]
+      asmt_list$data$WAA_fish <- sim_env$WAA_fish[,,,,,sim]
+      asmt_list$data$MatAA <- sim_env$MatAA[,,,,sim]
+      model$rep$fish_sel <- sim_env$fish_sel[,,,,,sim]
+      model$rep$Fmort <- sim_env$Fmort[,,,sim]
+      model$rep$natmort <- sim_env$natmort[,,,,sim]
+      model$rep$Rec <- sim_env$Rec[,,sim]
+      model$rep$sexratio <- sim_env$sexratio[,,,sim]
+      model$rep$Movement <- sim_env$Movement[,,,,,sim]
+      asmt_list$data$n_regions <- sim_env$n_regions
+      asmt_list$data$ages <- 1:sim_env$n_ages
+      asmt_list$data$n_sexes <- sim_env$n_sexes
+      asmt_list$data$n_fish_fleets <- sim_env$n_fish_fleets
+
+      # spatial projection that gets aggregated - shouldn't matter because spatially-invarint demographics
+      projection <- get_population_projection(data = asmt_list$data, rep = model$rep, y = y, n_proj_yrs = 2,
+                                              f_ref_pt = f_ref_pt) # get 1 year projection
+
+      # get total tac (to mimic single-region model)
+      tac <- sum(projection$proj_Catch[,2,]) # get tac by region
+
+      ### Apportionment (the axis we are varying here) -----------------------------------------------------------
+      if(apportionment_type == 'carryover') {
+        # get survey apportionment (survey biomass)
+        tmp_Srv_BiomIA <- sim_env$SrvIAA[,((y - 4): y),,,1,sim] * sim_env$WAA_srv[,((y - 4): y),,,1,sim]
+        tmp_srvidx_biom <- apply(tmp_Srv_BiomIA, 1:2, sum) # get biomass
+        apportionment <- get_single_region_survey_apportionment(feedback_start_yr = sim_env$feedback_start_yr,
+                                                                n_yrs = sim_env$n_yrs, y = y,
+                                                                srv_idx = tmp_srvidx_biom, # using true survey biomass values to do apportionment
+                                                                rolling_avg_yrs = 5,
+                                                                lls_design_type = lls_design_type)
+      }
+
+      if(apportionment_type == 'equal') { # equal apportionment
+        apportionment <- 1 / sim_env$n_regions
+      }
+
+      if(apportionment_type == '2024_values') { # freeze at last actual model year
+        apportionment <- c(0.24285, 0.27772, 0.09968, 0.20472, 0.06208 + 0.11296)
+      }
+
+      tac_r <- tac * apportionment # get regional tac
+      tac_rf <- tac_r * fleet_allocation # allocate regional tac by fleet
+
+      ### TAC to F ----------------------------------------------------------------
+      if (y < sim_env$n_yrs) {
+        move_age <- if(sim_env$do_recruits_move == 0) 2 else 1
+        tmp_naa_moved <- array(NA, dim = dim(sim_env$NAA[, y+1, , , sim]))
+        for(a in move_age:sim_env$n_ages) for(s in 1:sim_env$n_sexes)
+          tmp_naa_moved[,a,s] <- t(sim_env$NAA[,y+1,a,s,sim]) %*% sim_env$Movement[,,y+1,a,s,sim]
+        if(move_age == 2) tmp_naa_moved[,1,] <- sim_env$NAA[, y+1,1, , sim]
+
+        # Solve for all F simultaneously for each region
+        for(r in 1:sim_env$n_regions) {
+          sim_env$Fmort[r, y+1, , sim] <- solve_multifleet_F(
+            target_catch = tac_rf[r, ],
+            NAA = tmp_naa_moved[r, , ],
+            WAA = sim_env$WAA[r, y+1, , , sim],
+            natmort = sim_env$natmort[r, y+1, , , sim],
+            fish_sel = sim_env$fish_sel[r, y+1, , , , sim],
+            f_init = 0.05
+          )
+        } # end r loop
+      } # end if
+
+    } # end feedback
+
+  } # end y loop
+
+}
+
+#' Run Five-Region Closed-Loop Simulations in Parallel
+#'
+#' This function executes multiple single-region closed-loop simulations in
+#' parallel using `future` and `furrr`. Each simulation replicate is run with
+#' its own index and the results are merged back into the shared simulation
+#' environment. Arrays whose final dimension corresponds to simulation number
+#' are updated appropriately.
+#'
+#' @param sim_env A list or environment containing the simulation environment, including population dynamics,
+#'   survey data, movement matrices, natural mortality, and other model parameters.
+#' @param fleet_allocation Numeric vector. Proportions used to allocate regional TAC to fleets.
+#' @param n_cores Number of cores
+#' @param n_sims Number of simulations
+#' @param lls_design_type Using 'current' design as default
+#' @param apportionment_type Apportionment type, 'carryover, '2024_values', 'equal'
+#'
+#' @return The updated `sim_env` object containing results across all simulation
+#'   replicates. The function modifies `sim_env` in place and also returns it.
+run_apportionment_parallel <- function(sim_env, n_sims, fleet_allocation, lls_design_type = 'current', apportionment_type, n_cores) {
+
+
+  plan(multisession, workers = n_cores)
+  options(future.globals.maxSize = 8e9)
+  handlers(handler_progress(format = "[:bar] :percent"))
+
+  # run in parrallel and return simulation environment
+  with_progress({
+    env_list <- future_map(
+      1:n_sims,
+      ~{
+        run_apportionment_closedloop_i(sim_env, .x,
+                                       fleet_allocation,
+                                       lls_design_type = lls_design_type,
+                                       apportionment_type = apportionment_type)
+        sim_env
+      },
+      .progress = TRUE,
+      .options = furrr::furrr_options(seed = TRUE)
+    )
+  })
+
+  # Merge results back in
+  for(i in 1:n_sims) {
+    for(var_name in ls(sim_env, all.names = TRUE)) { # loop through sim_env to get variable names
+      arr <- env_list[[i]][[var_name]] # get array
+      if(is.array(arr)) { # check if array
+        ndim <- length(dim(arr)) # check array dimensions
+        last_dim <- dim(arr)[ndim] # get last dimension
+        if(last_dim == n_sims) { # if last dimension matches number of sims
+          comma_str <- paste(rep(",", ndim - 1), collapse = "") # build comma structure, e.g., 3d array gives ,,,
+          expr <- paste0("sim_env[[\"", var_name, "\"]][", comma_str, "i] <- env_list[[i]][[\"", var_name, "\"]][", comma_str, "i]") # write expression for array
+          eval(parse(text = expr)) # parse expression
+        }
+      }
+    }
+  }
+
+  # Merge model results back in
+  for(i in 1:n_sims) sim_env$models[[i]] <- env_list[[i]]$models[[i]]
+
+  return(sim_env)
 }
