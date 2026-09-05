@@ -348,5 +348,6 @@ ggplot() +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
   labs(x = 'Year', y = 'Apportionment', fill = 'Apportionment Type', color = 'Apportionment Type') +
-  theme_bw(base_size = 18)
+  theme_bw(base_size = 18) +
+  theme(legend.position = 'top')
 ggsave(file.path(fig_dir, 'apportionment_base.png'), width = 14, height = 7, dpi = 300)
