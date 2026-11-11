@@ -127,6 +127,11 @@ dir.create(fig_dir, showWarnings = FALSE, recursive = TRUE)
 carry <- readRDS(here(file_dir, 'carryover.RDS'))
 fixed <- readRDS(here(file_dir, '2024_values.RDS'))
 eq <- readRDS(here(file_dir, 'equal.RDS'))
+custom_730 <- readRDS(here(file_dir, 'custom_70_30_values.RDS'))
+custom_8020 <- readRDS(here(file_dir, 'custom_80_20_values.RDS'))
+custom_955 <- readRDS(here(file_dir, 'custom_95_5_values.RDS'))
+custom_3070 <- readRDS(here(file_dir, 'custom_30_70_values.RDS'))
+custom_1090 <- readRDS(here(file_dir, 'custom_10_90_values.RDS'))
 
 ## Process MSE results ---------------------------------------------------------
 n_sims <- 100
@@ -134,9 +139,11 @@ st_yr <- 65
 end_yr <- 95
 n_regions <- 5
 n_fish_fleets <- 2
+ages <- 2:31
 
-mse_list <- list(carry, fixed, eq)
+mse_list <- list(carry, fixed, eq, custom_730, custom_8020, custom_955, custom_3070, custom_1090)
 
+mean_age_results <- array(NA, dim = c(length(mse_list), n_regions, end_yr, n_sims))
 ssb_results   <- array(NA, dim = c(length(mse_list), n_regions, end_yr, n_sims))
 rec_results   <- array(NA, dim = c(length(mse_list), n_regions, end_yr, n_sims))
 catch_results <- array(NA, dim = c(length(mse_list), n_regions, end_yr, n_fish_fleets, n_sims))
@@ -153,6 +160,12 @@ for (i in 1:length(mse_list)) {
   ssb_results[i,,,]    <- ssb_all[,,keep]
   rec_results[i,,,]    <- rec_all[,,keep]
   catch_results[i,,,,] <- truecatch_all[,,,keep]
+
+  # get mean age
+  naa <- mse_list[[i]]$NAA[, 1:end_yr, , , keep_idx[[i]]]
+  mean_age_results[i,,,] <- apply(sweep(naa, 3, ages, '*'), c(1, 2, 5), sum) /
+    apply(naa, c(1, 2, 5), sum)
+
 }
 
 
@@ -174,23 +187,33 @@ ssb_rg_df <- reshape2::melt(ssb_results) %>%
   model = case_when(
     model == 1 ~ 'carryover',
     model == 2 ~ 'fixed',
-    model == 3 ~ 'equal'
+    model == 3 ~ 'equal',
+    model == 4 ~ '70_30',
+    model == 5 ~ '80_20',
+    model == 6 ~ '95_5',
+    model == 7 ~ '30_70',
+    model == 8 ~ '10_90'
   ),
   period = ifelse(year <= st_yr, "Historical", 'Projection'),
-  model = factor(model, levels = c('carryover', 'fixed', 'equal')),
+  model = factor(model, levels = c('carryover', 'fixed', 'equal', '70_30', '80_20', '95_5', '30_70', "10_90")),
   year = year + 1960)
 
 ssb_global_sim_df <- reshape2::melt(ssb_results) %>%
   rename(model = Var1, region = Var2, year = Var3, sim = Var4) %>%
   group_by(model, year, sim) %>%
   summarize(value = sum(value), .groups = 'drop') %>%
-  mutate(model = case_when(
+  mutate(  model = case_when(
     model == 1 ~ 'carryover',
     model == 2 ~ 'fixed',
-    model == 3 ~ 'equal'
+    model == 3 ~ 'equal',
+    model == 4 ~ '70_30',
+    model == 5 ~ '80_20',
+    model == 6 ~ '95_5',
+    model == 7 ~ '30_70',
+    model == 8 ~ '10_90'
   ),
   period = ifelse(year <= st_yr, "Historical", 'Projection'),
-  model = factor(model, levels = c('carryover', 'fixed', 'equal')),
+  model = factor(model, levels = c('carryover', 'fixed', 'equal', '70_30', '80_20', '95_5', '30_70', "10_90")),
   year = year + 1960)
 
 ssb_global_df <- ssb_global_sim_df %>%
@@ -218,23 +241,33 @@ catch_rg_df <- reshape2::melt(catch_results) %>%
   model = case_when(
     model == 1 ~ 'carryover',
     model == 2 ~ 'fixed',
-    model == 3 ~ 'equal'
+    model == 3 ~ 'equal',
+    model == 4 ~ '70_30',
+    model == 5 ~ '80_20',
+    model == 6 ~ '95_5',
+    model == 7 ~ '30_70',
+    model == 8 ~ '10_90'
   ),
   period = ifelse(year <= st_yr, "Historical", 'Projection'),
-  model = factor(model, levels = c('carryover', 'fixed', 'equal')),
+  model = factor(model, levels = c('carryover', 'fixed', 'equal', '70_30', '80_20', '95_5', '30_70', "10_90")),
   year = year + 1960)
 
 catch_global_sim_df <- reshape2::melt(catch_results) %>%
   rename(model = Var1, region = Var2, year = Var3, fleet = Var4, sim = Var5) %>%
   group_by(model, year, sim) %>%
   summarize(value = sum(value), .groups = 'drop') %>%
-  mutate(model = case_when(
+  mutate(  model = case_when(
     model == 1 ~ 'carryover',
     model == 2 ~ 'fixed',
-    model == 3 ~ 'equal'
+    model == 3 ~ 'equal',
+    model == 4 ~ '70_30',
+    model == 5 ~ '80_20',
+    model == 6 ~ '95_5',
+    model == 7 ~ '30_70',
+    model == 8 ~ '10_90'
   ),
   period = ifelse(year <= st_yr, "Historical", 'Projection'),
-  model = factor(model, levels = c('carryover', 'fixed', 'equal')),
+  model = factor(model, levels = c('carryover', 'fixed', 'equal', '70_30', '80_20', '95_5', '30_70', "10_90")),
   year = year + 1960)
 
 catch_global_df <- catch_global_sim_df %>%
@@ -264,11 +297,67 @@ apport_df <- reshape2::melt(catch_results) %>%
   model = case_when(
     model == 1 ~ 'carryover',
     model == 2 ~ 'fixed',
-    model == 3 ~ 'equal'
+    model == 3 ~ 'equal',
+    model == 4 ~ '70_30',
+    model == 5 ~ '80_20',
+    model == 6 ~ '95_5',
+    model == 7 ~ '30_70',
+    model == 8 ~ '10_90'
   ),
   period = ifelse(year <= st_yr, "Historical", 'Projection'),
-  model = factor(model, levels = c('carryover', 'fixed', 'equal')),
+  model = factor(model, levels = c('carryover', 'fixed', 'equal', '70_30', '80_20', '95_5', '30_70', "10_90")),
   year = year + 1960)
+
+meanage_rg_df <- reshape2::melt(mean_age_results) %>%
+  rename(model = Var1, region = Var2, year = Var3, sim = Var4) %>%
+  group_by(model, region, year) %>%
+  summarize(median = median(value, na.rm = T),
+            lwr = quantile(value, 0.025, na.rm = T),
+            upr = quantile(value, 0.975, na.rm = T)) %>%
+  mutate(region = case_when(
+    region == 1 ~ 'BS',
+    region == 2 ~ 'AI',
+    region == 3 ~ 'WGOA',
+    region == 4 ~ 'CGOA',
+    region == 5 ~ 'EGOA'
+  ),
+  region = factor(region, levels = c('BS', 'AI', 'WGOA', 'CGOA', 'EGOA')),
+  model = case_when(
+    model == 1 ~ 'carryover',
+    model == 2 ~ 'fixed',
+    model == 3 ~ 'equal',
+    model == 4 ~ '70_30',
+    model == 5 ~ '80_20',
+    model == 6 ~ '95_5',
+    model == 7 ~ '30_70',
+    model == 8 ~ '10_90'
+  ),
+  period = ifelse(year <= st_yr, "Historical", 'Projection'),
+  model = factor(model, levels = c('carryover', 'fixed', 'equal', '70_30', '80_20', '95_5', '30_70', "10_90")),
+  year = year + 1960)
+
+meanage_global_sim_df <- reshape2::melt(mean_age_results) %>%
+  rename(model = Var1, region = Var2, year = Var3, sim = Var4) %>%
+  group_by(model, year, sim) %>%
+  mutate(  model = case_when(
+    model == 1 ~ 'carryover',
+    model == 2 ~ 'fixed',
+    model == 3 ~ 'equal',
+    model == 4 ~ '70_30',
+    model == 5 ~ '80_20',
+    model == 6 ~ '95_5',
+    model == 7 ~ '30_70',
+    model == 8 ~ '10_90'
+  ),
+  period = ifelse(year <= st_yr, "Historical", 'Projection'),
+  model = factor(model, levels = c('carryover', 'fixed', 'equal', '70_30', '80_20', '95_5', '30_70', "10_90")),
+  year = year + 1960)
+
+meanage_global_df <- meanage_global_sim_df %>%
+  group_by(model, period, year) %>%
+  summarize(median = median(value, na.rm = T),
+            lwr = quantile(value, 0.025, na.rm = T),
+            upr = quantile(value, 0.975, na.rm = T), .groups = 'drop')
 
 
 ##### SSB ---------------------------------------------------------------------
@@ -281,7 +370,7 @@ ssb_local <- ggplot() +
   geom_vline(xintercept = 2025, lty = 2) +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
-  labs(x = 'Year', y = 'SSB (kt)', fill = 'Apportionment Type', color = 'Apportionment Type') +
+  labs(x = 'Year', y = 'SSB (kt)', fill = 'BRD Type', color = 'BRD Type') +
   theme_bw(base_size = 18) +
   theme(legend.position = 'none')
 ggsave(file.path(fig_dir, 'ssb_regional_base.png'), ssb_local, width = 14, height = 14, dpi = 300)
@@ -290,14 +379,14 @@ ssb_global <- ggplot() +
   geom_ribbon(ssb_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.15, color = NA) +
   geom_line(ssb_global_df %>% filter(year <= st_yr + 1960), mapping = aes(x = year, y = median), color = 'black', lwd = 1) +
   geom_line(ssb_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, color = factor(model)), lwd = 1) +
-  coord_cartesian(ylim = c(0, NA)) +
+  coord_cartesian(ylim = c(0, 450)) +
   geom_vline(xintercept = 2025, lty = 2) +
   theme_bw(base_size = 18) +
-  theme(legend.position = c(0.19, 0.9),
+  theme(legend.position = c(0.19, 0.8),
         legend.background = element_blank()) +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
-  labs(x = 'Year', y = 'SSB (kt)', fill = 'Apportionment Type', color = 'Apportionment Type')
+  labs(x = 'Year', y = 'SSB (kt)', fill = 'BRD Type', color = 'BRD Type')
 ggsave(file.path(fig_dir, 'ssb_global_base.png'), ssb_global, width = 8, height = 8, dpi = 300)
 
 # recruitment plot combined
@@ -315,7 +404,7 @@ catch_local <- ggplot() +
   geom_vline(xintercept = 2025, lty = 2) +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
-  labs(x = 'Year', y = 'Catch (kt)', fill = 'Apportionment Type', color = 'Apportionment Type') +
+  labs(x = 'Year', y = 'Catch (kt)', fill = 'BRD Type', color = 'BRD Type') +
   theme_bw(base_size = 18) +
   theme(legend.position = 'none')
 ggsave(file.path(fig_dir, 'catch_regional_base.png'), catch_local, width = 14, height = 14, dpi = 300)
@@ -324,14 +413,14 @@ catch_global <- ggplot() +
   geom_ribbon(catch_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.15, color = NA) +
   geom_line(catch_global_df %>% filter(year <= st_yr + 1960), mapping = aes(x = year, y = median), color = 'black', lwd = 1) +
   geom_line(catch_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, color = factor(model)), lwd = 1) +
-  coord_cartesian(ylim = c(0, NA)) +
+  coord_cartesian(ylim = c(0, 80)) +
   geom_vline(xintercept = 2025, lty = 2) +
   theme_bw(base_size = 18) +
-  theme(legend.position = c(0.19, 0.9),
+  theme(legend.position = c(0.19, 0.8),
         legend.background = element_blank()) +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
-  labs(x = 'Year', y = 'Catch (kt)', fill = 'Apportionment Type', color = 'Apportionment Type')
+  labs(x = 'Year', y = 'Catch (kt)', fill = 'BRD Type', color = 'BRD Type')
 ggsave(file.path(fig_dir, 'catch_global_base.png'), catch_global, width = 8, height = 8, dpi = 300)
 
 # recruitment plot combined
@@ -347,7 +436,41 @@ ggplot() +
   geom_vline(xintercept = 2025, lty = 2) +
   ggthemes::scale_color_colorblind() +
   ggthemes::scale_fill_colorblind() +
-  labs(x = 'Year', y = 'Apportionment', fill = 'Apportionment Type', color = 'Apportionment Type') +
+  labs(x = 'Year', y = 'Apportionment', fill = 'BRD Type', color = 'BRD Type') +
   theme_bw(base_size = 18) +
   theme(legend.position = 'top')
 ggsave(file.path(fig_dir, 'apportionment_base.png'), width = 14, height = 7, dpi = 300)
+
+
+
+##### Mean age by region ------------------------------------------------------
+meanage_local <- ggplot() +
+  geom_ribbon(meanage_rg_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.15, color = NA) +
+  geom_line(meanage_rg_df %>% filter(year <= st_yr + 1960), mapping = aes(x = year, y = median), color = 'black', lwd = 1) +
+  geom_line(meanage_rg_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, color = factor(model)), lwd = 1) +
+  facet_wrap(~region, ncol = 1) +
+  coord_cartesian(ylim = c(0, NA)) +
+  geom_vline(xintercept = 2025, lty = 2) +
+  ggthemes::scale_color_colorblind() +
+  ggthemes::scale_fill_colorblind() +
+  labs(x = 'Year', y = 'Mean Age', fill = 'BRD Type', color = 'BRD Type') +
+  theme_bw(base_size = 18) +
+  theme(legend.position = 'none')
+ggsave(file.path(fig_dir, 'meanage_regional_base.png'), meanage_local, width = 14, height = 14, dpi = 300)
+
+meanage_global <- ggplot() +
+  geom_ribbon(meanage_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, ymin = lwr, ymax = upr, color = factor(model), fill = factor(model)), alpha = 0.15, color = NA) +
+  geom_line(meanage_global_df %>% filter(year <= st_yr + 1960), mapping = aes(x = year, y = median), color = 'black', lwd = 1) +
+  geom_line(meanage_global_df %>% filter(year >= st_yr + 1960), mapping = aes(x = year, y = median, color = factor(model)), lwd = 1) +
+  coord_cartesian(ylim = c(0, 20)) +
+  geom_vline(xintercept = 2025, lty = 2) +
+  theme_bw(base_size = 18) +
+  theme(legend.position = c(0.19, 0.8),
+        legend.background = element_blank()) +
+  ggthemes::scale_color_colorblind() +
+  ggthemes::scale_fill_colorblind() +
+  labs(x = 'Year', y = 'Mean Age', fill = 'BRD Type', color = 'BRD Type')
+
+# mean age plot combined
+meanage_combined <- cowplot::plot_grid(meanage_global, meanage_local, rel_widths = c(0.75, 0.25), labels = c('A', 'B'), label_size = 20)
+ggsave(file.path(fig_dir, 'meanage_combined_base.png'), meanage_combined, width = 15, height = 10, dpi = 300)

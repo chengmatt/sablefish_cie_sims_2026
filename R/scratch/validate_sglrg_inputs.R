@@ -30,8 +30,8 @@ source(here("R", "functions", "mse_functions.R"))
 source(here("R", "functions", "single_region_em.R"))
 
 # Compare Assessments ------------------------------------------------------
-sgl <- readRDS("/Users/matthewcheng/Desktop/PostDoc/2025-Sablefish-SAFE-Dev/Sept PT Model Runs/25_12_Drop_TS_Upd_M/25_12_Drop_TS_Upd_M_model_results_v2.RDS")
-spt <- readRDS("/Users/matthewcheng/Desktop/PostDoc/2025-Sablefish-SAFE-Dev/Sept PT Model Runs/25_15_Spatial/Spatial_MltRel/Spatial_MltRel_model_results.RDS")
+sgl <- readRDS("/Users/matthewcheng/Desktop/Done Projects/2025-Sablefish-SAFE-Dev/Sept PT Model Runs/25_12_Drop_TS_Upd_M/25_12_Drop_TS_Upd_M_model_results_v2.RDS")
+spt <- readRDS("/Users/matthewcheng/Desktop/Done Projects/2025-Sablefish-SAFE-Dev/Sept PT Model Runs/25_15_Spatial/Spatial_MltRel/Spatial_MltRel_model_results.RDS")
 
 # SSB
 plot(t(sgl$rep$SSB), ylim=c(0,300), type = 'l')

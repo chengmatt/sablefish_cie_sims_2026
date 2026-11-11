@@ -115,3 +115,128 @@ saveRDS(
   here("outputs", "mse_results", "apportionment", "2024_values.RDS")
 )
 
+# custom values apportionment (based on 2024 apportionment values, then adjusted)
+apportionment_values <- c(
+  BS   = 0.30 * (0.24285 / (0.24285 + 0.27772)),
+  AI   = 0.30 * (0.27772 / (0.24285 + 0.27772)),
+  WGOA = 0.70 * (0.09968 / (0.09968 + 0.20472 + 0.17504)),
+  CGOA = 0.70 * (0.20472 / (0.09968 + 0.20472 + 0.17504)),
+  EGOA = 0.70 * (0.17504 / (0.09968 + 0.20472 + 0.17504))
+)
+
+sim_env_custom_7030_values <- Setup_sim_env(sim_list = sim_list)
+sim_env_custom_7030_values <- add_aggregated_obj_to_simenv(sim_env = sim_env_custom_7030_values)
+sim_env_custom_7030_values <- run_apportionment_parallel(
+  sim_env = sim_env_custom_7030_values,
+  n_sims = n_sims,
+  fleet_allocation = fleet_allocation,
+  apportionment_type = "custom",
+  apportionment_values = apportionment_values,
+  n_cores = 15
+)
+
+saveRDS(
+  sim_env_custom_7030_values,
+  here("outputs", "mse_results", "apportionment", "custom_70_30_values.RDS")
+)
+
+# custom values apportionment (based on 2024 apportionment values, then adjusted)
+apportionment_values <- c(
+  BS   = 0.20 * (0.24285 / (0.24285 + 0.27772)),
+  AI   = 0.20 * (0.27772 / (0.24285 + 0.27772)),
+  WGOA = 0.80 * (0.09968 / (0.09968 + 0.20472 + 0.17504)),
+  CGOA = 0.80 * (0.20472 / (0.09968 + 0.20472 + 0.17504)),
+  EGOA = 0.80 * (0.17504 / (0.09968 + 0.20472 + 0.17504))
+)
+
+sim_env_custom_8020_values <- Setup_sim_env(sim_list = sim_list)
+sim_env_custom_8020_values <- add_aggregated_obj_to_simenv(sim_env = sim_env_custom_8020_values)
+sim_env_custom_8020_values <- run_apportionment_parallel(
+  sim_env = sim_env_custom_8020_values,
+  n_sims = n_sims,
+  fleet_allocation = fleet_allocation,
+  apportionment_type = "custom",
+  apportionment_values = apportionment_values,
+  n_cores = 15
+)
+
+saveRDS(
+  sim_env_custom_8020_values,
+  here("outputs", "mse_results", "apportionment", "custom_80_20_values.RDS")
+)
+
+# custom values apportionment (based on 2024 apportionment values, then adjusted)
+apportionment_values <- c(
+  BS   = 0.05 * (0.24285 / (0.24285 + 0.27772)),
+  AI   = 0.05 * (0.27772 / (0.24285 + 0.27772)),
+  WGOA = 0.95 * (0.09968 / (0.09968 + 0.20472 + 0.17504)),
+  CGOA = 0.95 * (0.20472 / (0.09968 + 0.20472 + 0.17504)),
+  EGOA = 0.95 * (0.17504 / (0.09968 + 0.20472 + 0.17504))
+)
+
+sim_env_custom_955_values <- Setup_sim_env(sim_list = sim_list)
+sim_env_custom_955_values <- add_aggregated_obj_to_simenv(sim_env = sim_env_custom_955_values)
+sim_env_custom_955_values <- run_apportionment_parallel(
+  sim_env = sim_env_custom_955_values,
+  n_sims = n_sims,
+  fleet_allocation = fleet_allocation,
+  apportionment_type = "custom",
+  apportionment_values = apportionment_values,
+  n_cores = 15
+)
+
+saveRDS(
+  sim_env_custom_955_values,
+  here("outputs", "mse_results", "apportionment", "custom_95_5_values.RDS")
+)
+
+# custom values apportionment (based on 2024 apportionment values, then adjusted)
+apportionment_values <- c(
+  BS   = 0.7 * (0.24285 / (0.24285 + 0.27772)),
+  AI   = 0.7 * (0.27772 / (0.24285 + 0.27772)),
+  WGOA = 0.3 * (0.09968 / (0.09968 + 0.20472 + 0.17504)),
+  CGOA = 0.3 * (0.20472 / (0.09968 + 0.20472 + 0.17504)),
+  EGOA = 0.3 * (0.17504 / (0.09968 + 0.20472 + 0.17504))
+)
+
+sim_env_custom_3070_values <- Setup_sim_env(sim_list = sim_list)
+sim_env_custom_3070_values <- add_aggregated_obj_to_simenv(sim_env = sim_env_custom_3070_values)
+sim_env_custom_3070_values <- run_apportionment_parallel(
+  sim_env = sim_env_custom_3070_values,
+  n_sims = n_sims,
+  fleet_allocation = fleet_allocation,
+  apportionment_type = "custom",
+  apportionment_values = apportionment_values,
+  n_cores = 15
+)
+
+saveRDS(
+  sim_env_custom_3070_values,
+  here("outputs", "mse_results", "apportionment", "custom_30_70_values.RDS")
+)
+
+
+# custom values apportionment (based on 2024 apportionment values, then adjusted)
+apportionment_values <- c(
+  BS   = 0.9 * (0.24285 / (0.24285 + 0.27772)),
+  AI   = 0.9 * (0.27772 / (0.24285 + 0.27772)),
+  WGOA = 0.1 * (0.09968 / (0.09968 + 0.20472 + 0.17504)),
+  CGOA = 0.1 * (0.20472 / (0.09968 + 0.20472 + 0.17504)),
+  EGOA = 0.1 * (0.17504 / (0.09968 + 0.20472 + 0.17504))
+)
+
+sim_env_custom_1090_values <- Setup_sim_env(sim_list = sim_list)
+sim_env_custom_1090_values <- add_aggregated_obj_to_simenv(sim_env = sim_env_custom_1090_values)
+sim_env_custom_1090_values <- run_apportionment_parallel(
+  sim_env = sim_env_custom_1090_values,
+  n_sims = n_sims,
+  fleet_allocation = fleet_allocation,
+  apportionment_type = "custom",
+  apportionment_values = apportionment_values,
+  n_cores = 15
+)
+
+saveRDS(
+  sim_env_custom_1090_values,
+  here("outputs", "mse_results", "apportionment", "custom_10_90_values.RDS")
+)

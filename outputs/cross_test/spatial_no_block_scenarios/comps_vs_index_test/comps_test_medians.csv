@@ -1,0 +1,11 @@
+model,comps,index,variant,n,SSB_median,Old_median
+26.2_FAA,asrun,As run,faa_1fish,100,-0.06325915356260058,-0.03888674800188257
+26.2_FAA,complete,Complete,faa_1fish_all,100,-0.025202894849800435,-0.030900461825131714
+Single region,bs,Carryover,bs_comps_carry_idx,100,-0.18681662343576827,-0.16992793916628607
+Single region,bs,Complete,bs_comps_full_idx,100,-0.17486324437235914,-0.16281653549753394
+Single region,complete,Carryover,carry_idx_full_comps,100,-0.0026874856792120853,0.051233349834061075
+Single region,complete,Complete,all,100,0.01638552250714341,0.06890192375326964
+Single region,goa,Carryover,goa_comps_carry_idx,100,0.14583246756891108,0.2519454295065424
+Single region,goa,Complete,goa_comps_full_idx,100,0.1631022143717497,0.2688797445953387
+Single region,missing,Carryover,hist,100,0.06783074874960911,0.1426142911228211
+Single region,missing,Complete,full_idx_partial_comps,100,0.08675471223219891,0.16059575662360304

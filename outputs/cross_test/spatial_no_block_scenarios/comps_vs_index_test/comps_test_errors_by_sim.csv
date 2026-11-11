@@ -1,0 +1,1001 @@
+sim,variant,SSB,Old,model,comps,index,scen
+1,hist,0.06449240864597355,0.10724379714298721,Single region,missing,Carryover,sr_asrun
+1,full_idx_partial_comps,0.08391179615160134,0.12312267750849633,Single region,missing,Complete,NA
+1,goa_comps_carry_idx,0.15594224462337467,0.23176757521022837,Single region,goa,Carryover,sr_goa
+1,goa_comps_full_idx,0.1746637938417281,0.24708645654856465,Single region,goa,Complete,NA
+1,bs_comps_carry_idx,-0.15066336655254758,-0.1488192948059777,Single region,bs,Carryover,sr_bs
+1,bs_comps_full_idx,-0.13983805443431044,-0.1434868732329125,Single region,bs,Complete,NA
+1,carry_idx_full_comps,-0.00696961783379638,0.008282669693897607,Single region,complete,Carryover,sr_complete
+1,all,0.0129314488943566,0.024539809060552937,Single region,complete,Complete,NA
+2,hist,0.009234458509333528,0.10522430276375114,Single region,missing,Carryover,sr_asrun
+2,full_idx_partial_comps,0.029078559187314,0.12500402762650697,Single region,missing,Complete,NA
+2,goa_comps_carry_idx,0.08903705071135937,0.21248955344831502,Single region,goa,Carryover,sr_goa
+2,goa_comps_full_idx,0.10902091340343693,0.23257413627664747,Single region,goa,Complete,NA
+2,bs_comps_carry_idx,-0.19352721460499872,-0.14907481709732862,Single region,bs,Carryover,sr_bs
+2,bs_comps_full_idx,-0.18168941994802487,-0.13949521103630216,Single region,bs,Complete,NA
+2,carry_idx_full_comps,-0.04915234460722246,0.02533755904579758,Single region,complete,Carryover,sr_complete
+2,all,-0.029352804312479164,0.04491236139748818,Single region,complete,Complete,NA
+3,hist,0.12480553433561267,0.21544823900271992,Single region,missing,Carryover,sr_asrun
+3,full_idx_partial_comps,0.14402016916692878,0.2324472982939292,Single region,missing,Complete,NA
+3,goa_comps_carry_idx,0.2144369315934527,0.3349849191520823,Single region,goa,Carryover,sr_goa
+3,goa_comps_full_idx,0.23341346367732702,0.35181516483793795,Single region,goa,Complete,NA
+3,bs_comps_carry_idx,-0.1473206054711695,-0.11691190981794182,Single region,bs,Carryover,sr_bs
+3,bs_comps_full_idx,-0.13722093778082503,-0.11115084486160166,Single region,bs,Complete,NA
+3,carry_idx_full_comps,0.05007484699719814,0.11550708594520515,Single region,complete,Carryover,sr_complete
+3,all,0.06930235820600213,0.13244877357058596,Single region,complete,Complete,NA
+4,hist,-0.09491536975564355,-0.03300431016787644,Single region,missing,Carryover,sr_asrun
+4,full_idx_partial_comps,-0.07788343257016987,-0.01717051194791081,Single region,missing,Complete,NA
+4,goa_comps_carry_idx,-0.03663146346071931,0.044609613924830024,Single region,goa,Carryover,sr_goa
+4,goa_comps_full_idx,-0.019670037983059496,0.060462766256058224,Single region,goa,Complete,NA
+4,bs_comps_carry_idx,-0.2599066977912356,-0.2385884115352374,Single region,bs,Carryover,sr_bs
+4,bs_comps_full_idx,-0.24933750208782404,-0.23059094540694836,Single region,bs,Complete,NA
+4,carry_idx_full_comps,-0.14418861406252367,-0.10040893261781135,Single region,complete,Carryover,sr_complete
+4,all,-0.1269118514410162,-0.0843883519434203,Single region,complete,Complete,NA
+5,hist,0.06700726086951353,0.15128888999868798,Single region,missing,Carryover,sr_asrun
+5,full_idx_partial_comps,0.08700316072143684,0.1697896277092827,Single region,missing,Complete,NA
+5,goa_comps_carry_idx,0.12448311202346195,0.22362038768603912,Single region,goa,Carryover,sr_goa
+5,goa_comps_full_idx,0.14414846706948217,0.24164840619126005,Single region,goa,Complete,NA
+5,bs_comps_carry_idx,-0.16364024169221342,-0.13213896411417142,Single region,bs,Carryover,sr_bs
+5,bs_comps_full_idx,-0.15223058249355462,-0.12412895868015779,Single region,bs,Complete,NA
+5,carry_idx_full_comps,-0.010863547688647463,0.047631031626835574,Single region,complete,Carryover,sr_complete
+5,all,0.009194084072525803,0.06615247443823162,Single region,complete,Complete,NA
+6,hist,0.0528321304374887,0.1281210362263247,Single region,missing,Carryover,sr_asrun
+6,full_idx_partial_comps,0.07158919525329058,0.1449611493411255,Single region,missing,Complete,NA
+6,goa_comps_carry_idx,0.12188917466195054,0.2221022729587265,Single region,goa,Carryover,sr_goa
+6,goa_comps_full_idx,0.13981967079529906,0.2380482217511274,Single region,goa,Complete,NA
+6,bs_comps_carry_idx,-0.12465950162324187,-0.07864993002459966,Single region,bs,Carryover,sr_bs
+6,bs_comps_full_idx,-0.11366464596431848,-0.07147952000485124,Single region,bs,Complete,NA
+6,carry_idx_full_comps,-0.0010804060238984393,0.058957115168598764,Single region,complete,Carryover,sr_complete
+6,all,0.017767080751066082,0.07596905727585515,Single region,complete,Complete,NA
+7,hist,0.05760520798045002,0.12522239100103527,Single region,missing,Carryover,sr_asrun
+7,full_idx_partial_comps,0.07578246431951917,0.14105728410288915,Single region,missing,Complete,NA
+7,goa_comps_carry_idx,0.14527874408088373,0.24470602452452425,Single region,goa,Carryover,sr_goa
+7,goa_comps_full_idx,0.162794433617744,0.25989369829698544,Single region,goa,Complete,NA
+7,bs_comps_carry_idx,-0.17768542023153114,-0.16182895506261624,Single region,bs,Carryover,sr_bs
+7,bs_comps_full_idx,-0.16753583650754836,-0.1559016466985781,Single region,bs,Complete,NA
+7,carry_idx_full_comps,-0.0015240918502696598,0.04564295377214303,Single region,complete,Carryover,sr_complete
+7,all,0.016946555057524154,0.06178763258887958,Single region,complete,Complete,NA
+8,hist,0.026271011488645992,0.06918807966834215,Single region,missing,Carryover,sr_asrun
+8,full_idx_partial_comps,0.04460286575115605,0.08507612491751675,Single region,missing,Complete,NA
+8,goa_comps_carry_idx,0.11394649983727659,0.18495389640366672,Single region,goa,Carryover,sr_goa
+8,goa_comps_full_idx,0.13202780778069062,0.2006537892368349,Single region,goa,Complete,NA
+8,bs_comps_carry_idx,-0.07573526371216995,-0.037186201343328604,Single region,bs,Carryover,sr_bs
+8,bs_comps_full_idx,-0.06510111952585595,-0.030239227979662116,Single region,bs,Complete,NA
+8,carry_idx_full_comps,-0.03335563498835794,-0.010876581927979054,Single region,complete,Carryover,sr_complete
+8,all,-0.014567065007800337,0.005456160872045207,Single region,complete,Complete,NA
+9,hist,0.03219812787124104,0.10301758985351715,Single region,missing,Carryover,sr_asrun
+9,full_idx_partial_comps,0.04914839309968903,0.11749960878169569,Single region,missing,Complete,NA
+9,goa_comps_carry_idx,0.09460047627486237,0.18545454914386397,Single region,goa,Carryover,sr_goa
+9,goa_comps_full_idx,0.111031422211079,0.19934741186528557,Single region,goa,Complete,NA
+9,bs_comps_carry_idx,-0.2264567661042595,-0.21590603409751613,Single region,bs,Carryover,sr_bs
+9,bs_comps_full_idx,-0.2167372450904463,-0.21022412840055898,Single region,bs,Complete,NA
+9,carry_idx_full_comps,-0.031727461542326287,0.014304605635979867,Single region,complete,Carryover,sr_complete
+9,all,-0.014250397126633757,0.029279057503341442,Single region,complete,Complete,NA
+10,hist,0.11629537535212905,0.16929670768858515,Single region,missing,Carryover,sr_asrun
+10,full_idx_partial_comps,0.1363953630559548,0.18618444367566858,Single region,missing,Complete,NA
+10,goa_comps_carry_idx,0.20766151230677113,0.29031915340848397,Single region,goa,Carryover,sr_goa
+10,goa_comps_full_idx,0.2276422251133848,0.3073029942166729,Single region,goa,Complete,NA
+10,bs_comps_carry_idx,-0.2139953204912513,-0.24128305838042113,Single region,bs,Carryover,sr_bs
+10,bs_comps_full_idx,-0.20171773024675976,-0.23362306966465907,Single region,bs,Complete,NA
+10,carry_idx_full_comps,0.056215340234933006,0.0856691040451139,Single region,complete,Carryover,sr_complete
+10,all,0.07705282854136977,0.10331981918760881,Single region,complete,Complete,NA
+11,hist,-0.06608172048895833,0.0018277080646647717,Single region,missing,Carryover,sr_asrun
+11,full_idx_partial_comps,-0.04819997584761241,0.01891843361169128,Single region,missing,Complete,NA
+11,goa_comps_carry_idx,0.01786351112294448,0.11640965076269523,Single region,goa,Carryover,sr_goa
+11,goa_comps_full_idx,0.03562187450778293,0.13361875392552894,Single region,goa,Complete,NA
+11,bs_comps_carry_idx,-0.27158857259620783,-0.25468865194585055,Single region,bs,Carryover,sr_bs
+11,bs_comps_full_idx,-0.2611539336450133,-0.2466997811484616,Single region,bs,Complete,NA
+11,carry_idx_full_comps,-0.12494347170717239,-0.07935331574559365,Single region,complete,Carryover,sr_complete
+11,all,-0.10707497580905764,-0.0625218257615468,Single region,complete,Complete,NA
+12,hist,-0.035005897091269056,0.019131729941981465,Single region,missing,Carryover,sr_asrun
+12,full_idx_partial_comps,-0.01579653036747946,0.036623038052886955,Single region,missing,Complete,NA
+12,goa_comps_carry_idx,0.05029828097128261,0.13395882098137046,Single region,goa,Carryover,sr_goa
+12,goa_comps_full_idx,0.06923520049025349,0.15133492248613367,Single region,goa,Complete,NA
+12,bs_comps_carry_idx,-0.25399728975064173,-0.25210583222455346,Single region,bs,Carryover,sr_bs
+12,bs_comps_full_idx,-0.24180689478671294,-0.24320985754414248,Single region,bs,Complete,NA
+12,carry_idx_full_comps,-0.08061716345637174,-0.04172647284908086,Single region,complete,Carryover,sr_complete
+12,all,-0.06141100567639431,-0.024376201936491926,Single region,complete,Complete,NA
+13,hist,0.09805071537827308,0.17470599259330533,Single region,missing,Carryover,sr_asrun
+13,full_idx_partial_comps,0.11745971375983967,0.19155997859656704,Single region,missing,Complete,NA
+13,goa_comps_carry_idx,0.15674771229744786,0.2490239977098517,Single region,goa,Carryover,sr_goa
+13,goa_comps_full_idx,0.17582267302049176,0.2655419618072269,Single region,goa,Complete,NA
+13,bs_comps_carry_idx,-0.18780250879205304,-0.18405978988965135,Single region,bs,Carryover,sr_bs
+13,bs_comps_full_idx,-0.17616658548751896,-0.17671294640636706,Single region,bs,Complete,NA
+13,carry_idx_full_comps,0.025731371946473357,0.07604807302414006,Single region,complete,Carryover,sr_complete
+13,all,0.045202379508237994,0.09275715814788818,Single region,complete,Complete,NA
+14,hist,0.21112906846579407,0.31665204093142774,Single region,missing,Carryover,sr_asrun
+14,full_idx_partial_comps,0.2312712661073429,0.3339593774883155,Single region,missing,Complete,NA
+14,goa_comps_carry_idx,0.29447806764052487,0.4283309210835491,Single region,goa,Carryover,sr_goa
+14,goa_comps_full_idx,0.31405423791260006,0.4449872249678654,Single region,goa,Complete,NA
+14,bs_comps_carry_idx,-0.017656260447069708,0.043055736064099535,Single region,bs,Carryover,sr_bs
+14,bs_comps_full_idx,-0.007451060381545063,0.04804556159393876,Single region,bs,Complete,NA
+14,carry_idx_full_comps,0.13367631691963958,0.20574771786284232,Single region,complete,Carryover,sr_complete
+14,all,0.1544471328319127,0.22354572449244914,Single region,complete,Complete,NA
+15,hist,0.04294745734412425,0.10816459157907993,Single region,missing,Carryover,sr_asrun
+15,full_idx_partial_comps,0.06182188712578081,0.1250670021114433,Single region,missing,Complete,NA
+15,goa_comps_carry_idx,0.12610154301752408,0.21883121135095976,Single region,goa,Carryover,sr_goa
+15,goa_comps_full_idx,0.14480355210467055,0.23579348531766742,Single region,goa,Complete,NA
+15,bs_comps_carry_idx,-0.20286043177974716,-0.19298184261429244,Single region,bs,Carryover,sr_bs
+15,bs_comps_full_idx,-0.19206940400287614,-0.18581057022312325,Single region,bs,Complete,NA
+15,carry_idx_full_comps,-0.022734210811381838,0.01873425996224449,Single region,complete,Carryover,sr_complete
+15,all,-0.0036506016214743787,0.03567874433850386,Single region,complete,Complete,NA
+16,hist,0.10350856937380855,0.21216284132746052,Single region,missing,Carryover,sr_asrun
+16,full_idx_partial_comps,0.12225148047514624,0.22960654198371047,Single region,missing,Complete,NA
+16,goa_comps_carry_idx,0.19847703701255073,0.3439532596662445,Single region,goa,Carryover,sr_goa
+16,goa_comps_full_idx,0.21644083729753733,0.3605773686045893,Single region,goa,Complete,NA
+16,bs_comps_carry_idx,-0.16890499617624072,-0.13669693702535557,Single region,bs,Carryover,sr_bs
+16,bs_comps_full_idx,-0.15821439149424024,-0.1295134411077454,Single region,bs,Complete,NA
+16,carry_idx_full_comps,0.029765255821380312,0.11015545945414244,Single region,complete,Carryover,sr_complete
+16,all,0.048658380270394576,0.12757434794697292,Single region,complete,Complete,NA
+17,hist,0.1458792101200305,0.22004073380991013,Single region,missing,Carryover,sr_asrun
+17,full_idx_partial_comps,0.16756523249799332,0.23923451404645896,Single region,missing,Complete,NA
+17,goa_comps_carry_idx,0.24538450995377645,0.3519688731732827,Single region,goa,Carryover,sr_goa
+17,goa_comps_full_idx,0.2665651005867756,0.3707833421819613,Single region,goa,Complete,NA
+17,bs_comps_carry_idx,-0.10796276244373385,-0.0705322264955624,Single region,bs,Carryover,sr_bs
+17,bs_comps_full_idx,-0.09549798347839333,-0.06211737247332205,Single region,bs,Complete,NA
+17,carry_idx_full_comps,0.08871161958083428,0.1463635516903362,Single region,complete,Carryover,sr_complete
+17,all,0.11058297124460767,0.16577927946851845,Single region,complete,Complete,NA
+18,hist,0.020264754529047423,0.047386480847664045,Single region,missing,Carryover,sr_asrun
+18,full_idx_partial_comps,0.0397110067126051,0.06413936864281021,Single region,missing,Complete,NA
+18,goa_comps_carry_idx,0.09609508690152874,0.1403312564635371,Single region,goa,Carryover,sr_goa
+18,goa_comps_full_idx,0.11571506982258199,0.15729654100216753,Single region,goa,Complete,NA
+18,bs_comps_carry_idx,-0.2666705321770461,-0.30132773557877535,Single region,bs,Carryover,sr_bs
+18,bs_comps_full_idx,-0.25500575885603244,-0.29363574542152027,Single region,bs,Complete,NA
+18,carry_idx_full_comps,-0.02819658997635435,-0.01147890571861684,Single region,complete,Carryover,sr_complete
+18,all,-0.008924783459669877,0.005107344321379087,Single region,complete,Complete,NA
+19,hist,0.2310414672084216,0.3681191839237456,Single region,missing,Carryover,sr_asrun
+19,full_idx_partial_comps,0.24994386968193977,0.38518971708754085,Single region,missing,Complete,NA
+19,goa_comps_carry_idx,0.28865630469895986,0.4466628180084414,Single region,goa,Carryover,sr_goa
+19,goa_comps_full_idx,0.30671554890827984,0.4628052163693892,Single region,goa,Complete,NA
+19,bs_comps_carry_idx,-0.07916989969849714,-0.028785902300873006,Single region,bs,Carryover,sr_bs
+19,bs_comps_full_idx,-0.06880749535425229,-0.022598412499053935,Single region,bs,Complete,NA
+19,carry_idx_full_comps,0.16858282961518342,0.2801429172276448,Single region,complete,Carryover,sr_complete
+19,all,0.18794630573297402,0.29757349344935985,Single region,complete,Complete,NA
+20,hist,-0.06546406649140608,-0.027199423377342616,Single region,missing,Carryover,sr_asrun
+20,full_idx_partial_comps,-0.046496493661928665,-0.009744184533991968,Single region,missing,Complete,NA
+20,goa_comps_carry_idx,0.006468957865748338,0.06777798948829582,Single region,goa,Carryover,sr_goa
+20,goa_comps_full_idx,0.025537567659312685,0.08554207128032407,Single region,goa,Complete,NA
+20,bs_comps_carry_idx,-0.30698888580009454,-0.31941404349992697,Single region,bs,Carryover,sr_bs
+20,bs_comps_full_idx,-0.2960203645795047,-0.31142502037924596,Single region,bs,Complete,NA
+20,carry_idx_full_comps,-0.11775007085576598,-0.09710033411892104,Single region,complete,Carryover,sr_complete
+20,all,-0.0989944603128817,-0.08010513772769887,Single region,complete,Complete,NA
+21,hist,0.169890051189113,0.2619169276760673,Single region,missing,Carryover,sr_asrun
+21,full_idx_partial_comps,0.18918998969506226,0.27853826902825896,Single region,missing,Complete,NA
+21,goa_comps_carry_idx,0.2648266124468964,0.38880998492171,Single region,goa,Carryover,sr_goa
+21,goa_comps_full_idx,0.2834412226967956,0.4046578414466575,Single region,goa,Complete,NA
+21,bs_comps_carry_idx,-0.1654853624731143,-0.15451270788628016,Single region,bs,Carryover,sr_bs
+21,bs_comps_full_idx,-0.15358831925689734,-0.14661413190537556,Single region,bs,Complete,NA
+21,carry_idx_full_comps,0.1101439783606248,0.18206953747552376,Single region,complete,Carryover,sr_complete
+21,all,0.1300566863824846,0.19944517511599721,Single region,complete,Complete,NA
+22,hist,-0.035182533835986095,0.008637435089859416,Single region,missing,Carryover,sr_asrun
+22,full_idx_partial_comps,-0.016123073721416595,0.02579840689255862,Single region,missing,Complete,NA
+22,goa_comps_carry_idx,0.020000841647599087,0.08088106480478066,Single region,goa,Carryover,sr_goa
+22,goa_comps_full_idx,0.03843666556031131,0.09730125373790273,Single region,goa,Complete,NA
+22,bs_comps_carry_idx,-0.2833136692221417,-0.2935933255623217,Single region,bs,Carryover,sr_bs
+22,bs_comps_full_idx,-0.2713455581505781,-0.2849165956545276,Single region,bs,Complete,NA
+22,carry_idx_full_comps,-0.08647922491917928,-0.0577953157498947,Single region,complete,Carryover,sr_complete
+22,all,-0.06757044786923766,-0.0409362371934689,Single region,complete,Complete,NA
+23,hist,-0.15622441972516302,-0.09754606426784804,Single region,missing,Carryover,sr_asrun
+23,full_idx_partial_comps,-0.13966714514252054,-0.08162761449839219,Single region,missing,Complete,NA
+23,goa_comps_carry_idx,-0.08029049759088543,0.005163919310263993,Single region,goa,Carryover,sr_goa
+23,goa_comps_full_idx,-0.06320824365005355,0.022055442141213678,Single region,goa,Complete,NA
+23,bs_comps_carry_idx,-0.36721007411935513,-0.3585255560667236,Single region,bs,Carryover,sr_bs
+23,bs_comps_full_idx,-0.35745509376236534,-0.35090739939928994,Single region,bs,Complete,NA
+23,carry_idx_full_comps,-0.20186905240467215,-0.16269470357243468,Single region,complete,Carryover,sr_complete
+23,all,-0.1851885929847618,-0.1468528613407741,Single region,complete,Complete,NA
+24,hist,-0.0332903827094254,0.01797327656149783,Single region,missing,Carryover,sr_asrun
+24,full_idx_partial_comps,-0.01573730889395808,0.033066146732537736,Single region,missing,Complete,NA
+24,goa_comps_carry_idx,0.04011975819065475,0.11464513512997178,Single region,goa,Carryover,sr_goa
+24,goa_comps_full_idx,0.057451715983353566,0.1295287561370732,Single region,goa,Complete,NA
+24,bs_comps_carry_idx,-0.325732399582922,-0.3394854556507923,Single region,bs,Carryover,sr_bs
+24,bs_comps_full_idx,-0.31562462281701725,-0.33309683061637635,Single region,bs,Complete,NA
+24,carry_idx_full_comps,-0.088384731225369,-0.05663069419946429,Single region,complete,Carryover,sr_complete
+24,all,-0.07041744523197754,-0.041100540279927364,Single region,complete,Complete,NA
+25,hist,0.19689243912670892,0.3037659046653794,Single region,missing,Carryover,sr_asrun
+25,full_idx_partial_comps,0.21663114781197748,0.32126600980876036,Single region,missing,Complete,NA
+25,goa_comps_carry_idx,0.2792196373145621,0.4142544891318657,Single region,goa,Carryover,sr_goa
+25,goa_comps_full_idx,0.2980533077487555,0.4306823687933038,Single region,goa,Complete,NA
+25,bs_comps_carry_idx,-0.04411822200605149,0.01838609864442088,Single region,bs,Carryover,sr_bs
+25,bs_comps_full_idx,-0.03384499132694823,0.024492927299814414,Single region,bs,Complete,NA
+25,carry_idx_full_comps,0.12590383513513698,0.2069621102244029,Single region,complete,Carryover,sr_complete
+25,all,0.14605832531909554,0.22493109450515816,Single region,complete,Complete,NA
+26,hist,0.002950639639269607,0.06412089625760303,Single region,missing,Carryover,sr_asrun
+26,full_idx_partial_comps,0.0221860630891075,0.08163550657959191,Single region,missing,Complete,NA
+26,goa_comps_carry_idx,0.09161119045731202,0.17995220957514219,Single region,goa,Carryover,sr_goa
+26,goa_comps_full_idx,0.11091723692218716,0.19771547800580153,Single region,goa,Complete,NA
+26,bs_comps_carry_idx,-0.17143492768971416,-0.1317158221785856,Single region,bs,Carryover,sr_bs
+26,bs_comps_full_idx,-0.15956190663597822,-0.12248195939094425,Single region,bs,Complete,NA
+26,carry_idx_full_comps,-0.04942382670769548,-0.004832466484017603,Single region,complete,Carryover,sr_complete
+26,all,-0.029757465869549898,0.013189583068763652,Single region,complete,Complete,NA
+27,hist,0.061804488511447535,0.16043949790687453,Single region,missing,Carryover,sr_asrun
+27,full_idx_partial_comps,0.0790779169471431,0.17599935048220172,Single region,missing,Complete,NA
+27,goa_comps_carry_idx,0.15762817960715161,0.29279168164338565,Single region,goa,Carryover,sr_goa
+27,goa_comps_full_idx,0.17465357310096288,0.30834146123328987,Single region,goa,Complete,NA
+27,bs_comps_carry_idx,-0.1711634928147193,-0.13953012258704484,Single region,bs,Carryover,sr_bs
+27,bs_comps_full_idx,-0.16086575916566442,-0.13303645467498654,Single region,bs,Complete,NA
+27,carry_idx_full_comps,-0.010333870861436951,0.059174660378337976,Single region,complete,Carryover,sr_complete
+27,all,0.007488577541815056,0.07521039974726279,Single region,complete,Complete,NA
+28,hist,-0.029183456087658016,0.017656293519089435,Single region,missing,Carryover,sr_asrun
+28,full_idx_partial_comps,-0.0113163870835064,0.033527230532966225,Single region,missing,Complete,NA
+28,goa_comps_carry_idx,0.017949368305455817,0.0836123129857945,Single region,goa,Carryover,sr_goa
+28,goa_comps_full_idx,0.03520262233264373,0.09892779909302982,Single region,goa,Complete,NA
+28,bs_comps_carry_idx,-0.25575149908675526,-0.2677823880074201,Single region,bs,Carryover,sr_bs
+28,bs_comps_full_idx,-0.24414585001876216,-0.25953187382903253,Single region,bs,Complete,NA
+28,carry_idx_full_comps,-0.07678802006528013,-0.04618831481133755,Single region,complete,Carryover,sr_complete
+28,all,-0.058683683104274645,-0.03013993253097223,Single region,complete,Complete,NA
+29,hist,0.046838357867807295,0.11832158756184671,Single region,missing,Carryover,sr_asrun
+29,full_idx_partial_comps,0.06528872714090136,0.13473858856812965,Single region,missing,Complete,NA
+29,goa_comps_carry_idx,0.14859177102715235,0.25486686130323316,Single region,goa,Carryover,sr_goa
+29,goa_comps_full_idx,0.1666507476614108,0.27093165716286316,Single region,goa,Complete,NA
+29,bs_comps_carry_idx,-0.15946685613932612,-0.13253711253137718,Single region,bs,Carryover,sr_bs
+29,bs_comps_full_idx,-0.14917742050657803,-0.1262162261086737,Single region,bs,Complete,NA
+29,carry_idx_full_comps,-0.020372915287695446,0.028533969737996205,Single region,complete,Carryover,sr_complete
+29,all,-0.001753273519101765,0.04509046449252315,Single region,complete,Complete,NA
+30,hist,-0.12488102219057849,-0.0692930913258579,Single region,missing,Carryover,sr_asrun
+30,full_idx_partial_comps,-0.10861546877589934,-0.054276034534966336,Single region,missing,Complete,NA
+30,goa_comps_carry_idx,-0.0800548929748967,-0.010425132101712743,Single region,goa,Carryover,sr_goa
+30,goa_comps_full_idx,-0.06362224053892049,0.005033779708360599,Single region,goa,Complete,NA
+30,bs_comps_carry_idx,-0.3328531419994364,-0.3342932449704251,Single region,bs,Carryover,sr_bs
+30,bs_comps_full_idx,-0.32273288803700684,-0.3268733722244412,Single region,bs,Complete,NA
+30,carry_idx_full_comps,-0.1783417810061472,-0.14192456230455908,Single region,complete,Carryover,sr_complete
+30,all,-0.1620633939239076,-0.1269875336101076,Single region,complete,Complete,NA
+31,hist,-0.1279710235686163,-0.10243099396403924,Single region,missing,Carryover,sr_asrun
+31,full_idx_partial_comps,-0.11084202929542941,-0.0877252753497252,Single region,missing,Complete,NA
+31,goa_comps_carry_idx,-0.07655378486824756,-0.036901598090252084,Single region,goa,Carryover,sr_goa
+31,goa_comps_full_idx,-0.05945560413632131,-0.02221848331565117,Single region,goa,Complete,NA
+31,bs_comps_carry_idx,-0.3726096336518947,-0.4025919637087462,Single region,bs,Carryover,sr_bs
+31,bs_comps_full_idx,-0.362357963824053,-0.39575565350570396,Single region,bs,Complete,NA
+31,carry_idx_full_comps,-0.1696167732281469,-0.15669055478136956,Single region,complete,Carryover,sr_complete
+31,all,-0.15244979512358967,-0.1419038876730072,Single region,complete,Complete,NA
+32,hist,0.15226826850867362,0.2648850103090134,Single region,missing,Carryover,sr_asrun
+32,full_idx_partial_comps,0.17130679075503277,0.282327003843493,Single region,missing,Complete,NA
+32,goa_comps_carry_idx,0.25178887965689123,0.4021663936348959,Single region,goa,Carryover,sr_goa
+32,goa_comps_full_idx,0.27037114705248794,0.4193893590968895,Single region,goa,Complete,NA
+32,bs_comps_carry_idx,-0.16994820640715402,-0.13117536762419557,Single region,bs,Carryover,sr_bs
+32,bs_comps_full_idx,-0.15979948824498327,-0.12437801380038194,Single region,bs,Complete,NA
+32,carry_idx_full_comps,0.06025031354701919,0.13847945896830932,Single region,complete,Carryover,sr_complete
+32,all,0.07970995841003263,0.15633900995143674,Single region,complete,Complete,NA
+33,hist,0.14246139115949497,0.24102318332895123,Single region,missing,Carryover,sr_asrun
+33,full_idx_partial_comps,0.16183180437942066,0.25841334413461003,Single region,missing,Complete,NA
+33,goa_comps_carry_idx,0.20824404299735041,0.3284880750561071,Single region,goa,Carryover,sr_goa
+33,goa_comps_full_idx,0.22706101858180117,0.345351506990967,Single region,goa,Complete,NA
+33,bs_comps_carry_idx,-0.11394576944034401,-0.07290106542601336,Single region,bs,Carryover,sr_bs
+33,bs_comps_full_idx,-0.10251287647438141,-0.06534059940052844,Single region,bs,Complete,NA
+33,carry_idx_full_comps,0.06823307332444613,0.13735317108404674,Single region,complete,Carryover,sr_complete
+33,all,0.08813282397619894,0.15518973343892903,Single region,complete,Complete,NA
+34,hist,0.14288302164737635,0.24351483658220865,Single region,missing,Carryover,sr_asrun
+34,full_idx_partial_comps,0.1608996768266128,0.25919876302861244,Single region,missing,Complete,NA
+34,goa_comps_carry_idx,0.21766400564599855,0.34400954189800664,Single region,goa,Carryover,sr_goa
+34,goa_comps_full_idx,0.23496630998642695,0.35891625036595193,Single region,goa,Complete,NA
+34,bs_comps_carry_idx,-0.1279005228095337,-0.09905257164160854,Single region,bs,Carryover,sr_bs
+34,bs_comps_full_idx,-0.11732811445190942,-0.09277280576309181,Single region,bs,Complete,NA
+34,carry_idx_full_comps,0.08346763023485784,0.15852986223468662,Single region,complete,Carryover,sr_complete
+34,all,0.10201634473498389,0.17464463044626796,Single region,complete,Complete,NA
+35,hist,0.14865626520501052,0.220126909423264,Single region,missing,Carryover,sr_asrun
+35,full_idx_partial_comps,0.169372287246186,0.23808421069551847,Single region,missing,Complete,NA
+35,goa_comps_carry_idx,0.22205047448441118,0.3139430487810302,Single region,goa,Carryover,sr_goa
+35,goa_comps_full_idx,0.24222440510508783,0.3312834612837367,Single region,goa,Complete,NA
+35,bs_comps_carry_idx,-0.14675083154614363,-0.14451814559758241,Single region,bs,Carryover,sr_bs
+35,bs_comps_full_idx,-0.13422974548818084,-0.13670318659774996,Single region,bs,Complete,NA
+35,carry_idx_full_comps,0.07251274790327061,0.11710947083457683,Single region,complete,Carryover,sr_complete
+35,all,0.09335206991581785,0.13495944746016605,Single region,complete,Complete,NA
+36,hist,-0.0017520736480356866,0.06184856710835851,Single region,missing,Carryover,sr_asrun
+36,full_idx_partial_comps,0.01622992408267781,0.07805837444557544,Single region,missing,Complete,NA
+36,goa_comps_carry_idx,0.06543137219112868,0.152920907326041,Single region,goa,Carryover,sr_goa
+36,goa_comps_full_idx,0.08309135367061808,0.16893804137404525,Single region,goa,Complete,NA
+36,bs_comps_carry_idx,-0.28847082069177626,-0.2998148430297773,Single region,bs,Carryover,sr_bs
+36,bs_comps_full_idx,-0.27738465565333975,-0.29193120607713874,Single region,bs,Complete,NA
+36,carry_idx_full_comps,-0.07335999638338817,-0.03348103334332779,Single region,complete,Carryover,sr_complete
+36,all,-0.05553955781185771,-0.017573020468447713,Single region,complete,Complete,NA
+37,hist,0.11589637859333385,0.21020846161210413,Single region,missing,Carryover,sr_asrun
+37,full_idx_partial_comps,0.13409371408101797,0.2260154150258767,Single region,missing,Complete,NA
+37,goa_comps_carry_idx,0.21647189445969087,0.34578570407934445,Single region,goa,Carryover,sr_goa
+37,goa_comps_full_idx,0.23478586741867516,0.3620010316676047,Single region,goa,Complete,NA
+37,bs_comps_carry_idx,-0.1660365354471727,-0.14946068905166773,Single region,bs,Carryover,sr_bs
+37,bs_comps_full_idx,-0.15497386985136316,-0.1421631944517415,Single region,bs,Complete,NA
+37,carry_idx_full_comps,0.020171201167938316,0.07868529852631084,Single region,complete,Carryover,sr_complete
+37,all,0.039009348163542006,0.09515899632192598,Single region,complete,Complete,NA
+38,hist,0.0726570655049781,0.1279654929782204,Single region,missing,Carryover,sr_asrun
+38,full_idx_partial_comps,0.09249569694841758,0.1456951683309874,Single region,missing,Complete,NA
+38,goa_comps_carry_idx,0.1170767465028366,0.18445723658783425,Single region,goa,Carryover,sr_goa
+38,goa_comps_full_idx,0.13620985055448837,0.20141956355069818,Single region,goa,Complete,NA
+38,bs_comps_carry_idx,-0.23773623278107264,-0.253869536493145,Single region,bs,Carryover,sr_bs
+38,bs_comps_full_idx,-0.22615809498415024,-0.2460370405329016,Single region,bs,Complete,NA
+38,carry_idx_full_comps,-0.004297926361723499,0.027141922469345135,Single region,complete,Carryover,sr_complete
+38,all,0.015474911468003637,0.044673752999701596,Single region,complete,Complete,NA
+39,hist,0.0739526241206849,0.15291954168297556,Single region,missing,Carryover,sr_asrun
+39,full_idx_partial_comps,0.09134770972139428,0.16742730379928988,Single region,missing,Complete,NA
+39,goa_comps_carry_idx,0.17016010120765732,0.28634839301034665,Single region,goa,Carryover,sr_goa
+39,goa_comps_full_idx,0.1869620493513067,0.3002625418720565,Single region,goa,Complete,NA
+39,bs_comps_carry_idx,-0.08437452009147625,-0.03907185443508019,Single region,bs,Carryover,sr_bs
+39,bs_comps_full_idx,-0.0740706124061106,-0.03332147248563606,Single region,bs,Complete,NA
+39,carry_idx_full_comps,0.02288346076937761,0.08445358401599803,Single region,complete,Carryover,sr_complete
+39,all,0.0409416532072859,0.0999532139465293,Single region,complete,Complete,NA
+40,hist,0.02231147469823151,0.08835450609967091,Single region,missing,Carryover,sr_asrun
+40,full_idx_partial_comps,0.04169274640411501,0.10540153871629938,Single region,missing,Complete,NA
+40,goa_comps_carry_idx,0.11746905754616095,0.22037324308480463,Single region,goa,Carryover,sr_goa
+40,goa_comps_full_idx,0.13647789093614454,0.23729621464677414,Single region,goa,Complete,NA
+40,bs_comps_carry_idx,-0.23332053330018349,-0.22306675331646256,Single region,bs,Carryover,sr_bs
+40,bs_comps_full_idx,-0.2213949830409317,-0.2148754724517221,Single region,bs,Complete,NA
+40,carry_idx_full_comps,-0.04722906810233355,-0.004671939526666744,Single region,complete,Carryover,sr_complete
+40,all,-0.027628131977045462,0.012595090433570386,Single region,complete,Complete,NA
+41,hist,0.18901714993769558,0.2928349485473122,Single region,missing,Carryover,sr_asrun
+41,full_idx_partial_comps,0.2092181494978282,0.31073783045482234,Single region,missing,Complete,NA
+41,goa_comps_carry_idx,0.2859843117537001,0.42506071395996264,Single region,goa,Carryover,sr_goa
+41,goa_comps_full_idx,0.3055021251104509,0.4423096613766215,Single region,goa,Complete,NA
+41,bs_comps_carry_idx,-0.12411329601870083,-0.08446387242159567,Single region,bs,Carryover,sr_bs
+41,bs_comps_full_idx,-0.11325881949309963,-0.07804220944512816,Single region,bs,Complete,NA
+41,carry_idx_full_comps,0.10211881238085216,0.17707752703549573,Single region,complete,Carryover,sr_complete
+41,all,0.12251639628400267,0.19515436817376905,Single region,complete,Complete,NA
+42,hist,-0.11902692635806911,-0.0652267206663795,Single region,missing,Carryover,sr_asrun
+42,full_idx_partial_comps,-0.10269120217525476,-0.04994412589105183,Single region,missing,Complete,NA
+42,goa_comps_carry_idx,-0.0541190226050251,0.0249146764796784,Single region,goa,Carryover,sr_goa
+42,goa_comps_full_idx,-0.03790933446778445,0.04038114598657694,Single region,goa,Complete,NA
+42,bs_comps_carry_idx,-0.3368653496215211,-0.3317228461338533,Single region,bs,Carryover,sr_bs
+42,bs_comps_full_idx,-0.32807744492279606,-0.3258363852312623,Single region,bs,Complete,NA
+42,carry_idx_full_comps,-0.16154005977454292,-0.12170873059156483,Single region,complete,Carryover,sr_complete
+42,all,-0.14546355942871633,-0.10677045777567055,Single region,complete,Complete,NA
+43,hist,0.12272750918020417,0.20608334328036762,Single region,missing,Carryover,sr_asrun
+43,full_idx_partial_comps,0.1410706362321901,0.22230399561870262,Single region,missing,Complete,NA
+43,goa_comps_carry_idx,0.20595740714773622,0.3231332221213775,Single region,goa,Carryover,sr_goa
+43,goa_comps_full_idx,0.22376500411260994,0.33896076761675953,Single region,goa,Complete,NA
+43,bs_comps_carry_idx,-0.18179889110992675,-0.18552552513390613,Single region,bs,Carryover,sr_bs
+43,bs_comps_full_idx,-0.1707319162912711,-0.17836196684413344,Single region,bs,Complete,NA
+43,carry_idx_full_comps,0.07582390627194582,0.14529149192453913,Single region,complete,Carryover,sr_complete
+43,all,0.09415419489556177,0.1614973127754606,Single region,complete,Complete,NA
+44,hist,0.31133009127967004,0.46610346456726964,Single region,missing,Carryover,sr_asrun
+44,full_idx_partial_comps,0.3328055278632552,0.4860803119884835,Single region,missing,Complete,NA
+44,goa_comps_carry_idx,0.3676168541082734,0.542674417394679,Single region,goa,Carryover,sr_goa
+44,goa_comps_full_idx,0.3886674686141821,0.5623095315017187,Single region,goa,Complete,NA
+44,bs_comps_carry_idx,-0.06762743997377567,-0.012349040702139855,Single region,bs,Carryover,sr_bs
+44,bs_comps_full_idx,-0.056226386309285635,-0.0047374738843517505,Single region,bs,Complete,NA
+44,carry_idx_full_comps,0.2226436208820421,0.34642507457722604,Single region,complete,Carryover,sr_complete
+44,all,0.24392470732269947,0.36598426036436843,Single region,complete,Complete,NA
+45,hist,-0.06872745540640003,-0.016045734734913202,Single region,missing,Carryover,sr_asrun
+45,full_idx_partial_comps,-0.05206235679686236,-0.0014434248742927,Single region,missing,Complete,NA
+45,goa_comps_carry_idx,0.0037155900147838837,0.08122977295962094,Single region,goa,Carryover,sr_goa
+45,goa_comps_full_idx,0.020252960943839222,0.09579272089095511,Single region,goa,Complete,NA
+45,bs_comps_carry_idx,-0.31588295388338694,-0.32470085812354305,Single region,bs,Carryover,sr_bs
+45,bs_comps_full_idx,-0.3060614014008867,-0.31827853665172484,Single region,bs,Complete,NA
+45,carry_idx_full_comps,-0.12941269031139227,-0.09708238312117651,Single region,complete,Carryover,sr_complete
+45,all,-0.11287253636164289,-0.0826573399449665,Single region,complete,Complete,NA
+46,hist,0.08720997601654572,0.1782601769046913,Single region,missing,Carryover,sr_asrun
+46,full_idx_partial_comps,0.10660756780184083,0.1959850106960529,Single region,missing,Complete,NA
+46,goa_comps_carry_idx,0.1436376299640948,0.2559250793159676,Single region,goa,Carryover,sr_goa
+46,goa_comps_full_idx,0.16236986064701364,0.2730318552129061,Single region,goa,Complete,NA
+46,bs_comps_carry_idx,-0.20584741584075059,-0.18162208160799265,Single region,bs,Carryover,sr_bs
+46,bs_comps_full_idx,-0.1952424905391484,-0.17442260435901982,Single region,bs,Complete,NA
+46,carry_idx_full_comps,0.014691480202723761,0.08340467517262834,Single region,complete,Carryover,sr_complete
+46,all,0.0341673055725555,0.10120836820520698,Single region,complete,Complete,NA
+47,hist,0.13883571652993856,0.1932046973789948,Single region,missing,Carryover,sr_asrun
+47,full_idx_partial_comps,0.15749155647651053,0.2077439890011175,Single region,missing,Complete,NA
+47,goa_comps_carry_idx,0.21153056007472332,0.2901383259941004,Single region,goa,Carryover,sr_goa
+47,goa_comps_full_idx,0.22932213528030046,0.3036096825930934,Single region,goa,Complete,NA
+47,bs_comps_carry_idx,-0.10581328138572298,-0.0971116248931411,Single region,bs,Carryover,sr_bs
+47,bs_comps_full_idx,-0.09574518157681274,-0.09261927583576042,Single region,bs,Complete,NA
+47,carry_idx_full_comps,0.0970239853344992,0.13910663597870204,Single region,complete,Carryover,sr_complete
+47,all,0.11619747080073935,0.1543938225117021,Single region,complete,Complete,NA
+48,hist,0.14963640026720204,0.2615364014449187,Single region,missing,Carryover,sr_asrun
+48,full_idx_partial_comps,0.16905850181017046,0.27953951081756595,Single region,missing,Complete,NA
+48,goa_comps_carry_idx,0.21699277397173533,0.35335021185776516,Single region,goa,Carryover,sr_goa
+48,goa_comps_full_idx,0.23556278951741477,0.3703636836384362,Single region,goa,Complete,NA
+48,bs_comps_carry_idx,-0.14617783883566765,-0.10580173534902228,Single region,bs,Carryover,sr_bs
+48,bs_comps_full_idx,-0.135163877679974,-0.09837349429381718,Single region,bs,Complete,NA
+48,carry_idx_full_comps,0.08320679192403539,0.17036399784107287,Single region,complete,Carryover,sr_complete
+48,all,0.10286038108483944,0.18846471159951814,Single region,complete,Complete,NA
+49,hist,0.03980640740761416,0.10021516450873061,Single region,missing,Carryover,sr_asrun
+49,full_idx_partial_comps,0.05643745086963909,0.11373137051853452,Single region,missing,Complete,NA
+49,goa_comps_carry_idx,0.10905037524820345,0.1910099106391459,Single region,goa,Carryover,sr_goa
+49,goa_comps_full_idx,0.12548878408887115,0.20437446747872437,Single region,goa,Complete,NA
+49,bs_comps_carry_idx,-0.2264393438201698,-0.22613873566009948,Single region,bs,Carryover,sr_bs
+49,bs_comps_full_idx,-0.21711944890781779,-0.2212772852815298,Single region,bs,Complete,NA
+49,carry_idx_full_comps,-0.011994788312280092,0.030976027814894485,Single region,complete,Carryover,sr_complete
+49,all,0.005280232134590825,0.045352853046395934,Single region,complete,Complete,NA
+50,hist,0.3310557373112302,0.48882213207590725,Single region,missing,Carryover,sr_asrun
+50,full_idx_partial_comps,0.35068944860647605,0.5062275193762669,Single region,missing,Complete,NA
+50,goa_comps_carry_idx,0.41479356930104466,0.6001109031931927,Single region,goa,Carryover,sr_goa
+50,goa_comps_full_idx,0.4344622028084109,0.6176958965904665,Single region,goa,Complete,NA
+50,bs_comps_carry_idx,-0.0043750393349842355,0.06563281305613897,Single region,bs,Carryover,sr_bs
+50,bs_comps_full_idx,0.0071376885826065495,0.07308278539440621,Single region,bs,Complete,NA
+50,carry_idx_full_comps,0.2391125551203829,0.361381480236007,Single region,complete,Carryover,sr_complete
+50,all,0.25964956240936066,0.37984198181698453,Single region,complete,Complete,NA
+51,hist,0.18539245427774262,0.2711193409437968,Single region,missing,Carryover,sr_asrun
+51,full_idx_partial_comps,0.20578375681645455,0.28840051181737614,Single region,missing,Complete,NA
+51,goa_comps_carry_idx,0.2805781208264376,0.3970721457833889,Single region,goa,Carryover,sr_goa
+51,goa_comps_full_idx,0.30049026871020457,0.4138590980313864,Single region,goa,Complete,NA
+51,bs_comps_carry_idx,-0.11105230878783053,-0.0914120618892498,Single region,bs,Carryover,sr_bs
+51,bs_comps_full_idx,-0.09951202176586911,-0.08473672606818948,Single region,bs,Complete,NA
+51,carry_idx_full_comps,0.11370840661449451,0.17497761219339575,Single region,complete,Carryover,sr_complete
+51,all,0.13456888657508762,0.19277499296860742,Single region,complete,Complete,NA
+52,hist,0.07082924948717532,0.14090906026165928,Single region,missing,Carryover,sr_asrun
+52,full_idx_partial_comps,0.09041161818317185,0.15807220245805031,Single region,missing,Complete,NA
+52,goa_comps_carry_idx,0.16228233540820575,0.2644076177737269,Single region,goa,Carryover,sr_goa
+52,goa_comps_full_idx,0.1813234755950776,0.2810505771909953,Single region,goa,Complete,NA
+52,bs_comps_carry_idx,-0.21503232923190446,-0.20962228835365243,Single region,bs,Carryover,sr_bs
+52,bs_comps_full_idx,-0.2030228232892098,-0.20139227178789842,Single region,bs,Complete,NA
+52,carry_idx_full_comps,-0.008997544088237426,0.0338244878973593,Single region,complete,Carryover,sr_complete
+52,all,0.011016601349154257,0.05145129207546515,Single region,complete,Complete,NA
+53,hist,0.15785479594954957,0.28631178713949335,Single region,missing,Carryover,sr_asrun
+53,full_idx_partial_comps,0.17549218297154404,0.30247714727045427,Single region,missing,Complete,NA
+53,goa_comps_carry_idx,0.2551852418668653,0.42137935681070243,Single region,goa,Carryover,sr_goa
+53,goa_comps_full_idx,0.272450826086014,0.437282098384866,Single region,goa,Complete,NA
+53,bs_comps_carry_idx,-0.15004274704708134,-0.1079406813063804,Single region,bs,Carryover,sr_bs
+53,bs_comps_full_idx,-0.1397365482385599,-0.10114120584149812,Single region,bs,Complete,NA
+53,carry_idx_full_comps,0.08843911834643439,0.1902127929205537,Single region,complete,Carryover,sr_complete
+53,all,0.10638161234900763,0.20673718579843064,Single region,complete,Complete,NA
+54,hist,0.12179351786338216,0.244366012334669,Single region,missing,Carryover,sr_asrun
+54,full_idx_partial_comps,0.14074193405039565,0.2622349182925464,Single region,missing,Complete,NA
+54,goa_comps_carry_idx,0.20430444975532777,0.35782161374343097,Single region,goa,Carryover,sr_goa
+54,goa_comps_full_idx,0.22281117939794348,0.3753665339504099,Single region,goa,Complete,NA
+54,bs_comps_carry_idx,-0.1442453511266374,-0.08572747197769477,Single region,bs,Carryover,sr_bs
+54,bs_comps_full_idx,-0.13364840414896947,-0.07810661641029772,Single region,bs,Complete,NA
+54,carry_idx_full_comps,0.03840843589042138,0.13092520288592505,Single region,complete,Carryover,sr_complete
+54,all,0.05774509371838196,0.1491783604301584,Single region,complete,Complete,NA
+55,hist,0.13591753901305942,0.23414937197519006,Single region,missing,Carryover,sr_asrun
+55,full_idx_partial_comps,0.1554741882929871,0.25137776444727344,Single region,missing,Complete,NA
+55,goa_comps_carry_idx,0.21408303177870427,0.3370857663823535,Single region,goa,Carryover,sr_goa
+55,goa_comps_full_idx,0.23293123938411986,0.3535886164667024,Single region,goa,Complete,NA
+55,bs_comps_carry_idx,-0.1865234065247932,-0.16137575679655594,Single region,bs,Carryover,sr_bs
+55,bs_comps_full_idx,-0.1749419013596951,-0.15372348687770043,Single region,bs,Complete,NA
+55,carry_idx_full_comps,0.05744949941925645,0.12829932860688578,Single region,complete,Carryover,sr_complete
+55,all,0.07749505688824568,0.1460619294795839,Single region,complete,Complete,NA
+56,hist,0.1609588381531494,0.2484216976719958,Single region,missing,Carryover,sr_asrun
+56,full_idx_partial_comps,0.17903435621027972,0.26336361928291735,Single region,missing,Complete,NA
+56,goa_comps_carry_idx,0.2236278486693081,0.33124648965633946,Single region,goa,Carryover,sr_goa
+56,goa_comps_full_idx,0.24096534439311226,0.3452957069399294,Single region,goa,Complete,NA
+56,bs_comps_carry_idx,-0.15309943214452482,-0.1393253766095305,Single region,bs,Carryover,sr_bs
+56,bs_comps_full_idx,-0.14363245265754226,-0.1350409857822994,Single region,bs,Complete,NA
+56,carry_idx_full_comps,0.10522097114833363,0.17209973924189373,Single region,complete,Carryover,sr_complete
+56,all,0.12383742664230675,0.18765413837310682,Single region,complete,Complete,NA
+57,hist,0.05074481524127014,0.12224260723212671,Single region,missing,Carryover,sr_asrun
+57,full_idx_partial_comps,0.06880731120547308,0.13763796335085118,Single region,missing,Complete,NA
+57,goa_comps_carry_idx,0.14094013199602645,0.24391204977663974,Single region,goa,Carryover,sr_goa
+57,goa_comps_full_idx,0.15884810990825268,0.25938697955717,Single region,goa,Complete,NA
+57,bs_comps_carry_idx,-0.21141591871552437,-0.20265035270819243,Single region,bs,Carryover,sr_bs
+57,bs_comps_full_idx,-0.20073828655698545,-0.19622428203088924,Single region,bs,Complete,NA
+57,carry_idx_full_comps,-0.008603890954748821,0.0440237543494494,Single region,complete,Carryover,sr_complete
+57,all,0.009710373815811163,0.059712247278222656,Single region,complete,Complete,NA
+58,hist,0.28197825320224246,0.3839304863433187,Single region,missing,Carryover,sr_asrun
+58,full_idx_partial_comps,0.30074171608497813,0.3989316442360368,Single region,missing,Complete,NA
+58,goa_comps_carry_idx,0.4062819454619207,0.5453721300165509,Single region,goa,Carryover,sr_goa
+58,goa_comps_full_idx,0.42459121173471204,0.559795271813215,Single region,goa,Complete,NA
+58,bs_comps_carry_idx,0.019766470347467802,0.06491671005209622,Single region,bs,Carryover,sr_bs
+58,bs_comps_full_idx,0.029177918545251424,0.06819552323420779,Single region,bs,Complete,NA
+58,carry_idx_full_comps,0.1978133117244819,0.2701683584768852,Single region,complete,Carryover,sr_complete
+58,all,0.21730721778601503,0.28602526773261777,Single region,complete,Complete,NA
+59,hist,0.07056736321232031,0.1774877352233587,Single region,missing,Carryover,sr_asrun
+59,full_idx_partial_comps,0.08817250688321095,0.1935546622425724,Single region,missing,Complete,NA
+59,goa_comps_carry_idx,0.14638619105693843,0.2793005527991926,Single region,goa,Carryover,sr_goa
+59,goa_comps_full_idx,0.16337610365791957,0.29459595143709544,Single region,goa,Complete,NA
+59,bs_comps_carry_idx,-0.1675045140215749,-0.1153977690496338,Single region,bs,Carryover,sr_bs
+59,bs_comps_full_idx,-0.15722052587613652,-0.10842996337157361,Single region,bs,Complete,NA
+59,carry_idx_full_comps,0.01808803939395712,0.10471215909636127,Single region,complete,Carryover,sr_complete
+59,all,0.036247328355328914,0.12139684864213418,Single region,complete,Complete,NA
+60,hist,-0.046152735197601144,-0.014475067318461389,Single region,missing,Carryover,sr_asrun
+60,full_idx_partial_comps,-0.027429681465057563,0.002023123857548948,Single region,missing,Complete,NA
+60,goa_comps_carry_idx,0.028989640585793897,0.08521326055852403,Single region,goa,Carryover,sr_goa
+60,goa_comps_full_idx,0.04745569169093538,0.1016230025847381,Single region,goa,Complete,NA
+60,bs_comps_carry_idx,-0.29068083713141635,-0.307990649639505,Single region,bs,Carryover,sr_bs
+60,bs_comps_full_idx,-0.27974900453118506,-0.3007165640338213,Single region,bs,Complete,NA
+60,carry_idx_full_comps,-0.09628398033067621,-0.08565060402497267,Single region,complete,Carryover,sr_complete
+60,all,-0.07749174535824295,-0.06945153561181465,Single region,complete,Complete,NA
+61,hist,0.11549063410960458,0.2268339764154542,Single region,missing,Carryover,sr_asrun
+61,full_idx_partial_comps,0.13441923984167298,0.24408759823355033,Single region,missing,Complete,NA
+61,goa_comps_carry_idx,0.18779356287922078,0.3261359569072689,Single region,goa,Carryover,sr_goa
+61,goa_comps_full_idx,0.20605643739428683,0.3428098476939678,Single region,goa,Complete,NA
+61,bs_comps_carry_idx,-0.1907214096519899,-0.15652924558417672,Single region,bs,Carryover,sr_bs
+61,bs_comps_full_idx,-0.18062854240799134,-0.1503855384999157,Single region,bs,Complete,NA
+61,carry_idx_full_comps,0.05119206607025211,0.13987541783922278,Single region,complete,Carryover,sr_complete
+61,all,0.07044151072624918,0.1574196231802903,Single region,complete,Complete,NA
+62,hist,0.21749480099615834,0.34412945954568014,Single region,missing,Carryover,sr_asrun
+62,full_idx_partial_comps,0.23525392953144525,0.3596102459063002,Single region,missing,Complete,NA
+62,goa_comps_carry_idx,0.3039892873874286,0.46722985638613573,Single region,goa,Carryover,sr_goa
+62,goa_comps_full_idx,0.3207326570596523,0.4816969007465149,Single region,goa,Complete,NA
+62,bs_comps_carry_idx,-0.0650589417680538,-0.011670013660197124,Single region,bs,Carryover,sr_bs
+62,bs_comps_full_idx,-0.055311802821183614,-0.006367998874772455,Single region,bs,Complete,NA
+62,carry_idx_full_comps,0.13911708083885882,0.24009847743143267,Single region,complete,Carryover,sr_complete
+62,all,0.1573246146568204,0.25625782136357766,Single region,complete,Complete,NA
+63,hist,0.11052758870991596,0.17909007782652311,Single region,missing,Carryover,sr_asrun
+63,full_idx_partial_comps,0.12927637474491802,0.19480425597957432,Single region,missing,Complete,NA
+63,goa_comps_carry_idx,0.19739115339700958,0.290772063040509,Single region,goa,Carryover,sr_goa
+63,goa_comps_full_idx,0.21594537671035172,0.30622095333391913,Single region,goa,Complete,NA
+63,bs_comps_carry_idx,-0.21718645280653565,-0.22691330148265235,Single region,bs,Carryover,sr_bs
+63,bs_comps_full_idx,-0.20638505173940022,-0.2205676929313012,Single region,bs,Complete,NA
+63,carry_idx_full_comps,0.042060317653912584,0.08487209906505197,Single region,complete,Carryover,sr_complete
+63,all,0.06140596785374191,0.10123042619482053,Single region,complete,Complete,NA
+64,hist,0.05409721223186545,0.1402256208352616,Single region,missing,Carryover,sr_asrun
+64,full_idx_partial_comps,0.07290391100107838,0.1578488646194704,Single region,missing,Complete,NA
+64,goa_comps_carry_idx,0.11986151700470175,0.22672833607560255,Single region,goa,Carryover,sr_goa
+64,goa_comps_full_idx,0.13852403905470176,0.24425908427095253,Single region,goa,Complete,NA
+64,bs_comps_carry_idx,-0.23676710995291475,-0.22841369251207544,Single region,bs,Carryover,sr_bs
+64,bs_comps_full_idx,-0.22591092961673195,-0.220558704877941,Single region,bs,Complete,NA
+64,carry_idx_full_comps,-0.012529712517076588,0.05074886489390635,Single region,complete,Carryover,sr_complete
+64,all,0.006184999460341949,0.06811803978666683,Single region,complete,Complete,NA
+65,hist,0.12969370581997058,0.23654645723632634,Single region,missing,Carryover,sr_asrun
+65,full_idx_partial_comps,0.14768203633575713,0.252159512902204,Single region,missing,Complete,NA
+65,goa_comps_carry_idx,0.2185878300919573,0.3600196446815325,Single region,goa,Carryover,sr_goa
+65,goa_comps_full_idx,0.23585943821278638,0.37490243808613216,Single region,goa,Complete,NA
+65,bs_comps_carry_idx,-0.16595502524452074,-0.132542264767965,Single region,bs,Carryover,sr_bs
+65,bs_comps_full_idx,-0.15564846270936195,-0.12650189017444038,Single region,bs,Complete,NA
+65,carry_idx_full_comps,0.05652387978949027,0.13233214807444527,Single region,complete,Carryover,sr_complete
+65,all,0.07523397441669447,0.14864121563327218,Single region,complete,Complete,NA
+66,hist,0.03454905186376159,0.0972516600995739,Single region,missing,Carryover,sr_asrun
+66,full_idx_partial_comps,0.05437592070791342,0.11530633397137321,Single region,missing,Complete,NA
+66,goa_comps_carry_idx,0.1352128675495727,0.23304782070590205,Single region,goa,Carryover,sr_goa
+66,goa_comps_full_idx,0.1547605576540857,0.2510708624819678,Single region,goa,Complete,NA
+66,bs_comps_carry_idx,-0.18710984034674333,-0.17643372242845942,Single region,bs,Carryover,sr_bs
+66,bs_comps_full_idx,-0.1747845873850232,-0.1676933386360014,Single region,bs,Complete,NA
+66,carry_idx_full_comps,-0.0357613440855246,0.0014811861099082485,Single region,complete,Carryover,sr_complete
+66,all,-0.015747364620072635,0.019470596992945493,Single region,complete,Complete,NA
+67,hist,0.04903946224126937,0.13476510454075696,Single region,missing,Carryover,sr_asrun
+67,full_idx_partial_comps,0.069080258883537915,0.15371830691422747,Single region,missing,Complete,NA
+67,goa_comps_carry_idx,0.13401457523605964,0.24804263735389082,Single region,goa,Carryover,sr_goa
+67,goa_comps_full_idx,0.1537924165655718,0.2668278320278142,Single region,goa,Complete,NA
+67,bs_comps_carry_idx,-0.2161815085757538,-0.19482115541107206,Single region,bs,Carryover,sr_bs
+67,bs_comps_full_idx,-0.20484897960660403,-0.1866506591878024,Single region,bs,Complete,NA
+67,carry_idx_full_comps,-0.02221928672725125,0.03780875798620804,Single region,complete,Carryover,sr_complete
+67,all,-0.0023698168850061854,0.05635102206007603,Single region,complete,Complete,NA
+68,hist,0.05243628221596811,0.132694223610143,Single region,missing,Carryover,sr_asrun
+68,full_idx_partial_comps,0.0723469117048685,0.1508961653104933,Single region,missing,Complete,NA
+68,goa_comps_carry_idx,0.13121101250246192,0.23844394426574,Single region,goa,Carryover,sr_goa
+68,goa_comps_full_idx,0.15054350473655212,0.2561035307606694,Single region,goa,Complete,NA
+68,bs_comps_carry_idx,-0.1832212219040006,-0.1540194512274066,Single region,bs,Carryover,sr_bs
+68,bs_comps_full_idx,-0.17217172322876434,-0.14659269727958155,Single region,bs,Complete,NA
+68,carry_idx_full_comps,-0.01991381045761306,0.03206357119034089,Single region,complete,Carryover,sr_complete
+68,all,3.244244568789504e-4,0.050429683175920295,Single region,complete,Complete,NA
+69,hist,0.11363519989054431,0.22169550098430751,Single region,missing,Carryover,sr_asrun
+69,full_idx_partial_comps,0.13424949203479758,0.24130511892228615,Single region,missing,Complete,NA
+69,goa_comps_carry_idx,0.20585201008617812,0.3441568328898928,Single region,goa,Carryover,sr_goa
+69,goa_comps_full_idx,0.2262211174868566,0.3635931928461252,Single region,goa,Complete,NA
+69,bs_comps_carry_idx,-0.11292842891903362,-0.06054368425035629,Single region,bs,Carryover,sr_bs
+69,bs_comps_full_idx,-0.10064963586129096,-0.05135615688290891,Single region,bs,Complete,NA
+69,carry_idx_full_comps,0.05442087492477032,0.140741492194096,Single region,complete,Carryover,sr_complete
+69,all,0.07523605327195465,0.16042956654505727,Single region,complete,Complete,NA
+70,hist,0.06023962416171715,0.12899270424833567,Single region,missing,Carryover,sr_asrun
+70,full_idx_partial_comps,0.078713390411809,0.14500323164091683,Single region,missing,Complete,NA
+70,goa_comps_carry_idx,0.1101938644333978,0.1949506581057397,Single region,goa,Carryover,sr_goa
+70,goa_comps_full_idx,0.12808207549346703,0.21032510952123368,Single region,goa,Complete,NA
+70,bs_comps_carry_idx,-0.2131453573707234,-0.2108465628076901,Single region,bs,Carryover,sr_bs
+70,bs_comps_full_idx,-0.20263441547844283,-0.20468834990594836,Single region,bs,Complete,NA
+70,carry_idx_full_comps,-0.007049435025150773,0.03725845150464304,Single region,complete,Carryover,sr_complete
+70,all,0.011695213150356112,0.05340568672860541,Single region,complete,Complete,NA
+71,hist,0.16631842219925058,0.2884228994699183,Single region,missing,Carryover,sr_asrun
+71,full_idx_partial_comps,0.1841801224588892,0.30413437845538344,Single region,missing,Complete,NA
+71,goa_comps_carry_idx,0.28063881706316096,0.4459547265691309,Single region,goa,Carryover,sr_goa
+71,goa_comps_full_idx,0.29805960763865735,0.46137022145499346,Single region,goa,Complete,NA
+71,bs_comps_carry_idx,-0.11257191409131678,-0.05561272509782751,Single region,bs,Carryover,sr_bs
+71,bs_comps_full_idx,-0.10291789177113038,-0.04989099502314625,Single region,bs,Complete,NA
+71,carry_idx_full_comps,0.11219680916504765,0.21714176634946922,Single region,complete,Carryover,sr_complete
+71,all,0.13066143186643345,0.2337399324939497,Single region,complete,Complete,NA
+72,hist,0.0668925998179178,0.1736898713536719,Single region,missing,Carryover,sr_asrun
+72,full_idx_partial_comps,0.0849726865348722,0.1906602179995402,Single region,missing,Complete,NA
+72,goa_comps_carry_idx,0.14518443360521488,0.2819936527563983,Single region,goa,Carryover,sr_goa
+72,goa_comps_full_idx,0.16282832508557984,0.2986881644506153,Single region,goa,Complete,NA
+72,bs_comps_carry_idx,-0.19540847090859664,-0.167925882896909,Single region,bs,Carryover,sr_bs
+72,bs_comps_full_idx,-0.18428267184292418,-0.15994469198820607,Single region,bs,Complete,NA
+72,carry_idx_full_comps,0.02315947791781519,0.1142480468305326,Single region,complete,Carryover,sr_complete
+72,all,0.041389482628985716,0.13136149546001483,Single region,complete,Complete,NA
+73,hist,0.040906600787836395,0.09599533017940459,Single region,missing,Carryover,sr_asrun
+73,full_idx_partial_comps,0.06098142410044806,0.11403901507909722,Single region,missing,Complete,NA
+73,goa_comps_carry_idx,0.1254740430722324,0.20753750181448583,Single region,goa,Carryover,sr_goa
+73,goa_comps_full_idx,0.1451630247554781,0.2252107346946772,Single region,goa,Complete,NA
+73,bs_comps_carry_idx,-0.19926867448852076,-0.19182720351549726,Single region,bs,Carryover,sr_bs
+73,bs_comps_full_idx,-0.1873815787685574,-0.18340959361471634,Single region,bs,Complete,NA
+73,carry_idx_full_comps,-0.013247274870199353,0.019345148526718158,Single region,complete,Carryover,sr_complete
+73,all,0.007027976349173444,0.03732975849996243,Single region,complete,Complete,NA
+74,hist,-0.03699827565010488,0.02312472925666339,Single region,missing,Carryover,sr_asrun
+74,full_idx_partial_comps,-0.019654044952730734,0.038204032866503514,Single region,missing,Complete,NA
+74,goa_comps_carry_idx,0.015236812006135317,0.09518271366475202,Single region,goa,Carryover,sr_goa
+74,goa_comps_full_idx,0.03217771339338268,0.10991866963225508,Single region,goa,Complete,NA
+74,bs_comps_carry_idx,-0.2749574035453979,-0.27111885927552937,Single region,bs,Carryover,sr_bs
+74,bs_comps_full_idx,-0.26471640395441337,-0.2645692424894827,Single region,bs,Complete,NA
+74,carry_idx_full_comps,-0.09864069678391345,-0.06269983113716339,Single region,complete,Carryover,sr_complete
+74,all,-0.08132972722928813,-0.047906942384495756,Single region,complete,Complete,NA
+75,hist,0.14349228998337826,0.24120340769870002,Single region,missing,Carryover,sr_asrun
+75,full_idx_partial_comps,0.1620481084852927,0.2573817447158809,Single region,missing,Complete,NA
+75,goa_comps_carry_idx,0.23876529975798047,0.36533955139948454,Single region,goa,Carryover,sr_goa
+75,goa_comps_full_idx,0.2568042800870776,0.38077405422889243,Single region,goa,Complete,NA
+75,bs_comps_carry_idx,-0.14337801852998092,-0.12348685019753697,Single region,bs,Carryover,sr_bs
+75,bs_comps_full_idx,-0.13249554687321366,-0.1170966252084505,Single region,bs,Complete,NA
+75,carry_idx_full_comps,0.061902621983337625,0.1318586264100336,Single region,complete,Carryover,sr_complete
+75,all,0.08061843162293855,0.14813113369484981,Single region,complete,Complete,NA
+76,hist,0.0927128412193827,0.17123082902032846,Single region,missing,Carryover,sr_asrun
+76,full_idx_partial_comps,0.11359435294534045,0.19046777023704037,Single region,missing,Complete,NA
+76,goa_comps_carry_idx,0.1648414107555814,0.26979590278217863,Single region,goa,Carryover,sr_goa
+76,goa_comps_full_idx,0.18556945021297164,0.289183970000178,Single region,goa,Complete,NA
+76,bs_comps_carry_idx,-0.14608329129577288,-0.11770863798202448,Single region,bs,Carryover,sr_bs
+76,bs_comps_full_idx,-0.13406187162762292,-0.10923357624166866,Single region,bs,Complete,NA
+76,carry_idx_full_comps,0.024745022842572097,0.07982261597144136,Single region,complete,Carryover,sr_complete
+76,all,0.04577660674275462,0.09911564700992091,Single region,complete,Complete,NA
+77,hist,0.21137039505836933,0.3377478982267193,Single region,missing,Carryover,sr_asrun
+77,full_idx_partial_comps,0.23126915673246043,0.35571139308613264,Single region,missing,Complete,NA
+77,goa_comps_carry_idx,0.3305689105844078,0.5037848946382603,Single region,goa,Carryover,sr_goa
+77,goa_comps_full_idx,0.349469014468358,0.5206814061505799,Single region,goa,Complete,NA
+77,bs_comps_carry_idx,-0.032145870934752005,0.04235338473539368,Single region,bs,Carryover,sr_bs
+77,bs_comps_full_idx,-0.020872767790922692,0.049566024646248166,Single region,bs,Complete,NA
+77,carry_idx_full_comps,0.14267201980305497,0.24555797239268265,Single region,complete,Carryover,sr_complete
+77,all,0.16300690326649211,0.2641345151219992,Single region,complete,Complete,NA
+78,hist,0.03036900998769695,0.09002668656532428,Single region,missing,Carryover,sr_asrun
+78,full_idx_partial_comps,0.04817384769559668,0.10548688232484568,Single region,missing,Complete,NA
+78,goa_comps_carry_idx,0.10482579749847235,0.19198877551648152,Single region,goa,Carryover,sr_goa
+78,goa_comps_full_idx,0.1222134273449956,0.2072130696443844,Single region,goa,Complete,NA
+78,bs_comps_carry_idx,-0.21302348706047056,-0.21541147826069523,Single region,bs,Carryover,sr_bs
+78,bs_comps_full_idx,-0.20240897347625836,-0.2087757122671171,Single region,bs,Complete,NA
+78,carry_idx_full_comps,-0.02354568116431393,0.020272593845020115,Single region,complete,Carryover,sr_complete
+78,all,-0.005713647926598412,0.03575465636185402,Single region,complete,Complete,NA
+79,hist,0.04044884694918759,0.10401337226710114,Single region,missing,Carryover,sr_asrun
+79,full_idx_partial_comps,0.0600406382621453,0.12221994379846388,Single region,missing,Complete,NA
+79,goa_comps_carry_idx,0.10713011072328864,0.19162990146183798,Single region,goa,Carryover,sr_goa
+79,goa_comps_full_idx,0.12652922042825726,0.20982943951742758,Single region,goa,Complete,NA
+79,bs_comps_carry_idx,-0.18613746837355338,-0.17445022271569915,Single region,bs,Carryover,sr_bs
+79,bs_comps_full_idx,-0.17423922775472311,-0.16572222757145078,Single region,bs,Complete,NA
+79,carry_idx_full_comps,-0.026571414643441097,0.01534317597869823,Single region,complete,Carryover,sr_complete
+79,all,-0.006941420176003714,0.03359937495864191,Single region,complete,Complete,NA
+80,hist,0.016417242064764036,0.07519704035773149,Single region,missing,Carryover,sr_asrun
+80,full_idx_partial_comps,0.034730617382724066,0.09136446751728615,Single region,missing,Complete,NA
+80,goa_comps_carry_idx,0.0652153732924907,0.13740019327573955,Single region,goa,Carryover,sr_goa
+80,goa_comps_full_idx,0.0831699406145378,0.15305959488898732,Single region,goa,Complete,NA
+80,bs_comps_carry_idx,-0.24591715092916452,-0.25053755571643405,Single region,bs,Carryover,sr_bs
+80,bs_comps_full_idx,-0.23501194576677634,-0.2433762369128106,Single region,bs,Complete,NA
+80,carry_idx_full_comps,-0.03445684943246593,0.009754734304077013,Single region,complete,Carryover,sr_complete
+80,all,-0.016305964681525984,0.025671369359986693,Single region,complete,Complete,NA
+81,hist,-0.07947844556327051,-0.031388572317737125,Single region,missing,Carryover,sr_asrun
+81,full_idx_partial_comps,-0.06087567161838998,-0.014082847365903803,Single region,missing,Complete,NA
+81,goa_comps_carry_idx,-0.007523960465709301,0.06308814134807315,Single region,goa,Carryover,sr_goa
+81,goa_comps_full_idx,0.01121456847415609,0.08072957772701642,Single region,goa,Complete,NA
+81,bs_comps_carry_idx,-0.30388597796748645,-0.3060096133462634,Single region,bs,Carryover,sr_bs
+81,bs_comps_full_idx,-0.2928752900529217,-0.2978346840370919,Single region,bs,Complete,NA
+81,carry_idx_full_comps,-0.13644207004148953,-0.10636294739407401,Single region,complete,Carryover,sr_complete
+81,all,-0.11785464267770561,-0.08910494102123362,Single region,complete,Complete,NA
+82,hist,0.0926787838649458,0.1625287716738417,Single region,missing,Carryover,sr_asrun
+82,full_idx_partial_comps,0.11163812635745284,0.17875580675903727,Single region,missing,Complete,NA
+82,goa_comps_carry_idx,0.16478375978449994,0.2591459636751855,Single region,goa,Carryover,sr_goa
+82,goa_comps_full_idx,0.18351216503474896,0.27533862024523226,Single region,goa,Complete,NA
+82,bs_comps_carry_idx,-0.1972876443436328,-0.19680815263892676,Single region,bs,Carryover,sr_bs
+82,bs_comps_full_idx,-0.18635940782347826,-0.19010858569584216,Single region,bs,Complete,NA
+82,carry_idx_full_comps,0.030113512164213773,0.08105109144668819,Single region,complete,Carryover,sr_complete
+82,all,0.04909022699413392,0.09732538956067174,Single region,complete,Complete,NA
+83,hist,-0.03149880645190267,0.04547256528107026,Single region,missing,Carryover,sr_asrun
+83,full_idx_partial_comps,-0.013689888303219567,0.06197766384662444,Single region,missing,Complete,NA
+83,goa_comps_carry_idx,0.022216072332267814,0.11533592030950106,Single region,goa,Carryover,sr_goa
+83,goa_comps_full_idx,0.03972535097357881,0.13155884249648445,Single region,goa,Complete,NA
+83,bs_comps_carry_idx,-0.24178739114762887,-0.21345791262001437,Single region,bs,Carryover,sr_bs
+83,bs_comps_full_idx,-0.23122160007908157,-0.20573781287066925,Single region,bs,Complete,NA
+83,carry_idx_full_comps,-0.09125874856267562,-0.036279730560204795,Single region,complete,Carryover,sr_complete
+83,all,-0.0732247559276121,-0.019636521964413282,Single region,complete,Complete,NA
+84,hist,0.04250061589244209,0.10236188457654999,Single region,missing,Carryover,sr_asrun
+84,full_idx_partial_comps,0.060891502396258554,0.11871754431688109,Single region,missing,Complete,NA
+84,goa_comps_carry_idx,0.09024660644747896,0.1650775177435083,Single region,goa,Carryover,sr_goa
+84,goa_comps_full_idx,0.10821225123599029,0.18097261310010251,Single region,goa,Complete,NA
+84,bs_comps_carry_idx,-0.19092401578007184,-0.17192999543566317,Single region,bs,Carryover,sr_bs
+84,bs_comps_full_idx,-0.18067812468385397,-0.16568837900686184,Single region,bs,Complete,NA
+84,carry_idx_full_comps,-0.005974871133320785,0.038003427747817994,Single region,complete,Carryover,sr_complete
+84,all,0.012350140533963692,0.054089549898133485,Single region,complete,Complete,NA
+85,hist,0.07850813256314436,0.16891241636496723,Single region,missing,Carryover,sr_asrun
+85,full_idx_partial_comps,0.09808754346610113,0.18729671935973544,Single region,missing,Complete,NA
+85,goa_comps_carry_idx,0.12786712265454078,0.2305828583961437,Single region,goa,Carryover,sr_goa
+85,goa_comps_full_idx,0.14691824901545222,0.24814693611317254,Single region,goa,Complete,NA
+85,bs_comps_carry_idx,-0.19435480990479279,-0.17883265427876874,Single region,bs,Carryover,sr_bs
+85,bs_comps_full_idx,-0.182824907423602,-0.17052500480421182,Single region,bs,Complete,NA
+85,carry_idx_full_comps,-0.003850879508154511,0.05139788758627038,Single region,complete,Carryover,sr_complete
+85,all,0.015824489956762666,0.06946971695803857,Single region,complete,Complete,NA
+86,hist,0.07350633666413645,0.1443195219839829,Single region,missing,Carryover,sr_asrun
+86,full_idx_partial_comps,0.0940651542267032,0.16311931078915576,Single region,missing,Complete,NA
+86,goa_comps_carry_idx,0.1611569660108834,0.25945256508632275,Single region,goa,Carryover,sr_goa
+86,goa_comps_full_idx,0.18127190680292377,0.2777800324049081,Single region,goa,Complete,NA
+86,bs_comps_carry_idx,-0.2303317509236134,-0.22452229237731836,Single region,bs,Carryover,sr_bs
+86,bs_comps_full_idx,-0.21846195386732853,-0.21599013466966105,Single region,bs,Complete,NA
+86,carry_idx_full_comps,0.002721695012940691,0.05357517279243849,Single region,complete,Carryover,sr_complete
+86,all,0.023152619230344347,0.07222085459085005,Single region,complete,Complete,NA
+87,hist,0.06865423662970468,0.1187977760183369,Single region,missing,Carryover,sr_asrun
+87,full_idx_partial_comps,0.086506263742961,0.1336854103088413,Single region,missing,Complete,NA
+87,goa_comps_carry_idx,0.12643817610102268,0.1953063505384762,Single region,goa,Carryover,sr_goa
+87,goa_comps_full_idx,0.14357471462912386,0.20942249633410162,Single region,goa,Complete,NA
+87,bs_comps_carry_idx,-0.17871924568242953,-0.17855278522444998,Single region,bs,Carryover,sr_bs
+87,bs_comps_full_idx,-0.16898989785885643,-0.17341071436909775,Single region,bs,Complete,NA
+87,carry_idx_full_comps,-0.005341639053851512,0.018579394271904536,Single region,complete,Carryover,sr_complete
+87,all,0.012684393314925674,0.03345669350144738,Single region,complete,Complete,NA
+88,hist,0.05347926683841823,0.11866617340344866,Single region,missing,Carryover,sr_asrun
+88,full_idx_partial_comps,0.07272317718008292,0.1356751106437222,Single region,missing,Complete,NA
+88,goa_comps_carry_idx,0.1277228010171595,0.21913554958512219,Single region,goa,Carryover,sr_goa
+88,goa_comps_full_idx,0.1464397682958159,0.23563813203385864,Single region,goa,Complete,NA
+88,bs_comps_carry_idx,-0.20076407846898003,-0.19348343994282174,Single region,bs,Carryover,sr_bs
+88,bs_comps_full_idx,-0.1893556229348924,-0.18577151687387697,Single region,bs,Complete,NA
+88,carry_idx_full_comps,-0.020952652514687118,0.017353170010347307,Single region,complete,Carryover,sr_complete
+88,all,-0.0015113594237595432,0.034457355315543774,Single region,complete,Complete,NA
+89,hist,0.1458099112186896,0.24472231251890322,Single region,missing,Carryover,sr_asrun
+89,full_idx_partial_comps,0.1659011407762916,0.26228313991209806,Single region,missing,Complete,NA
+89,goa_comps_carry_idx,0.2208433066345659,0.3473038985920171,Single region,goa,Carryover,sr_goa
+89,goa_comps_full_idx,0.24076911713850738,0.3650178613821327,Single region,goa,Complete,NA
+89,bs_comps_carry_idx,-0.09396279075944394,-0.04126452581286668,Single region,bs,Carryover,sr_bs
+89,bs_comps_full_idx,-0.0827890876355694,-0.034306282867547444,Single region,bs,Complete,NA
+89,carry_idx_full_comps,0.08528708414860516,0.16414190314891208,Single region,complete,Carryover,sr_complete
+89,all,0.10590422663753629,0.1824493962758254,Single region,complete,Complete,NA
+90,hist,0.03294958177171334,0.1136268232430004,Single region,missing,Carryover,sr_asrun
+90,full_idx_partial_comps,0.051252999207989904,0.1298076161114024,Single region,missing,Complete,NA
+90,goa_comps_carry_idx,0.2588020032930422,0.42824677470803735,Single region,goa,Carryover,sr_goa
+90,goa_comps_full_idx,0.27665470559795513,0.44465861863654504,Single region,goa,Complete,NA
+90,bs_comps_carry_idx,-0.23053997492889042,-0.21137433267318498,Single region,bs,Carryover,sr_bs
+90,bs_comps_full_idx,-0.21902378932616504,-0.2031149717107842,Single region,bs,Complete,NA
+90,carry_idx_full_comps,-0.01928683426484173,0.040473266158812346,Single region,complete,Carryover,sr_complete
+90,all,-5.182066810560049e-4,0.05706554829223946,Single region,complete,Complete,NA
+91,hist,-0.09095773764400782,-0.04422442841248589,Single region,missing,Carryover,sr_asrun
+91,full_idx_partial_comps,-0.07219641251826865,-0.02692175578492717,Single region,missing,Complete,NA
+91,goa_comps_carry_idx,-0.026955152078300067,0.03898363899465732,Single region,goa,Carryover,sr_goa
+91,goa_comps_full_idx,-0.007994240877826147,0.05658398438227626,Single region,goa,Complete,NA
+91,bs_comps_carry_idx,-0.3366679633558732,-0.33967482895830053,Single region,bs,Carryover,sr_bs
+91,bs_comps_full_idx,-0.3256431263858104,-0.3315585745918161,Single region,bs,Complete,NA
+91,carry_idx_full_comps,-0.13841027089812688,-0.10504343050785744,Single region,complete,Carryover,sr_complete
+91,all,-0.11989829796320327,-0.08813658807927556,Single region,complete,Complete,NA
+92,hist,0.048492307595829495,0.10383973681459932,Single region,missing,Carryover,sr_asrun
+92,full_idx_partial_comps,0.06804534101761389,0.12087396849760793,Single region,missing,Complete,NA
+92,goa_comps_carry_idx,0.12712395623981845,0.20721689350111216,Single region,goa,Carryover,sr_goa
+92,goa_comps_full_idx,0.1463145670645031,0.22389416157860936,Single region,goa,Complete,NA
+92,bs_comps_carry_idx,-0.1469628062519986,-0.13132461310010587,Single region,bs,Carryover,sr_bs
+92,bs_comps_full_idx,-0.13485391601160823,-0.12346429559662733,Single region,bs,Complete,NA
+92,carry_idx_full_comps,0.006847217446896135,0.05106881208185177,Single region,complete,Carryover,sr_complete
+92,all,0.026607660993456208,0.06833413054850074,Single region,complete,Complete,NA
+93,hist,0.15956418978169773,0.29066315944997906,Single region,missing,Carryover,sr_asrun
+93,full_idx_partial_comps,0.17810815616454376,0.3074606473589906,Single region,missing,Complete,NA
+93,goa_comps_carry_idx,0.21910257327515775,0.36874292618615034,Single region,goa,Carryover,sr_goa
+93,goa_comps_full_idx,0.23763504544312183,0.3856418578300182,Single region,goa,Complete,NA
+93,bs_comps_carry_idx,-0.12144433946169016,-0.07428924211849144,Single region,bs,Carryover,sr_bs
+93,bs_comps_full_idx,-0.11050252159626858,-0.0672254842741332,Single region,bs,Complete,NA
+93,carry_idx_full_comps,0.09534287504319958,0.20275742113765258,Single region,complete,Carryover,sr_complete
+93,all,0.11437583365254919,0.22020043287520635,Single region,complete,Complete,NA
+94,hist,0.014782161026830791,0.067797603102302,Single region,missing,Carryover,sr_asrun
+94,full_idx_partial_comps,0.03365703495994717,0.08454429117945679,Single region,missing,Complete,NA
+94,goa_comps_carry_idx,0.09587371501792773,0.17851438863168448,Single region,goa,Carryover,sr_goa
+94,goa_comps_full_idx,0.11428029318520098,0.1949229390992255,Single region,goa,Complete,NA
+94,bs_comps_carry_idx,-0.19883623611641577,-0.1903406870145572,Single region,bs,Carryover,sr_bs
+94,bs_comps_full_idx,-0.18718263581630165,-0.1822779188150442,Single region,bs,Complete,NA
+94,carry_idx_full_comps,-0.04761377537372993,-0.013824564796368134,Single region,complete,Carryover,sr_complete
+94,all,-0.028507300792703052,0.003205909357313811,Single region,complete,Complete,NA
+95,hist,0.07641427800558917,0.15267955678638834,Single region,missing,Carryover,sr_asrun
+95,full_idx_partial_comps,0.09469413457733591,0.16879459411934836,Single region,missing,Complete,NA
+95,goa_comps_carry_idx,0.17296029796046308,0.28108442043017795,Single region,goa,Carryover,sr_goa
+95,goa_comps_full_idx,0.19049059125026363,0.29630432027028025,Single region,goa,Complete,NA
+95,bs_comps_carry_idx,-0.14971324118388504,-0.12347220174410628,Single region,bs,Carryover,sr_bs
+95,bs_comps_full_idx,-0.13949239482183048,-0.11725865669145345,Single region,bs,Complete,NA
+95,carry_idx_full_comps,0.008321655485533402,0.06188809049271653,Single region,complete,Carryover,sr_complete
+95,all,0.026796636824537392,0.07816634339149292,Single region,complete,Complete,NA
+96,hist,0.16104307095120649,0.25205165242001215,Single region,missing,Carryover,sr_asrun
+96,full_idx_partial_comps,0.17986866530013373,0.2676170403334492,Single region,missing,Complete,NA
+96,goa_comps_carry_idx,0.24358288970785424,0.3622432081528924,Single region,goa,Carryover,sr_goa
+96,goa_comps_full_idx,0.2617328590755881,0.37698697826152994,Single region,goa,Complete,NA
+96,bs_comps_carry_idx,-0.12007284028950582,-0.08766196271849117,Single region,bs,Carryover,sr_bs
+96,bs_comps_full_idx,-0.10929010403772693,-0.08149097635098829,Single region,bs,Complete,NA
+96,carry_idx_full_comps,0.09722298369867986,0.1645578591881903,Single region,complete,Carryover,sr_complete
+96,all,0.11693476686666755,0.18120080556058132,Single region,complete,Complete,NA
+97,hist,0.23350838193597034,0.3133633473483505,Single region,missing,Carryover,sr_asrun
+97,full_idx_partial_comps,0.25320335164382596,0.32909914519343725,Single region,missing,Complete,NA
+97,goa_comps_carry_idx,0.3058419701123493,0.4071225131420558,Single region,goa,Carryover,sr_goa
+97,goa_comps_full_idx,0.3246435421910415,0.4217439274326821,Single region,goa,Complete,NA
+97,bs_comps_carry_idx,-0.08788271662913158,-0.08363189004381476,Single region,bs,Carryover,sr_bs
+97,bs_comps_full_idx,-0.0765869221103807,-0.07804064596567654,Single region,bs,Complete,NA
+97,carry_idx_full_comps,0.1608269053129522,0.21671430487516255,Single region,complete,Carryover,sr_complete
+97,all,0.18092161492752065,0.23294062984602495,Single region,complete,Complete,NA
+98,hist,0.00271773615986635,0.0817175877183175,Single region,missing,Carryover,sr_asrun
+98,full_idx_partial_comps,0.020345126294128633,0.09791045848581535,Single region,missing,Complete,NA
+98,goa_comps_carry_idx,0.06181565105733339,0.16338090397095126,Single region,goa,Carryover,sr_goa
+98,goa_comps_full_idx,0.07913639309838032,0.17939948152158802,Single region,goa,Complete,NA
+98,bs_comps_carry_idx,-0.2531269589532194,-0.23765505717867325,Single region,bs,Carryover,sr_bs
+98,bs_comps_full_idx,-0.24294437326519713,-0.23082205017842536,Single region,bs,Complete,NA
+98,carry_idx_full_comps,-0.05341578411126556,0.0070091888827380645,Single region,complete,Carryover,sr_complete
+98,all,-0.03584209093478455,0.022979454053550494,Single region,complete,Complete,NA
+99,hist,0.15744066302579285,0.24038887827439998,Single region,missing,Carryover,sr_asrun
+99,full_idx_partial_comps,0.17719487518998697,0.25697162992819833,Single region,missing,Complete,NA
+99,goa_comps_carry_idx,0.2199866071539502,0.32798919292525763,Single region,goa,Carryover,sr_goa
+99,goa_comps_full_idx,0.238611071097081,0.34349099802806643,Single region,goa,Complete,NA
+99,bs_comps_carry_idx,-0.21198814167297902,-0.21110150541641554,Single region,bs,Carryover,sr_bs
+99,bs_comps_full_idx,-0.1999755366080866,-0.20376314020743663,Single region,bs,Complete,NA
+99,carry_idx_full_comps,0.09045969786196509,0.14782073874961218,Single region,complete,Carryover,sr_complete
+99,all,0.11079621933394333,0.1648967064155306,Single region,complete,Complete,NA
+100,hist,7.419787921484714e-6,0.05545775167336457,Single region,missing,Carryover,sr_asrun
+100,full_idx_partial_comps,0.017991318517561493,0.07116545398421462,Single region,missing,Complete,NA
+100,goa_comps_carry_idx,0.056392223989522025,0.1285005022633848,Single region,goa,Carryover,sr_goa
+100,goa_comps_full_idx,0.07446212639495182,0.1444689370113672,Single region,goa,Complete,NA
+100,bs_comps_carry_idx,-0.2267430379910089,-0.22144607398208432,Single region,bs,Carryover,sr_bs
+100,bs_comps_full_idx,-0.21605139260656575,-0.2144107992818298,Single region,bs,Complete,NA
+100,carry_idx_full_comps,-0.059265387373945315,-0.024225217422038363,Single region,complete,Carryover,sr_complete
+100,all,-0.04099801224103931,-0.008238156463397489,Single region,complete,Complete,NA
+1,faa_1fish,-0.12539075684188297,-0.11880278977361879,26.2_FAA,asrun,As run,faa_asrun
+1,faa_1fish_all,-0.0822695321131364,-0.11343238205987399,26.2_FAA,complete,Complete,faa_complete
+2,faa_1fish,-0.09691828027436543,-0.06872241945557427,26.2_FAA,asrun,As run,faa_asrun
+2,faa_1fish_all,-0.04733330317538973,-0.054071222017224065,26.2_FAA,complete,Complete,faa_complete
+3,faa_1fish,-0.002223257976535033,0.03624484328344044,26.2_FAA,asrun,As run,faa_asrun
+3,faa_1fish_all,0.05199071013485987,0.043567399394258105,26.2_FAA,complete,Complete,faa_complete
+4,faa_1fish,-0.06350688484940713,-0.041013559273164656,26.2_FAA,asrun,As run,faa_asrun
+4,faa_1fish_all,-0.030313637893676502,-0.05209112012538705,26.2_FAA,complete,Complete,faa_complete
+5,faa_1fish,-0.02467123921798664,0.0032042521086800987,26.2_FAA,asrun,As run,faa_asrun
+5,faa_1fish_all,-0.0340680824379019,-0.05582083798982603,26.2_FAA,complete,Complete,faa_complete
+6,faa_1fish,0.09671346050036363,0.15250708902414176,26.2_FAA,asrun,As run,faa_asrun
+6,faa_1fish_all,0.17155727915368824,0.1825121039604522,26.2_FAA,complete,Complete,faa_complete
+7,faa_1fish,0.05721377577342009,0.115343571248637,26.2_FAA,asrun,As run,faa_asrun
+7,faa_1fish_all,0.04992095845326876,0.06842473020139352,26.2_FAA,complete,Complete,faa_complete
+8,faa_1fish,-0.06605979439992307,-0.07646802871518513,26.2_FAA,asrun,As run,faa_asrun
+8,faa_1fish_all,-0.00912387864033437,-0.054169620562473306,26.2_FAA,complete,Complete,faa_complete
+9,faa_1fish,-0.17440421004589776,-0.15940068342356445,26.2_FAA,asrun,As run,faa_asrun
+9,faa_1fish_all,-0.12310951903288553,-0.14196821235655918,26.2_FAA,complete,Complete,faa_complete
+10,faa_1fish,-0.11888117087063377,-0.11155985739602667,26.2_FAA,asrun,As run,faa_asrun
+10,faa_1fish_all,-0.023610888239328123,-0.04686721824868398,26.2_FAA,complete,Complete,faa_complete
+11,faa_1fish,-0.0955246408833845,-0.07183245977852395,26.2_FAA,asrun,As run,faa_asrun
+11,faa_1fish_all,-0.0657687063915828,-0.0848387250029015,26.2_FAA,complete,Complete,faa_complete
+12,faa_1fish,-0.1384643210574275,-0.15162530805516386,26.2_FAA,asrun,As run,faa_asrun
+12,faa_1fish_all,-0.06487073318026572,-0.10699618948279124,26.2_FAA,complete,Complete,faa_complete
+13,faa_1fish,-0.1377442237589747,-0.10015528924663629,26.2_FAA,asrun,As run,faa_asrun
+13,faa_1fish_all,-0.12031700828158978,-0.12610925082062052,26.2_FAA,complete,Complete,faa_complete
+14,faa_1fish,-0.098997660318453,-0.09355468907444764,26.2_FAA,asrun,As run,faa_asrun
+14,faa_1fish_all,-0.015643235325305895,-0.04635534629363139,26.2_FAA,complete,Complete,faa_complete
+15,faa_1fish,0.03333558737925788,0.07841531123886572,26.2_FAA,asrun,As run,faa_asrun
+15,faa_1fish_all,0.04102546991823723,0.04640856165399114,26.2_FAA,complete,Complete,faa_complete
+16,faa_1fish,-0.07494242530592768,-0.0265191783168379,26.2_FAA,asrun,As run,faa_asrun
+16,faa_1fish_all,-0.028608975641257677,-0.020119302912479674,26.2_FAA,complete,Complete,faa_complete
+17,faa_1fish,-0.08436387936895207,-0.0636947701712562,26.2_FAA,asrun,As run,faa_asrun
+17,faa_1fish_all,-0.04713982742763899,-0.06678725324373139,26.2_FAA,complete,Complete,faa_complete
+18,faa_1fish,-0.05940119233301926,-0.05879241287575425,26.2_FAA,asrun,As run,faa_asrun
+18,faa_1fish_all,-0.04775268273451186,-0.09276903630777901,26.2_FAA,complete,Complete,faa_complete
+19,faa_1fish,-0.02509827829604593,0.013510008365075777,26.2_FAA,asrun,As run,faa_asrun
+19,faa_1fish_all,0.010368319710761483,0.014031785316388339,26.2_FAA,complete,Complete,faa_complete
+20,faa_1fish,-0.07380516852576,-0.048716267391089745,26.2_FAA,asrun,As run,faa_asrun
+20,faa_1fish_all,-0.04075027425553568,-0.052723144671273835,26.2_FAA,complete,Complete,faa_complete
+21,faa_1fish,-0.10744191709769337,-0.09229532107077017,26.2_FAA,asrun,As run,faa_asrun
+21,faa_1fish_all,-0.06141353618803475,-0.08059659050186557,26.2_FAA,complete,Complete,faa_complete
+22,faa_1fish,-0.08359278937173999,-0.06120622131699478,26.2_FAA,asrun,As run,faa_asrun
+22,faa_1fish_all,-0.05618848512899292,-0.07232174871568307,26.2_FAA,complete,Complete,faa_complete
+23,faa_1fish,-0.09656193092708373,-0.08281834838948815,26.2_FAA,asrun,As run,faa_asrun
+23,faa_1fish_all,-0.04635330908106092,-0.06510532080836892,26.2_FAA,complete,Complete,faa_complete
+24,faa_1fish,-0.1319456915425688,-0.09913628106708569,26.2_FAA,asrun,As run,faa_asrun
+24,faa_1fish_all,-0.053619996935619446,-0.050417800471673886,26.2_FAA,complete,Complete,faa_complete
+25,faa_1fish,-0.048306936153132814,-0.00950437968882635,26.2_FAA,asrun,As run,faa_asrun
+25,faa_1fish_all,0.002861148292996849,0.007722102600138105,26.2_FAA,complete,Complete,faa_complete
+26,faa_1fish,0.039863552008523075,0.09212781860659165,26.2_FAA,asrun,As run,faa_asrun
+26,faa_1fish_all,0.12147005444560297,0.14204608003107547,26.2_FAA,complete,Complete,faa_complete
+27,faa_1fish,-0.10561431953495455,-0.07288471070680834,26.2_FAA,asrun,As run,faa_asrun
+27,faa_1fish_all,-0.051287827384300405,-0.05967226587396081,26.2_FAA,complete,Complete,faa_complete
+28,faa_1fish,-0.1238725072388991,-0.10809194882454974,26.2_FAA,asrun,As run,faa_asrun
+28,faa_1fish_all,-0.08890418260682624,-0.12101145143376088,26.2_FAA,complete,Complete,faa_complete
+29,faa_1fish,-0.09292082781324452,-0.07481262743724301,26.2_FAA,asrun,As run,faa_asrun
+29,faa_1fish_all,-0.0327714815728691,-0.05104761139383715,26.2_FAA,complete,Complete,faa_complete
+30,faa_1fish,-0.08762848284500538,-0.045844521612706905,26.2_FAA,asrun,As run,faa_asrun
+30,faa_1fish_all,-0.04911002889381948,-0.05021856815926097,26.2_FAA,complete,Complete,faa_complete
+31,faa_1fish,-0.10057040313232694,-0.08415760425376036,26.2_FAA,asrun,As run,faa_asrun
+31,faa_1fish_all,-0.04987522004123823,-0.06670469756500969,26.2_FAA,complete,Complete,faa_complete
+32,faa_1fish,-0.016245709297241378,0.0386255132813353,26.2_FAA,asrun,As run,faa_asrun
+32,faa_1fish_all,0.04053630430208937,0.053166456054006626,26.2_FAA,complete,Complete,faa_complete
+33,faa_1fish,-0.07894279861662241,-0.055164898098574985,26.2_FAA,asrun,As run,faa_asrun
+33,faa_1fish_all,0.01861024546200665,0.017012860334410667,26.2_FAA,complete,Complete,faa_complete
+34,faa_1fish,0.01037459694791039,0.06812368259605316,26.2_FAA,asrun,As run,faa_asrun
+34,faa_1fish_all,0.04617706241005024,0.06468512254131502,26.2_FAA,complete,Complete,faa_complete
+35,faa_1fish,-0.06215005197919406,-0.038662415305918324,26.2_FAA,asrun,As run,faa_asrun
+35,faa_1fish_all,-0.047308596930905646,-0.06774268593082113,26.2_FAA,complete,Complete,faa_complete
+36,faa_1fish,-0.06596401079832175,-0.06144408275711336,26.2_FAA,asrun,As run,faa_asrun
+36,faa_1fish_all,-0.07321706390846108,-0.11384810908251303,26.2_FAA,complete,Complete,faa_complete
+37,faa_1fish,0.08514873707122245,0.1411290669266991,26.2_FAA,asrun,As run,faa_asrun
+37,faa_1fish_all,0.08213792202201876,0.08384978074272081,26.2_FAA,complete,Complete,faa_complete
+38,faa_1fish,-0.028130202720783447,-0.019486059075507278,26.2_FAA,asrun,As run,faa_asrun
+38,faa_1fish_all,0.0014813246148617472,-0.023414762619649823,26.2_FAA,complete,Complete,faa_complete
+39,faa_1fish,-0.11353306842459693,-0.09292591350772213,26.2_FAA,asrun,As run,faa_asrun
+39,faa_1fish_all,-0.04448854188365579,-0.048452306539951695,26.2_FAA,complete,Complete,faa_complete
+40,faa_1fish,-0.12437590828105051,-0.0871201484460865,26.2_FAA,asrun,As run,faa_asrun
+40,faa_1fish_all,-0.10027366417101506,-0.10853668887016862,26.2_FAA,complete,Complete,faa_complete
+41,faa_1fish,-0.022035149940660387,0.01416049045449746,26.2_FAA,asrun,As run,faa_asrun
+41,faa_1fish_all,-0.005341238140478093,-0.015921971603119613,26.2_FAA,complete,Complete,faa_complete
+42,faa_1fish,-0.06301142227579402,-0.052305894329269756,26.2_FAA,asrun,As run,faa_asrun
+42,faa_1fish_all,0.03222017426149234,-6.681008998462579e-4,26.2_FAA,complete,Complete,faa_complete
+43,faa_1fish,-0.054974550827676126,-0.039111080697846815,26.2_FAA,asrun,As run,faa_asrun
+43,faa_1fish_all,0.03134958877029803,0.024704357932871762,26.2_FAA,complete,Complete,faa_complete
+44,faa_1fish,0.026690738709901893,0.07268927825610279,26.2_FAA,asrun,As run,faa_asrun
+44,faa_1fish_all,0.06598249252426219,0.06925815974996412,26.2_FAA,complete,Complete,faa_complete
+45,faa_1fish,-0.11575213385659609,-0.0970350846718663,26.2_FAA,asrun,As run,faa_asrun
+45,faa_1fish_all,-0.10814613950394289,-0.13977510594318943,26.2_FAA,complete,Complete,faa_complete
+46,faa_1fish,0.04075649397021112,0.1068246527932876,26.2_FAA,asrun,As run,faa_asrun
+46,faa_1fish_all,0.07306892445940084,0.09969661897846079,26.2_FAA,complete,Complete,faa_complete
+47,faa_1fish,-0.048238374463730756,-0.011935988585380856,26.2_FAA,asrun,As run,faa_asrun
+47,faa_1fish_all,0.07233482536958422,0.08249884688553469,26.2_FAA,complete,Complete,faa_complete
+48,faa_1fish,-0.07889628121375676,-0.0483529822117391,26.2_FAA,asrun,As run,faa_asrun
+48,faa_1fish_all,-0.06255927450762763,-0.07057959187669136,26.2_FAA,complete,Complete,faa_complete
+49,faa_1fish,-0.05061944087863754,-0.022721402346789654,26.2_FAA,asrun,As run,faa_asrun
+49,faa_1fish_all,-0.0040651705898879,-0.01714041110726679,26.2_FAA,complete,Complete,faa_complete
+50,faa_1fish,-0.042198416487466174,-0.0012111697485520656,26.2_FAA,asrun,As run,faa_asrun
+50,faa_1fish_all,-0.007128822694119668,-0.00904520929517587,26.2_FAA,complete,Complete,faa_complete
+51,faa_1fish,-0.011009402409004899,0.008828037410892203,26.2_FAA,asrun,As run,faa_asrun
+51,faa_1fish_all,0.05698962439675801,0.03991914871451517,26.2_FAA,complete,Complete,faa_complete
+52,faa_1fish,-0.08979387840403624,-0.05472662716914742,26.2_FAA,asrun,As run,faa_asrun
+52,faa_1fish_all,-0.07929617073462403,-0.09419642615138656,26.2_FAA,complete,Complete,faa_complete
+53,faa_1fish,-0.05528598221870361,0.012084102733905446,26.2_FAA,asrun,As run,faa_asrun
+53,faa_1fish_all,0.006061662744970654,0.04348310054226727,26.2_FAA,complete,Complete,faa_complete
+54,faa_1fish,-0.02922868150147579,0.011790907353287463,26.2_FAA,asrun,As run,faa_asrun
+54,faa_1fish_all,0.012457186869989442,0.01461017791572921,26.2_FAA,complete,Complete,faa_complete
+55,faa_1fish,-0.03304526403356037,0.0048144068461184065,26.2_FAA,asrun,As run,faa_asrun
+55,faa_1fish_all,-0.005396588688023125,-0.010075773410350326,26.2_FAA,complete,Complete,faa_complete
+56,faa_1fish,-0.04972409953205694,-0.020117997058420052,26.2_FAA,asrun,As run,faa_asrun
+56,faa_1fish_all,-0.0032196895515915636,-0.011829291174681272,26.2_FAA,complete,Complete,faa_complete
+57,faa_1fish,-0.07885480420090327,-0.054454046672623886,26.2_FAA,asrun,As run,faa_asrun
+57,faa_1fish_all,-0.02875268536213356,-0.03646305980694875,26.2_FAA,complete,Complete,faa_complete
+58,faa_1fish,0.048597042785449615,0.08044345586978323,26.2_FAA,asrun,As run,faa_asrun
+58,faa_1fish_all,0.09522177177533066,0.0802578245162698,26.2_FAA,complete,Complete,faa_complete
+59,faa_1fish,-0.05943194289942647,-0.02395476782927571,26.2_FAA,asrun,As run,faa_asrun
+59,faa_1fish_all,0.029493284726456945,0.03888455637663253,26.2_FAA,complete,Complete,faa_complete
+60,faa_1fish,-0.13618706050063728,-0.1164555554117739,26.2_FAA,asrun,As run,faa_asrun
+60,faa_1fish_all,-0.10842482737379679,-0.12673255564570293,26.2_FAA,complete,Complete,faa_complete
+61,faa_1fish,-0.2049874270065509,-0.1841554944581871,26.2_FAA,asrun,As run,faa_asrun
+61,faa_1fish_all,-0.10630568755030378,-0.10657090516128144,26.2_FAA,complete,Complete,faa_complete
+62,faa_1fish,0.11158048252676461,0.1976578290300675,26.2_FAA,asrun,As run,faa_asrun
+62,faa_1fish_all,0.13010762377813165,0.1774670374872948,26.2_FAA,complete,Complete,faa_complete
+63,faa_1fish,-0.10880845758944505,-0.08452536211927421,26.2_FAA,asrun,As run,faa_asrun
+63,faa_1fish_all,-0.03610142837701781,-0.042692220223905265,26.2_FAA,complete,Complete,faa_complete
+64,faa_1fish,0.04894171361212786,0.11185366296348029,26.2_FAA,asrun,As run,faa_asrun
+64,faa_1fish_all,0.1133511052032527,0.13800992221946135,26.2_FAA,complete,Complete,faa_complete
+65,faa_1fish,-0.06123424980444067,-0.020050132731822705,26.2_FAA,asrun,As run,faa_asrun
+65,faa_1fish_all,-0.052416868241054806,-0.05360013381769644,26.2_FAA,complete,Complete,faa_complete
+66,faa_1fish,-0.07769744883167183,-0.036623335603069615,26.2_FAA,asrun,As run,faa_asrun
+66,faa_1fish_all,0.01848106463807722,0.023399795419980125,26.2_FAA,complete,Complete,faa_complete
+67,faa_1fish,-0.03440642588822843,0.02270115543463481,26.2_FAA,asrun,As run,faa_asrun
+67,faa_1fish_all,0.005308874272906872,0.02362533145352015,26.2_FAA,complete,Complete,faa_complete
+68,faa_1fish,-0.1349567445096423,-0.09958608015327959,26.2_FAA,asrun,As run,faa_asrun
+68,faa_1fish_all,-0.04335050577778651,-0.039284034057026594,26.2_FAA,complete,Complete,faa_complete
+69,faa_1fish,-0.11556979916365763,-0.11393474661567246,26.2_FAA,asrun,As run,faa_asrun
+69,faa_1fish_all,-0.05167451366136707,-0.08344412668226425,26.2_FAA,complete,Complete,faa_complete
+70,faa_1fish,-0.057730722326803416,-0.021669103512664177,26.2_FAA,asrun,As run,faa_asrun
+70,faa_1fish_all,0.009891026601418012,0.010024525702534513,26.2_FAA,complete,Complete,faa_complete
+71,faa_1fish,-0.009556307588645091,0.04908775077171081,26.2_FAA,asrun,As run,faa_asrun
+71,faa_1fish_all,0.020009205527511762,0.04220037630726256,26.2_FAA,complete,Complete,faa_complete
+72,faa_1fish,-0.1017581208042825,-0.07546538652626858,26.2_FAA,asrun,As run,faa_asrun
+72,faa_1fish_all,-0.05062638587166994,-0.05715811046350232,26.2_FAA,complete,Complete,faa_complete
+73,faa_1fish,-0.0419791051552312,-0.019365059276780016,26.2_FAA,asrun,As run,faa_asrun
+73,faa_1fish_all,-0.003330871354011546,-0.02731960182626962,26.2_FAA,complete,Complete,faa_complete
+74,faa_1fish,-0.12381010159431802,-0.09710675569973472,26.2_FAA,asrun,As run,faa_asrun
+74,faa_1fish_all,-0.030471143299231142,-0.043542818996138724,26.2_FAA,complete,Complete,faa_complete
+75,faa_1fish,-0.030314206561641938,0.023968497425560016,26.2_FAA,asrun,As run,faa_asrun
+75,faa_1fish_all,-0.0021377062951241795,0.009577892429406399,26.2_FAA,complete,Complete,faa_complete
+76,faa_1fish,-0.03691434112664317,-0.006590007450887801,26.2_FAA,asrun,As run,faa_asrun
+76,faa_1fish_all,-0.050690127976810176,-0.06216197736354707,26.2_FAA,complete,Complete,faa_complete
+77,faa_1fish,-0.05725480404658825,-0.01029629062777283,26.2_FAA,asrun,As run,faa_asrun
+77,faa_1fish_all,-8.357098664908255e-4,0.008678900363153417,26.2_FAA,complete,Complete,faa_complete
+78,faa_1fish,-0.08002704156322975,-0.07531106269450012,26.2_FAA,asrun,As run,faa_asrun
+78,faa_1fish_all,-0.026794901460272746,-0.0504023318952718,26.2_FAA,complete,Complete,faa_complete
+79,faa_1fish,-0.03609704522469368,-0.02377746288830588,26.2_FAA,asrun,As run,faa_asrun
+79,faa_1fish_all,0.022634275464736016,-0.0057313848539223035,26.2_FAA,complete,Complete,faa_complete
+80,faa_1fish,-0.0890405333671059,-0.07410608547594863,26.2_FAA,asrun,As run,faa_asrun
+80,faa_1fish_all,0.07328675392032555,0.07224813250778826,26.2_FAA,complete,Complete,faa_complete
+81,faa_1fish,-0.15262010447540303,-0.1687982037817964,26.2_FAA,asrun,As run,faa_asrun
+81,faa_1fish_all,-0.07503268011083633,-0.1247674755874472,26.2_FAA,complete,Complete,faa_complete
+82,faa_1fish,-0.063829520227993,-0.026435109565705682,26.2_FAA,asrun,As run,faa_asrun
+82,faa_1fish_all,-0.03199958758744803,-0.036425192982675075,26.2_FAA,complete,Complete,faa_complete
+83,faa_1fish,-0.05925144231557959,-0.012154758100342875,26.2_FAA,asrun,As run,faa_asrun
+83,faa_1fish_all,-0.035458367898360134,-0.029046948448973407,26.2_FAA,complete,Complete,faa_complete
+84,faa_1fish,-0.14342735129949621,-0.12677597254114817,26.2_FAA,asrun,As run,faa_asrun
+84,faa_1fish_all,-0.029902251111618913,-0.03046623682667355,26.2_FAA,complete,Complete,faa_complete
+85,faa_1fish,0.007165046760899724,0.052782029486995716,26.2_FAA,asrun,As run,faa_asrun
+85,faa_1fish_all,0.05662330787023315,0.06606234835737937,26.2_FAA,complete,Complete,faa_complete
+86,faa_1fish,-0.1411559593949532,-0.13995749269363086,26.2_FAA,asrun,As run,faa_asrun
+86,faa_1fish_all,-0.11612408149688677,-0.15388418975137927,26.2_FAA,complete,Complete,faa_complete
+87,faa_1fish,-0.11763126194583061,-0.09876397632896697,26.2_FAA,asrun,As run,faa_asrun
+87,faa_1fish_all,-0.06856914485452491,-0.09187398584495704,26.2_FAA,complete,Complete,faa_complete
+88,faa_1fish,-0.04392966249650211,-0.035322052849493496,26.2_FAA,asrun,As run,faa_asrun
+88,faa_1fish_all,0.009055860046597563,-0.03133468682358988,26.2_FAA,complete,Complete,faa_complete
+89,faa_1fish,-0.03632033022158698,0.011399311484035723,26.2_FAA,asrun,As run,faa_asrun
+89,faa_1fish_all,0.02917045586257151,0.051468116712983764,26.2_FAA,complete,Complete,faa_complete
+90,faa_1fish,-0.038697288260823456,0.00843030001289364,26.2_FAA,asrun,As run,faa_asrun
+90,faa_1fish_all,0.06589053527386284,0.08338606932753165,26.2_FAA,complete,Complete,faa_complete
+91,faa_1fish,-0.11891113704518233,-0.09748186646937372,26.2_FAA,asrun,As run,faa_asrun
+91,faa_1fish_all,-0.05454854549041824,-0.05769495074364742,26.2_FAA,complete,Complete,faa_complete
+92,faa_1fish,-0.14028300458596007,-0.11248065737740236,26.2_FAA,asrun,As run,faa_asrun
+92,faa_1fish_all,-0.09832161767785647,-0.09848400537827878,26.2_FAA,complete,Complete,faa_complete
+93,faa_1fish,-0.12133955571773315,-0.10479250690053306,26.2_FAA,asrun,As run,faa_asrun
+93,faa_1fish_all,-0.055584750258847286,-0.06466764707889268,26.2_FAA,complete,Complete,faa_complete
+94,faa_1fish,-0.01087216774592208,-0.006603993929801199,26.2_FAA,asrun,As run,faa_asrun
+94,faa_1fish_all,0.013664737126622417,-0.025610528544368998,26.2_FAA,complete,Complete,faa_complete
+95,faa_1fish,-0.037555544749286504,0.003248664227118375,26.2_FAA,asrun,As run,faa_asrun
+95,faa_1fish_all,0.03735594762450665,0.0501652460773597,26.2_FAA,complete,Complete,faa_complete
+96,faa_1fish,-0.05198444847286505,0.005693696977096578,26.2_FAA,asrun,As run,faa_asrun
+96,faa_1fish_all,0.03476946212370255,0.06480347048641696,26.2_FAA,complete,Complete,faa_complete
+97,faa_1fish,-0.05471195005106491,-0.010877753608802897,26.2_FAA,asrun,As run,faa_asrun
+97,faa_1fish_all,0.004094764500603127,-0.002335918672869904,26.2_FAA,complete,Complete,faa_complete
+98,faa_1fish,-0.08462352953156112,-0.04542013069448654,26.2_FAA,asrun,As run,faa_asrun
+98,faa_1fish_all,-0.02811464838072573,-0.024409970465399906,26.2_FAA,complete,Complete,faa_complete
+99,faa_1fish,0.005299086355285178,0.05971122353144069,26.2_FAA,asrun,As run,faa_asrun
+99,faa_1fish_all,0.06030736984199201,0.07905441226473958,26.2_FAA,complete,Complete,faa_complete
+100,faa_1fish,-0.1106185175179348,-0.09346099426314469,26.2_FAA,asrun,As run,faa_asrun
+100,faa_1fish_all,-0.036298100056418564,-0.06735692149810578,26.2_FAA,complete,Complete,faa_complete

@@ -3531,7 +3531,8 @@ run_five_rg_closedloop_i <- function(sim_env,
 #' @param lls_design_type Character string specifying the longline survey design:
 #'   `"current"`, `"historical"`, or `"all"`. Passed to the assessment model
 #'   builder for appropriate survey imputation logic.
-#' @param apportionment_type Character - 'carryover', 'equal', or '2024_values' apportionment
+#' @param apportionment_type Character - 'carryover', 'equal', or '2024_values', or 'custom' apportionment
+#' @param apportionment_values Apportionment values, only when apportionment_type = 'custom'
 #'
 #' @return The function updates `sim_env` in place (population states, catches,
 #'   F rates, and assessment outputs). No value is returned.
@@ -3539,7 +3540,8 @@ run_apportionment_closedloop_i <- function(sim_env,
                                            sim,
                                            fleet_allocation,
                                            lls_design_type,
-                                           apportionment_type
+                                           apportionment_type,
+                                           apportionment_values
 ) {
 
   # Run Closed Loop ---------------------------------------------------------
@@ -3631,6 +3633,10 @@ run_apportionment_closedloop_i <- function(sim_env,
         apportionment <- c(0.24285, 0.27772, 0.09968, 0.20472, 0.06208 + 0.11296)
       }
 
+      if(apportionment_type == 'custom') { # freeze at last actual model year
+        apportionment <- apportionment_values
+      }
+
       tac_r <- tac * apportionment # get regional tac
       tac_rf <- tac_r * fleet_allocation # allocate regional tac by fleet
 
@@ -3675,11 +3681,12 @@ run_apportionment_closedloop_i <- function(sim_env,
 #' @param n_cores Number of cores
 #' @param n_sims Number of simulations
 #' @param lls_design_type Using 'current' design as default
-#' @param apportionment_type Apportionment type, 'carryover, '2024_values', 'equal'
+#' @param apportionment_type Apportionment type, 'carryover, '2024_values', 'equal', 'custom'
+#' @param apportionment_values Custom values, only when apportionment type = 'custom'
 #'
 #' @return The updated `sim_env` object containing results across all simulation
 #'   replicates. The function modifies `sim_env` in place and also returns it.
-run_apportionment_parallel <- function(sim_env, n_sims, fleet_allocation, lls_design_type = 'current', apportionment_type, n_cores) {
+run_apportionment_parallel <- function(sim_env, n_sims, fleet_allocation, lls_design_type = 'current', apportionment_type, apportionment_values = NULL, n_cores) {
 
 
   plan(multisession, workers = n_cores)
@@ -3694,7 +3701,8 @@ run_apportionment_parallel <- function(sim_env, n_sims, fleet_allocation, lls_de
         run_apportionment_closedloop_i(sim_env, .x,
                                        fleet_allocation,
                                        lls_design_type = lls_design_type,
-                                       apportionment_type = apportionment_type)
+                                       apportionment_type = apportionment_type,
+                                       apportionment_values = apportionment_values)
         sim_env
       },
       .progress = TRUE,
