@@ -49,7 +49,7 @@ pB <- ggplot(de, aes(x = year, y = err, color = design)) +
   geom_line(lwd = 1.3) +
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3, col = 'black') +
   scale_color_manual(values = c(err_hist = "#E69F00", err_alt = "#000000"),
-                     labels = c(err_hist = "Historical design (as run): one of BS / AI carried",
+                     labels = c(err_hist = "Historical design: one of BS / AI carried",
                                 err_alt = "Current design from 1997: GOA or BS + AI carried")) +
   labs(x = 'Year', y = 'Relative Error\n(Carryover vs. True Index)', color = NULL) +
   theme_bw(base_size = 15) +
@@ -62,7 +62,7 @@ ggsave(file.path(fig_dir, "carryover_index_lag.png"), p, width = 10, height = 7.
 pB_hist <- ggplot(de %>% filter(design == "err_hist"), aes(x = year, y = err)) +
   geom_line(lwd = 1.3, color = "#E69F00") +
   geom_hline(yintercept = 0, lty = 2, lwd = 1.3, col = 'black') +
-  labs(x = 'Year', y = 'Relative Error\n(Carryover vs. True Index)') +
+  labs(x = 'Year', y = 'Carryover Index Error\n(Historical Design)') +
   theme_bw(base_size = 15)
 ggsave(file.path(fig_dir, "carryover_index_lag_hist.png"), pA / pB_hist, width = 10, height = 7, dpi = 300)
 
